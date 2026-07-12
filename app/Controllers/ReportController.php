@@ -15,6 +15,7 @@ use App\Models\ParkingSlot;
 use App\Models\Society;
 use App\Models\Staff;
 use App\Models\Visitor;
+use App\Services\PenaltyService;
 
 final class ReportController
 {
@@ -52,11 +53,18 @@ final class ReportController
     public function defaulters(): void
     {
         $rows = MaintenanceBill::defaulters(Society::currentId());
+        foreach ($rows as &$bill) {
+            $penalty = PenaltyService::recalculate((int) $bill['id']);
+            $bill['penalty_amount'] = $penalty['penalty_amount'] ?? 0;
+            $bill['penalty'] = $penalty;
+        }
+        unset($bill);
 
         if (($_GET['format'] ?? '') === 'csv') {
             Csv::export('defaulter-report.csv', [
                 'Flat' => 'flat_number', 'Wing' => 'wing_name', 'Bill No' => 'bill_number',
                 'Due Date' => 'due_date', 'Days Overdue' => 'days_overdue', 'Outstanding' => 'outstanding',
+                'Penalty' => 'penalty_amount',
             ], $rows);
         }
 

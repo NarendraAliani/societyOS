@@ -40,6 +40,7 @@ if (!function_exists('config')) {
                 'key' => env('APP_KEY', ''),
                 'session_lifetime' => (int) env('SESSION_LIFETIME', 120),
                 'upload_max_size_mb' => (int) env('UPLOAD_MAX_SIZE_MB', 5),
+                'penalty_interest_rate_percent' => (float) env('PENALTY_INTEREST_RATE_PERCENT', 18.0),
                 'mail' => [
                     'host' => env('MAIL_HOST'),
                     'port' => (int) env('MAIL_PORT', 587),

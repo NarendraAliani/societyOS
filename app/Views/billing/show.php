@@ -26,6 +26,13 @@ $outstanding = (float) $bill['total_amount'] - (float) $bill['paid_amount'];
                         <tr class="fw-bold text-danger"><td>Outstanding</td><td class="text-end"><?= number_format($outstanding, 2) ?></td></tr>
                     </tfoot>
                 </table>
+                <?php if ($penalty && (float) $penalty['penalty_amount'] > 0): ?>
+                    <div class="alert alert-warning py-2 mb-0">
+                        <strong>Late payment interest:</strong> <?= number_format((float) $penalty['penalty_amount'], 2) ?>
+                        (<?= (int) $penalty['days_overdue'] ?> day<?= (int) $penalty['days_overdue'] !== 1 ? 's' : '' ?> overdue at <?= number_format((float) $penalty['interest_rate_percent'], 2) ?>% p.a.)
+                        <div class="small text-muted">Charged separately from the bill above — not included in the maintenance total or payment form.</div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
 

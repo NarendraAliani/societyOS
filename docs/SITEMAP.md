@@ -45,7 +45,7 @@ Status legend: ✅ built this phase · ⬜ planned (routes not yet wired)
 /billing/{id}                   ✅ GET — Bill detail (items, payment history)
 /billing/{id}/payments          ✅ POST — Record payment (updates paid_amount/status)
 /billing/payments/{id}/receipt  ✅ GET — Receipt PDF (DomPDF)
-/billing/penalties              ⬜ Persisted penalty/interest tracking (not built — see DECISIONS.md)
+/billing/penalties               ✅ Persisted penalty/interest, recomputed on view (bill detail + defaulter report) — see DECISIONS.md
 /billing/defaulters             ✅ GET — Defaulter report (outstanding + days overdue)
 
 /accounting/accounts            ✅ GET/POST — Accounts (cash/bank), computed current balance
@@ -119,4 +119,4 @@ Full target hierarchy (module → sub-items) is documented in the original spec;
 
 **Phase 2 note**: Society Setup and Residents are functionally complete (CRUD verified end-to-end against a live DB — see `docs/DECISIONS.md`), but forms are plain POST + page reload, not the AJAX/DataTables/SweetAlert2 pattern named in the tech stack. That polish is deferred; see decision log.
 
-**Phases 6–10 note**: Complaints, Notices/Events/Polls, Staff, Assets, Reports, and Admin (Users/Roles/Activity Logs) are all built and verified end-to-end against a live DB through the real Apache vhost — see `docs/DECISIONS.md` for what's deferred in each (persisted penalties, chart-of-accounts reports, scannable QR, activity-log instrumentation, backup/restore, self-service profile).
+**Phases 6–10 note**: Complaints, Notices/Events/Polls, Staff, Assets, Reports, and Admin (Users/Roles/Activity Logs) are all built and verified end-to-end against a live DB through the real Apache vhost — see `docs/DECISIONS.md` for what's deferred in each (chart-of-accounts reports, scannable QR, backup/restore, self-service profile).

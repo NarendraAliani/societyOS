@@ -13,6 +13,7 @@ use App\Models\MaintenanceBill;
 use App\Models\Receipt;
 use App\Models\Society;
 use App\Services\BillingService;
+use App\Services\PenaltyService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -67,6 +68,7 @@ final class BillingController
         }
         $items = MaintenanceBill::items((int) $id);
         $payments = MaintenanceBill::payments((int) $id);
+        $penalty = PenaltyService::recalculate((int) $id);
         require __DIR__ . '/../Views/billing/show.php';
     }
 
@@ -135,6 +137,12 @@ final class BillingController
     {
         $pageTitle = 'Defaulter Report';
         $defaulters = MaintenanceBill::defaulters(Society::currentId());
+        foreach ($defaulters as &$bill) {
+            $penalty = PenaltyService::recalculate((int) $bill['id']);
+            $bill['penalty_amount'] = $penalty['penalty_amount'] ?? 0;
+            $bill['penalty'] = $penalty;
+        }
+        unset($bill);
         require __DIR__ . '/../Views/billing/defaulters.php';
     }
 
