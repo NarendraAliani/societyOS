@@ -60,7 +60,10 @@ Status legend: ✅ built this phase · ⬜ planned (routes not yet wired)
 /accounting/ledger               ✅ GET — All entries, filterable by account (raw log; see cash-book/bank-book below for a running-balance view)
 /accounting/cash-book             ✅ GET — Cash accounts, date range + opening/running/closing balance
 /accounting/bank-book             ✅ GET — Bank accounts, date range + opening/running/closing balance
-/accounting/reports              ⬜ Trial balance, P&L, balance sheet — needs a chart-of-accounts model this schema doesn't have (see DECISIONS.md)
+/accounting/reports               ✅ GET — Index linking the three reports below
+/accounting/reports/trial-balance ✅ GET — Cash/bank account balances as of a date (see DECISIONS.md for scope)
+/accounting/reports/income-expense-statement ✅ GET — P&L by category, date range
+/accounting/reports/balance-sheet ✅ GET — Assets vs Accumulated Fund (see DECISIONS.md for scope)
 
 /visitors                       ✅ GET/POST — Gate register, filterable by date
 /visitors/{id}/approve          ✅ POST
@@ -129,4 +132,4 @@ Full target hierarchy (module → sub-items) is documented in the original spec;
 
 **Phase 2 note**: Society Setup and Residents are functionally complete (CRUD verified end-to-end against a live DB — see `docs/DECISIONS.md`), but forms are plain POST + page reload, not the AJAX/DataTables/SweetAlert2 pattern named in the tech stack. That polish is deferred; see decision log.
 
-**Phases 6–10 note**: Complaints, Notices/Events/Polls, Staff, Assets, Reports, and Admin (Users/Roles/Activity Logs) are all built and verified end-to-end against a live DB through the real Apache vhost — see `docs/DECISIONS.md` for what's deferred in each (chart-of-accounts reports, scannable QR, backup/restore, self-service profile).
+**Phases 6–10 note**: Complaints, Notices/Events/Polls, Staff, Assets, Reports, and Admin (Users/Roles/Activity Logs) are all built and verified end-to-end against a live DB through the real Apache vhost — see `docs/DECISIONS.md` for what's deferred in each (scannable QR, self-service profile).

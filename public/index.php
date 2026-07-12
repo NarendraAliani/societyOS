@@ -143,6 +143,11 @@ $router->get('/accounting/ledger', [AccountingController::class, 'ledger'], [$au
 $router->get('/accounting/cash-book', [AccountingController::class, 'cashBook'], [$auth, $can('accounting.view')]);
 $router->get('/accounting/bank-book', [AccountingController::class, 'bankBook'], [$auth, $can('accounting.view')]);
 
+$router->get('/accounting/reports', [AccountingController::class, 'reports'], [$auth, $can('accounting.view')]);
+$router->get('/accounting/reports/trial-balance', [AccountingController::class, 'trialBalance'], [$auth, $can('accounting.view')]);
+$router->get('/accounting/reports/income-expense-statement', [AccountingController::class, 'incomeExpenseStatement'], [$auth, $can('accounting.view')]);
+$router->get('/accounting/reports/balance-sheet', [AccountingController::class, 'balanceSheet'], [$auth, $can('accounting.view')]);
+
 // Visitors & Security
 $router->get('/visitors', [VisitorController::class, 'index'], [$auth, $can('visitors.manage')]);
 $router->post('/visitors', [VisitorController::class, 'store'], [$auth, $can('visitors.manage')]);

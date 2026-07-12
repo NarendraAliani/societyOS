@@ -12,6 +12,7 @@ use App\Models\ActivityLog;
 use App\Models\Income;
 use App\Models\Expense;
 use App\Models\LedgerEntry;
+use App\Models\MaintenanceBill;
 use App\Models\Society;
 use App\Models\Vendor;
 use App\Services\AccountingService;
@@ -272,6 +273,68 @@ final class AccountingController
         }
 
         require __DIR__ . '/../Views/accounting/book.php';
+    }
+
+    public function reports(): void
+    {
+        $pageTitle = 'Financial Reports';
+        require __DIR__ . '/../Views/accounting/reports_index.php';
+    }
+
+    /**
+     * Not a true double-entry trial balance — this app only tracks cash/bank accounts, not
+     * a full chart of accounts, so it's really an account-balances summary as of a date.
+     * Labeled plainly as such in the view rather than implying more accounting rigor than
+     * the underlying data supports.
+     */
+    public function trialBalance(): void
+    {
+        $pageTitle = 'Trial Balance';
+        $asOf = $_GET['as_of'] ?? date('Y-m-d');
+        $accounts = Account::allForSociety(Society::currentId());
+
+        $rows = [];
+        $total = 0.0;
+        foreach ($accounts as $acc) {
+            $balance = Account::balanceAsOf((int) $acc['id'], $asOf);
+            $rows[] = ['name' => $acc['name'], 'account_type' => $acc['account_type'], 'balance' => $balance];
+            $total += $balance;
+        }
+
+        require __DIR__ . '/../Views/accounting/trial_balance.php';
+    }
+
+    public function incomeExpenseStatement(): void
+    {
+        $pageTitle = 'Income & Expense Statement';
+        $from = $_GET['from'] ?? date('Y-m-01');
+        $to = $_GET['to'] ?? date('Y-m-d');
+
+        $incomeByCategory = Income::summaryByCategory(Society::currentId(), $from, $to);
+        $expenseByCategory = Expense::summaryByCategory(Society::currentId(), $from, $to);
+        $totalIncome = array_sum(array_column($incomeByCategory, 'total'));
+        $totalExpense = array_sum(array_column($expenseByCategory, 'total'));
+        $net = $totalIncome - $totalExpense;
+
+        require __DIR__ . '/../Views/accounting/income_expense_statement.php';
+    }
+
+    /**
+     * Assets = cash/bank balances + outstanding maintenance dues (Accounts Receivable).
+     * Liabilities are always ₹0 — this schema has no loans/payables table — so Equity
+     * (Accumulated Fund) equals total Assets by construction. Labeled plainly in the view;
+     * this is a snapshot of today's state, not a historical as-of-date statement, since
+     * bill balances aren't tracked with historical snapshots.
+     */
+    public function balanceSheet(): void
+    {
+        $pageTitle = 'Balance Sheet';
+        $accounts = Account::allForSociety(Society::currentId());
+        $accountsTotal = array_sum(array_column($accounts, 'current_balance'));
+        $receivables = MaintenanceBill::totalOutstanding(Society::currentId());
+        $totalAssets = $accountsTotal + $receivables;
+
+        require __DIR__ . '/../Views/accounting/balance_sheet.php';
     }
 
     private function verifyCsrf(): void

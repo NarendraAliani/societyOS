@@ -56,6 +56,26 @@ final class Account
         return (float) $account['opening_balance'] + $net;
     }
 
+    /** Balance including everything posted on or before $date — for the Trial Balance. */
+    public static function balanceAsOf(int $accountId, string $date): float
+    {
+        $account = self::find($accountId);
+        if (!$account) {
+            return 0.0;
+        }
+
+        $stmt = db()->prepare(
+            'SELECT
+                COALESCE(SUM(CASE WHEN entry_type = "credit" THEN amount ELSE 0 END), 0)
+                - COALESCE(SUM(CASE WHEN entry_type = "debit" THEN amount ELSE 0 END), 0) AS net
+             FROM ledger_entries WHERE account_id = :account_id AND entry_date <= :date'
+        );
+        $stmt->execute(['account_id' => $accountId, 'date' => $date]);
+        $net = (float) $stmt->fetchColumn();
+
+        return (float) $account['opening_balance'] + $net;
+    }
+
     public static function create(int $societyId, string $name, string $type, float $openingBalance): int
     {
         $stmt = db()->prepare(

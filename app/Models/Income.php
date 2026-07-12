@@ -32,6 +32,20 @@ final class Income
         return $stmt->fetchAll();
     }
 
+    /** Category totals for a date range, for the Income & Expense Statement. */
+    public static function summaryByCategory(int $societyId, string $from, string $to): array
+    {
+        $stmt = db()->prepare(
+            'SELECT category, SUM(amount) AS total
+             FROM income
+             WHERE society_id = :sid AND income_date BETWEEN :from AND :to
+             GROUP BY category
+             ORDER BY total DESC'
+        );
+        $stmt->execute(['sid' => $societyId, 'from' => $from, 'to' => $to]);
+        return $stmt->fetchAll();
+    }
+
     public static function create(int $societyId, array $fields): int
     {
         $stmt = db()->prepare(

@@ -10,7 +10,8 @@ ob_start();
         <a href="/accounting/vendors" class="btn btn-outline-secondary btn-sm me-2">Vendors</a>
         <a href="/accounting/ledger" class="btn btn-outline-primary btn-sm me-2">Ledger</a>
         <a href="/accounting/cash-book" class="btn btn-outline-primary btn-sm me-2">Cash Book</a>
-        <a href="/accounting/bank-book" class="btn btn-outline-primary btn-sm">Bank Book</a>
+        <a href="/accounting/bank-book" class="btn btn-outline-primary btn-sm me-2">Bank Book</a>
+        <a href="/accounting/reports" class="btn btn-outline-dark btn-sm">Financial Reports</a>
     </div>
 </div>
 <div class="row">

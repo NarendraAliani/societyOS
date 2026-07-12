@@ -127,6 +127,17 @@ final class MaintenanceBill
         return $stmt->fetchAll();
     }
 
+    /** Total unpaid balance across all bills, regardless of due date — "Accounts Receivable" for the Balance Sheet. */
+    public static function totalOutstanding(int $societyId): float
+    {
+        $stmt = db()->prepare(
+            "SELECT COALESCE(SUM(total_amount - paid_amount), 0) FROM maintenance_bills
+             WHERE society_id = :sid AND status != 'paid'"
+        );
+        $stmt->execute(['sid' => $societyId]);
+        return (float) $stmt->fetchColumn();
+    }
+
     public static function defaulters(int $societyId): array
     {
         $stmt = db()->prepare(
