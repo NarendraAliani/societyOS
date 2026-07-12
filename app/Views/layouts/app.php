@@ -1,3 +1,9 @@
+<?php
+// Site-wide defaults from Settings — only used as the fallback before a browser has its own
+// localStorage preference (set the first time a user picks Theme/Font Size from the topbar).
+$siteThemeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] ?? 0), 'theme_default', 'light');
+$siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] ?? 0), 'font_size_default', 'medium');
+?>
 <!doctype html>
 <html lang="en">
 <head>
@@ -9,10 +15,14 @@
 <link href="/static/css/app.css" rel="stylesheet">
 <script>
 (function () {
-    var theme = localStorage.getItem('societyos-theme') || 'light';
+    var theme = localStorage.getItem('societyos-theme') || <?= json_encode($siteThemeDefault) ?>;
     document.documentElement.setAttribute('data-bs-theme', theme === 'dark' ? 'dark' : 'light');
     if (theme === 'mid') {
         document.documentElement.setAttribute('data-theme', 'mid');
+    }
+    var fontSize = localStorage.getItem('societyos-font-size') || <?= json_encode($siteFontSizeDefault) ?>;
+    if (fontSize !== 'medium') {
+        document.documentElement.setAttribute('data-font-size', fontSize);
     }
 })();
 </script>
@@ -51,6 +61,16 @@
                         <li><button class="dropdown-item theme-option" type="button" data-theme-value="light"><i class="fa-solid fa-sun me-2"></i>Light</button></li>
                         <li><button class="dropdown-item theme-option" type="button" data-theme-value="dark"><i class="fa-solid fa-moon me-2"></i>Dark</button></li>
                         <li><button class="dropdown-item theme-option" type="button" data-theme-value="mid"><i class="fa-solid fa-circle-half-stroke me-2"></i>Mid</button></li>
+                    </ul>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" title="Font Size">
+                        <i class="fa-solid fa-text-height me-1"></i>Font
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><button class="dropdown-item font-size-option" type="button" data-font-size-value="small">Small</button></li>
+                        <li><button class="dropdown-item font-size-option" type="button" data-font-size-value="medium">Medium</button></li>
+                        <li><button class="dropdown-item font-size-option" type="button" data-font-size-value="large">Large</button></li>
                     </ul>
                 </div>
                 <div class="dropdown">
@@ -98,6 +118,20 @@
     document.querySelectorAll('.theme-option').forEach(function (btn) {
         btn.addEventListener('click', function () {
             applyTheme(btn.getAttribute('data-theme-value'));
+        });
+    });
+
+    function applyFontSize(size) {
+        if (size === 'medium') {
+            document.documentElement.removeAttribute('data-font-size');
+        } else {
+            document.documentElement.setAttribute('data-font-size', size);
+        }
+        localStorage.setItem('societyos-font-size', size);
+    }
+    document.querySelectorAll('.font-size-option').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            applyFontSize(btn.getAttribute('data-font-size-value'));
         });
     });
 })();

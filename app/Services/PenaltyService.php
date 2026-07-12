@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\MaintenanceBill;
 use App\Models\Penalty;
+use App\Models\Settings;
 
 /**
  * Recomputes late-payment interest as a running estimate against the bill's *current*
@@ -29,7 +30,11 @@ final class PenaltyService
             return Penalty::forBill($billId);
         }
 
-        $ratePercent = (float) config()['penalty_interest_rate_percent'];
+        $ratePercent = (float) Settings::get(
+            (int) $bill['society_id'],
+            'penalty_interest_rate_percent',
+            config()['penalty_interest_rate_percent']
+        );
         $dailyRate = $ratePercent / 100 / 365;
         $penaltyAmount = round($daysOverdue * $dailyRate * $outstanding, 2);
 

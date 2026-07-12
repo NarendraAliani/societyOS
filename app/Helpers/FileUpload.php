@@ -58,7 +58,11 @@ final class FileUpload
             throw new \RuntimeException('Invalid upload.');
         }
 
-        $maxSizeMb = (int) config()['upload_max_size_mb'];
+        $maxSizeMb = (int) \App\Models\Settings::get(
+            (int) ($_SESSION['society_id'] ?? 0),
+            'upload_max_size_mb',
+            config()['upload_max_size_mb']
+        );
         if ($file['size'] > $maxSizeMb * 1024 * 1024) {
             throw new \RuntimeException("File is too large (max {$maxSizeMb} MB).");
         }

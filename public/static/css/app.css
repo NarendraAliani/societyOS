@@ -102,3 +102,10 @@ body {
 
 .kpi-secondary { border-left-color: var(--bs-secondary); }
 .kpi-secondary .kpi-icon { background: rgba(108, 117, 125, .15); color: var(--bs-secondary); }
+
+/* ===== Font size =====
+   Scales the root font-size; every rem-based Bootstrap component (buttons, tables, form
+   controls) follows proportionally without needing per-component overrides. */
+
+[data-font-size="small"] { font-size: 14px; }
+[data-font-size="large"] { font-size: 18px; }

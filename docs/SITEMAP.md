@@ -122,6 +122,7 @@ Status legend: ✅ built this phase · ⬜ planned (routes not yet wired)
 /admin/backup/{filename}/restore  ✅ POST — Restore from a stored backup (auto safety-backup first)
 /admin/backup/{filename}/delete   ✅ POST — Delete a stored backup
 /admin/backup/restore-upload      ✅ POST — Restore from an uploaded .sql file (auto safety-backup first)
+/admin/settings                   ✅ GET/POST — Theme/font-size defaults, late-payment interest rate, upload size cap
 
 /profile                        ✅ GET — View own name/email/phone/role/status/last login
 /profile/edit                   ✅ GET/POST — Edit own name/email/phone (email uniqueness enforced, role/status not self-editable)

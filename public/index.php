@@ -26,6 +26,7 @@ use App\Controllers\ReportController;
 use App\Controllers\AdminController;
 use App\Controllers\BackupController;
 use App\Controllers\ProfileController;
+use App\Controllers\SettingsController;
 
 Session::start();
 
@@ -257,6 +258,9 @@ $router->get('/admin/backup/{filename}/download', [BackupController::class, 'dow
 $router->post('/admin/backup/{filename}/delete', [BackupController::class, 'delete'], [$auth]);
 $router->post('/admin/backup/{filename}/restore', [BackupController::class, 'restoreFromList'], [$auth]);
 $router->post('/admin/backup/restore-upload', [BackupController::class, 'restoreFromUpload'], [$auth]);
+
+$router->get('/admin/settings', [SettingsController::class, 'index'], [$auth, $can('settings.manage')]);
+$router->post('/admin/settings', [SettingsController::class, 'update'], [$auth, $can('settings.manage')]);
 
 // Profile — any authenticated user, no specific permission required
 $router->get('/profile', [ProfileController::class, 'show'], [$auth]);

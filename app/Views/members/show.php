@@ -183,7 +183,7 @@ ob_start();
                     <div class="col-5"><input type="file" name="document" accept=".jpg,.jpeg,.png,.pdf" class="form-control form-control-sm" required></div>
                     <div class="col-2"><button type="submit" class="btn btn-sm btn-primary w-100">Upload</button></div>
                 </form>
-                <div class="form-text mt-1">JPG, PNG, or PDF, up to <?= (int) config()['upload_max_size_mb'] ?> MB.</div>
+                <div class="form-text mt-1">JPG, PNG, or PDF, up to <?= (int) \App\Models\Settings::get((int) $_SESSION['society_id'], 'upload_max_size_mb', config()['upload_max_size_mb']) ?> MB.</div>
             </div>
         </div>
 
