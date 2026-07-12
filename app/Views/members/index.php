@@ -4,7 +4,10 @@ ob_start();
 ?>
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h5 class="mb-0">Residents</h5>
-    <a href="/members/create" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus me-1"></i>Add Resident</a>
+    <div>
+        <a href="/members/tenants" class="btn btn-outline-secondary btn-sm me-2">Tenants &amp; Leases</a>
+        <a href="/members/create" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus me-1"></i>Add Resident</a>
+    </div>
 </div>
 <div class="card border-0 shadow-sm">
     <div class="card-body">

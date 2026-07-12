@@ -15,6 +15,7 @@ use App\Models\FamilyMember;
 use App\Models\Flat;
 use App\Models\Member;
 use App\Models\Society;
+use App\Models\Tenant;
 use App\Models\Vehicle;
 
 final class MemberController
@@ -24,6 +25,13 @@ final class MemberController
         $pageTitle = 'Residents';
         $members = Member::allForSociety(Society::currentId());
         require __DIR__ . '/../Views/members/index.php';
+    }
+
+    public function tenants(): void
+    {
+        $pageTitle = 'Tenants';
+        $tenants = Tenant::allForSociety(Society::currentId());
+        require __DIR__ . '/../Views/members/tenants.php';
     }
 
     public function create(): void
@@ -77,6 +85,14 @@ final class MemberController
         $emergencyContacts = EmergencyContact::forMember((int) $id);
         $vehicles = Vehicle::forMember((int) $id);
         $documents = Document::forMember((int) $id);
+
+        $tenant = null;
+        $ownerCandidates = [];
+        if ($member['member_type'] === 'tenant') {
+            $tenant = Tenant::forMember((int) $id);
+            $ownerCandidates = Tenant::ownerCandidatesForFlat((int) $member['flat_id']);
+        }
+
         require __DIR__ . '/../Views/members/show.php';
     }
 
@@ -259,6 +275,108 @@ final class MemberController
         }
 
         $fullPath = dirname(__DIR__, 2) . '/uploads/' . $document['file_path'];
+        if (!is_file($fullPath)) {
+            http_response_code(404);
+            exit('Not found.');
+        }
+
+        $contentTypes = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'pdf' => 'application/pdf'];
+        $extension = strtolower((string) pathinfo($fullPath, PATHINFO_EXTENSION));
+
+        header('Content-Type: ' . ($contentTypes[$extension] ?? 'application/octet-stream'));
+        header('Content-Length: ' . filesize($fullPath));
+        header('X-Content-Type-Options: nosniff');
+        readfile($fullPath);
+        exit;
+    }
+
+    public function storeLease(string $memberId): void
+    {
+        $this->verifyCsrf();
+
+        $member = Member::find((int) $memberId);
+        $ownerMemberId = (int) ($_POST['owner_member_id'] ?? 0);
+
+        if (!$member || $member['member_type'] !== 'tenant' || $ownerMemberId <= 0) {
+            Flash::set('error', 'A flat owner is required to set up lease details.');
+            header("Location: /members/{$memberId}");
+            exit;
+        }
+
+        try {
+            $docPath = FileUpload::storeDocument($_FILES['agreement_doc'] ?? [], 'documents');
+        } catch (\RuntimeException $e) {
+            Flash::set('error', $e->getMessage());
+            header("Location: /members/{$memberId}");
+            exit;
+        }
+
+        Tenant::create(
+            (int) $member['flat_id'],
+            (int) $memberId,
+            $ownerMemberId,
+            $_POST['lease_start'] ?? null,
+            $_POST['lease_end'] ?? null,
+            $docPath
+        );
+
+        ActivityLog::log('members', 'lease_create', "Set up lease details for tenant id {$memberId}");
+        Flash::set('success', 'Lease details saved.');
+        header("Location: /members/{$memberId}");
+        exit;
+    }
+
+    public function updateLease(string $id): void
+    {
+        $this->verifyCsrf();
+
+        $tenant = Tenant::find((int) $id);
+        if (!$tenant) {
+            Flash::set('error', 'Lease record not found.');
+            header('Location: /members');
+            exit;
+        }
+
+        $ownerMemberId = (int) ($_POST['owner_member_id'] ?? 0);
+        if ($ownerMemberId <= 0) {
+            Flash::set('error', 'A flat owner is required.');
+            header("Location: /members/{$tenant['member_id']}");
+            exit;
+        }
+
+        try {
+            $docPath = FileUpload::storeDocument($_FILES['agreement_doc'] ?? [], 'documents');
+        } catch (\RuntimeException $e) {
+            Flash::set('error', $e->getMessage());
+            header("Location: /members/{$tenant['member_id']}");
+            exit;
+        }
+
+        Tenant::update((int) $id, $ownerMemberId, $_POST['lease_start'] ?? null, $_POST['lease_end'] ?? null);
+        if ($docPath !== null) {
+            Tenant::updateAgreementDoc((int) $id, $docPath);
+        }
+
+        ActivityLog::log('members', 'lease_update', "Updated lease details (tenant record id {$id})");
+        Flash::set('success', 'Lease details updated.');
+        header("Location: /members/{$tenant['member_id']}");
+        exit;
+    }
+
+    /**
+     * Streams an uploaded lease agreement after the route's own auth+permission
+     * middleware has already run — same "never linked directly" pattern as
+     * MemberController::serveDocument().
+     */
+    public function serveLeaseDocument(string $id): void
+    {
+        $tenant = Tenant::find((int) $id);
+        if (!$tenant || empty($tenant['agreement_doc_path'])) {
+            http_response_code(404);
+            exit('Not found.');
+        }
+
+        $fullPath = dirname(__DIR__, 2) . '/uploads/' . $tenant['agreement_doc_path'];
         if (!is_file($fullPath)) {
             http_response_code(404);
             exit('Not found.');

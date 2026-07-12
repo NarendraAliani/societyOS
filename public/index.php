@@ -72,6 +72,7 @@ $router->post('/maintenance-head-rates/{id}/delete', [SocietyController::class, 
 
 // Residents
 $router->get('/members', [MemberController::class, 'index'], [$auth, $can('members.view')]);
+$router->get('/members/tenants', [MemberController::class, 'tenants'], [$auth, $can('members.view')]);
 $router->get('/members/create', [MemberController::class, 'create'], [$auth, $can('members.manage')]);
 $router->post('/members', [MemberController::class, 'store'], [$auth, $can('members.manage')]);
 $router->get('/members/{id}', [MemberController::class, 'show'], [$auth, $can('members.view')]);
@@ -87,6 +88,10 @@ $router->post('/emergency-contacts/{id}/delete', [MemberController::class, 'dele
 $router->post('/members/{id}/documents', [MemberController::class, 'storeDocument'], [$auth, $can('members.manage')]);
 $router->post('/documents/{id}/delete', [MemberController::class, 'deleteDocument'], [$auth, $can('members.manage')]);
 $router->get('/documents/{id}/file', [MemberController::class, 'serveDocument'], [$auth, $can('members.view')]);
+
+$router->post('/members/{id}/lease', [MemberController::class, 'storeLease'], [$auth, $can('members.manage')]);
+$router->post('/leases/{id}', [MemberController::class, 'updateLease'], [$auth, $can('members.manage')]);
+$router->get('/leases/{id}/agreement', [MemberController::class, 'serveLeaseDocument'], [$auth, $can('members.view')]);
 
 // Maintenance Billing — static paths must be registered before the /billing/{id} wildcard
 $router->get('/billing', [BillingController::class, 'index'], [$auth, $can('billing.view')]);

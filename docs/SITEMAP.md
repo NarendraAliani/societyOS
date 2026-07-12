@@ -26,7 +26,10 @@ Status legend: ✅ built this phase · ⬜ planned (routes not yet wired)
 /members/create                 ✅ GET/POST — Add resident
 /members/{id}                   ✅ GET/POST — Detail/edit, POST .../delete
 /members/{id}/family-members    ✅ POST — add family member (inline on detail page)
-/members/tenants                ⬜ Dedicated tenants view (lease dates) — `tenants` table not yet wired
+/members/tenants                ✅ GET — All tenants: flat, owner, lease dates, expiry-urgency badge
+/members/{id}/lease             ✅ POST — Set up lease details (owner + dates + agreement doc) for a tenant
+/leases/{id}                    ✅ POST — Update lease details
+/leases/{id}/agreement          ✅ GET — Authenticated agreement doc serving, never linked directly
 /members/{id}/documents          ✅ POST — Upload a resident document (JPG/PNG/PDF), inline on detail page
 /documents/{id}/delete           ✅ POST — Delete a document (DB row + file)
 /documents/{id}/file             ✅ GET — Authenticated file serving, never linked directly
