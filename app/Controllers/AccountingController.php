@@ -148,19 +148,34 @@ final class AccountingController
         $this->verifyCsrf();
 
         $name = trim((string) ($_POST['name'] ?? ''));
+        // Set when the vendor is being added from another page (e.g. an asset's "Add AMC
+        // Record" form) rather than the main Vendors screen — same pattern as the vehicle
+        // create form's return_to_member, so the caller lands back where they started.
+        $returnToAsset = is_numeric($_POST['return_to_asset'] ?? '') ? (int) $_POST['return_to_asset'] : null;
+        $redirect = $returnToAsset ? "/assets/{$returnToAsset}" : '/accounting/vendors';
+
         if ($name === '') {
             Flash::set('error', 'Vendor name is required.');
-        } else {
-            Vendor::create(Society::currentId(), [
-                'name' => $name,
-                'contact_person' => trim((string) ($_POST['contact_person'] ?? '')),
-                'phone' => trim((string) ($_POST['phone'] ?? '')),
-                'email' => trim((string) ($_POST['email'] ?? '')),
-                'category' => trim((string) ($_POST['category'] ?? '')),
-            ]);
-            Flash::set('success', "Vendor \"{$name}\" added.");
+            header("Location: {$redirect}");
+            exit;
         }
-        header('Location: /accounting/vendors');
+
+        $vendorId = Vendor::create(Society::currentId(), [
+            'name' => $name,
+            'contact_person' => trim((string) ($_POST['contact_person'] ?? '')),
+            'phone' => trim((string) ($_POST['phone'] ?? '')),
+            'email' => trim((string) ($_POST['email'] ?? '')),
+            'category' => trim((string) ($_POST['category'] ?? '')),
+        ]);
+        Flash::set('success', "Vendor \"{$name}\" added.");
+
+        // Pre-select the newly created vendor back on the asset page, so the admin doesn't
+        // have to find it again in the dropdown they just left to create it.
+        if ($returnToAsset) {
+            $redirect .= "?vendor_id={$vendorId}";
+        }
+
+        header("Location: {$redirect}");
         exit;
     }
 

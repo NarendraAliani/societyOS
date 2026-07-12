@@ -31,9 +31,10 @@ final class AssetAmc
     public static function expiringWithin(int $societyId, int $days): array
     {
         $stmt = db()->prepare(
-            'SELECT amc.*, a.name AS asset_name
+            'SELECT amc.*, a.name AS asset_name, v.name AS vendor_name
              FROM asset_amc amc
              JOIN assets a ON a.id = amc.asset_id
+             LEFT JOIN vendors v ON v.id = amc.vendor_id
              WHERE a.society_id = :sid AND amc.end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL :days DAY)
              ORDER BY amc.end_date'
         );

@@ -71,6 +71,35 @@ final class Society
         $expenses = $pdo->prepare('SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE society_id = :sid AND MONTH(expense_date) = MONTH(CURDATE()) AND YEAR(expense_date) = YEAR(CURDATE())');
         $expenses->execute(['sid' => $societyId]);
 
+        // Distinct flats with an overdue, not-fully-paid bill — a count is more actionable
+        // at a glance than the outstanding-amount total above (which doesn't say how many
+        // households that's spread across).
+        $defaulters = $pdo->prepare(
+            "SELECT COUNT(DISTINCT flat_id) FROM maintenance_bills
+             WHERE society_id = :sid AND status IN ('unpaid','partially_paid','overdue') AND due_date < CURDATE()"
+        );
+        $defaulters->execute(['sid' => $societyId]);
+
+        $accountBalance = $pdo->prepare(
+            'SELECT COALESCE(SUM(
+                a.opening_balance
+                + COALESCE((SELECT SUM(amount) FROM ledger_entries WHERE account_id = a.id AND entry_type = "credit"), 0)
+                - COALESCE((SELECT SUM(amount) FROM ledger_entries WHERE account_id = a.id AND entry_type = "debit"), 0)
+             ), 0) FROM accounts a WHERE a.society_id = :sid'
+        );
+        $accountBalance->execute(['sid' => $societyId]);
+
+        $parkingTotal = $pdo->prepare('SELECT COUNT(*) FROM parking_slots WHERE society_id = :sid');
+        $parkingTotal->execute(['sid' => $societyId]);
+
+        $parkingOccupied = $pdo->prepare('SELECT COUNT(*) FROM parking_slots WHERE society_id = :sid AND is_allocated = 1');
+        $parkingOccupied->execute(['sid' => $societyId]);
+
+        $staffVerificationPending = $pdo->prepare(
+            "SELECT COUNT(*) FROM staff WHERE society_id = :sid AND status = 'active' AND police_verification_status IN ('pending','not_verified')"
+        );
+        $staffVerificationPending->execute(['sid' => $societyId]);
+
         return [
             'flats' => (int) $flats->fetchColumn(),
             'active_members' => (int) $members->fetchColumn(),
@@ -79,6 +108,11 @@ final class Society
             'outstanding_amount' => (float) $outstandingBills->fetchColumn(),
             'income_this_month' => (float) $income->fetchColumn(),
             'expenses_this_month' => (float) $expenses->fetchColumn(),
+            'defaulter_count' => (int) $defaulters->fetchColumn(),
+            'account_balance' => (float) $accountBalance->fetchColumn(),
+            'parking_total' => (int) $parkingTotal->fetchColumn(),
+            'parking_occupied' => (int) $parkingOccupied->fetchColumn(),
+            'staff_verification_pending' => (int) $staffVerificationPending->fetchColumn(),
         ];
     }
 }

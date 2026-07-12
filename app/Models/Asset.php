@@ -67,6 +67,20 @@ final class Asset
         ]);
     }
 
+    public static function warrantiesExpiringWithin(int $societyId, int $days): array
+    {
+        $stmt = db()->prepare(
+            "SELECT a.*, ac.name AS category_name
+             FROM assets a
+             JOIN asset_categories ac ON ac.id = a.category_id
+             WHERE a.society_id = :sid AND a.status != 'disposed'
+               AND a.warranty_expiry BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL :days DAY)
+             ORDER BY a.warranty_expiry"
+        );
+        $stmt->execute(['sid' => $societyId, 'days' => $days]);
+        return $stmt->fetchAll();
+    }
+
     public static function setStatus(int $id, string $status): void
     {
         $stmt = db()->prepare('UPDATE assets SET status = :status WHERE id = :id');

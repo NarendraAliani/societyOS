@@ -7,6 +7,15 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css" rel="stylesheet">
 <link href="/static/css/app.css" rel="stylesheet">
+<script>
+(function () {
+    var theme = localStorage.getItem('societyos-theme') || 'light';
+    document.documentElement.setAttribute('data-bs-theme', theme === 'dark' ? 'dark' : 'light');
+    if (theme === 'mid') {
+        document.documentElement.setAttribute('data-theme', 'mid');
+    }
+})();
+</script>
 </head>
 <body>
 <div class="d-flex" id="app-shell">
@@ -31,23 +40,35 @@
         </ul>
     </nav>
     <main class="flex-grow-1">
-        <nav class="navbar navbar-light bg-white border-bottom px-3">
+        <nav class="navbar app-topbar border-bottom px-3">
             <span class="navbar-text"><?= htmlspecialchars($pageTitle ?? '') ?></span>
-            <div class="dropdown">
-                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fa-solid fa-user-circle me-1"></i><?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="/profile">Profile</a></li>
-                    <li><a class="dropdown-item" href="/profile/password">Change Password</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
-                        <form method="post" action="/logout">
-                            <?= \App\Helpers\Csrf::field() ?>
-                            <button class="dropdown-item" type="submit">Logout</button>
-                        </form>
-                    </li>
-                </ul>
+            <div class="d-flex align-items-center gap-2">
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" title="Theme">
+                        <i class="fa-solid fa-circle-half-stroke me-1"></i>Theme
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><button class="dropdown-item theme-option" type="button" data-theme-value="light"><i class="fa-solid fa-sun me-2"></i>Light</button></li>
+                        <li><button class="dropdown-item theme-option" type="button" data-theme-value="dark"><i class="fa-solid fa-moon me-2"></i>Dark</button></li>
+                        <li><button class="dropdown-item theme-option" type="button" data-theme-value="mid"><i class="fa-solid fa-circle-half-stroke me-2"></i>Mid</button></li>
+                    </ul>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fa-solid fa-user-circle me-1"></i><?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                        <li><a class="dropdown-item" href="/profile/password">Change Password</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form method="post" action="/logout">
+                                <?= \App\Helpers\Csrf::field() ?>
+                                <button class="dropdown-item" type="submit">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </nav>
         <div class="p-4">
@@ -63,5 +84,23 @@
     </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function () {
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-bs-theme', theme === 'dark' ? 'dark' : 'light');
+        if (theme === 'mid') {
+            document.documentElement.setAttribute('data-theme', 'mid');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+        }
+        localStorage.setItem('societyos-theme', theme);
+    }
+    document.querySelectorAll('.theme-option').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            applyTheme(btn.getAttribute('data-theme-value'));
+        });
+    });
+})();
+</script>
 </body>
 </html>

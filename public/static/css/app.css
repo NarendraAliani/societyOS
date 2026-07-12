@@ -1,3 +1,5 @@
+/* ===== Base ===== */
+
 body {
     background-color: #f5f6fa;
 }
@@ -10,3 +12,93 @@ body {
 .card {
     border-radius: 0.75rem;
 }
+
+/* ===== Theme-aware topbar =====
+   Bootstrap's own utilities (bg-white, navbar-light) aren't color-mode aware, so the
+   topbar uses this custom class instead of those, and gets restyled per theme below. */
+
+.app-topbar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* ===== Dark theme =====
+   Bootstrap 5.3's [data-bs-theme="dark"] already restyles cards/tables/forms/badges on
+   its own; only the pieces Bootstrap doesn't own (body bg, sidebar hover, our topbar
+   class) need an explicit override here. */
+
+[data-bs-theme="dark"] body {
+    background-color: #12141c;
+}
+
+[data-bs-theme="dark"] .app-topbar {
+    background-color: #1c1f2b;
+    border-bottom-color: #2c3040;
+}
+
+[data-bs-theme="dark"] .sidebar {
+    background-color: #0d0f17 !important;
+}
+
+/* ===== Mid theme =====
+   Not a Bootstrap-native mode — stays on light-mode Bootstrap components underneath,
+   with a muted/soft palette layered on top via this custom attribute. */
+
+[data-theme="mid"] body {
+    background-color: #e4e8ee;
+}
+
+[data-theme="mid"] .app-topbar {
+    background-color: #f4f6f9;
+    border-bottom-color: #d8dde5;
+}
+
+[data-theme="mid"] .card {
+    background-color: #f4f6f9;
+    border-color: #d8dde5;
+}
+
+[data-theme="mid"] .sidebar {
+    background-color: #232840 !important;
+}
+
+[data-theme="mid"] .table {
+    --bs-table-bg: transparent;
+}
+
+/* ===== Colorful KPI cards =====
+   Uses Bootstrap's own --bs-* color variables, so the accent colors stay correct across
+   both the native dark mode and the custom mid theme without needing per-theme overrides. */
+
+.kpi-card {
+    border-left: 4px solid transparent;
+}
+
+.kpi-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+.kpi-primary { border-left-color: var(--bs-primary); }
+.kpi-primary .kpi-icon { background: rgba(13, 110, 253, .15); color: var(--bs-primary); }
+
+.kpi-success { border-left-color: var(--bs-success); }
+.kpi-success .kpi-icon { background: rgba(25, 135, 84, .15); color: var(--bs-success); }
+
+.kpi-info { border-left-color: var(--bs-info); }
+.kpi-info .kpi-icon { background: rgba(13, 202, 240, .18); color: #0aa2c0; }
+
+.kpi-warning { border-left-color: var(--bs-warning); }
+.kpi-warning .kpi-icon { background: rgba(255, 193, 7, .18); color: #b8860b; }
+
+.kpi-danger { border-left-color: var(--bs-danger); }
+.kpi-danger .kpi-icon { background: rgba(220, 53, 69, .15); color: var(--bs-danger); }
+
+.kpi-secondary { border-left-color: var(--bs-secondary); }
+.kpi-secondary .kpi-icon { background: rgba(108, 117, 125, .15); color: var(--bs-secondary); }

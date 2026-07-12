@@ -65,15 +65,20 @@ ob_start();
 
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
-                <h6>Add AMC Record</h6>
-                <form method="post" action="/assets/<?= (int) $asset['id'] ?>/amc">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Add AMC Record</h6>
+                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#add-vendor-modal" title="Add a new vendor">
+                        <i class="fa-solid fa-plus"></i> Vendor
+                    </button>
+                </div>
+                <form method="post" action="/assets/<?= (int) $asset['id'] ?>/amc" class="mt-2">
                     <?= \App\Helpers\Csrf::field() ?>
                     <div class="mb-2">
                         <label class="form-label">Vendor</label>
                         <select name="vendor_id" class="form-select">
                             <option value="">None</option>
                             <?php foreach ($vendors as $vendor): ?>
-                                <option value="<?= (int) $vendor['id'] ?>"><?= htmlspecialchars($vendor['name']) ?></option>
+                                <option value="<?= (int) $vendor['id'] ?>" <?= isset($_GET['vendor_id']) && (int) $_GET['vendor_id'] === (int) $vendor['id'] ? 'selected' : '' ?>><?= htmlspecialchars($vendor['name']) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -166,6 +171,47 @@ ob_start();
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="add-vendor-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="/accounting/vendors">
+                <?= \App\Helpers\Csrf::field() ?>
+                <input type="hidden" name="return_to_asset" value="<?= (int) $asset['id'] ?>">
+                <div class="modal-header">
+                    <h6 class="modal-title">Add Vendor</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label class="form-label">Name *</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Category</label>
+                        <input type="text" name="category" class="form-control" placeholder="e.g. Lift Maintenance">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Contact Person</label>
+                        <input type="text" name="contact_person" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Phone</label>
+                        <input type="text" name="phone" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Vendor</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
