@@ -19,7 +19,7 @@
 </head>
 <body>
 <div class="d-flex" id="app-shell">
-    <nav class="sidebar bg-dark text-white p-3" style="width:250px;min-height:100vh;">
+    <nav class="sidebar bg-dark text-white p-3" style="width:275px;min-height:100vh;">
         <h4 class="mb-4"><i class="fa-solid fa-building"></i> SocietyOS</h4>
         <ul class="nav nav-pills flex-column gap-1">
             <li class="nav-item"><a class="nav-link text-white" href="/dashboard"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
