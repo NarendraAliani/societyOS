@@ -52,6 +52,7 @@ final class AdminController
 
         User::create(Society::currentId(), $name, $email, trim((string) ($_POST['phone'] ?? '')) ?: null, $roleId, $password);
 
+        ActivityLog::log('admin', 'create_user', "Created user \"{$name}\" ({$email})");
         Flash::set('success', "User \"{$name}\" created. They must change their password on first login.");
         header('Location: /admin/users');
         exit;
@@ -77,6 +78,7 @@ final class AdminController
         }
 
         User::updateRoleAndStatus((int) $id, $roleId, $status);
+        ActivityLog::log('admin', 'update_user', "Updated user id {$id}: role_id {$roleId}, status \"{$status}\"");
         Flash::set('success', 'User updated.');
         header('Location: /admin/users');
         exit;
@@ -94,6 +96,7 @@ final class AdminController
         }
 
         User::resetPassword((int) $id, $password);
+        ActivityLog::log('admin', 'reset_password', "Reset password for user id {$id}");
         Flash::set('success', 'Password reset. The user must change it on next login.');
         header('Location: /admin/users');
         exit;
@@ -135,6 +138,7 @@ final class AdminController
         $permissionIds = array_map('intval', $_POST['permission_ids'] ?? []);
         Role::setPermissions((int) $id, $permissionIds);
 
+        ActivityLog::log('admin', 'update_role_permissions', "Updated permissions for role id {$id}");
         Flash::set('success', 'Role permissions updated.');
         header('Location: /admin/roles');
         exit;

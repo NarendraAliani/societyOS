@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Helpers\Auth;
 use App\Helpers\Csrf;
 use App\Helpers\Flash;
+use App\Models\ActivityLog;
 use App\Models\Event;
 use App\Models\Member;
 use App\Models\Notice;
@@ -44,6 +45,7 @@ final class NoticeController
             'expires_at' => $_POST['expires_at'] ?? '',
         ]);
 
+        ActivityLog::log('notices', 'create', "Published notice \"{$title}\"");
         Flash::set('success', "\"{$title}\" published.");
         header('Location: /notices');
         exit;
@@ -53,6 +55,7 @@ final class NoticeController
     {
         $this->verifyCsrf();
         Notice::delete((int) $id);
+        ActivityLog::log('notices', 'delete', "Removed notice id {$id}");
         Flash::set('success', 'Notice removed.');
         header('Location: /notices');
         exit;
@@ -87,6 +90,7 @@ final class NoticeController
             'created_by' => Auth::id(),
         ]);
 
+        ActivityLog::log('notices', 'create', "Created event \"{$title}\"");
         Flash::set('success', "Event \"{$title}\" created.");
         header('Location: /notices/events');
         exit;
@@ -96,6 +100,7 @@ final class NoticeController
     {
         $this->verifyCsrf();
         Event::delete((int) $id);
+        ActivityLog::log('notices', 'delete', "Removed event id {$id}");
         Flash::set('success', 'Event removed.');
         header('Location: /notices/events');
         exit;
@@ -123,6 +128,7 @@ final class NoticeController
 
         Poll::create(Society::currentId(), $question, $_POST['closes_at'] ?: null, Auth::id(), $options);
 
+        ActivityLog::log('notices', 'create', "Created poll \"{$question}\"");
         Flash::set('success', 'Poll created.');
         header('Location: /notices/polls');
         exit;

@@ -6,6 +6,22 @@ namespace App\Models;
 
 final class ActivityLog
 {
+    public static function log(string $module, string $action, ?string $description = null): void
+    {
+        $stmt = db()->prepare(
+            'INSERT INTO activity_logs (society_id, user_id, module, action, description, ip_address)
+             VALUES (:society_id, :user_id, :module, :action, :description, :ip_address)'
+        );
+        $stmt->execute([
+            'society_id' => $_SESSION['society_id'] ?? 0,
+            'user_id' => \App\Helpers\Auth::id(),
+            'module' => $module,
+            'action' => $action,
+            'description' => $description,
+            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+        ]);
+    }
+
     public static function recent(int $societyId, int $limit = 200): array
     {
         $stmt = db()->prepare(

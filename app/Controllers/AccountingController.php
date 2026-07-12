@@ -8,6 +8,7 @@ use App\Helpers\Auth;
 use App\Helpers\Csrf;
 use App\Helpers\Flash;
 use App\Models\Account;
+use App\Models\ActivityLog;
 use App\Models\Income;
 use App\Models\Expense;
 use App\Models\LedgerEntry;
@@ -36,6 +37,7 @@ final class AccountingController
             Flash::set('error', 'Account name and a numeric opening balance are required.');
         } else {
             Account::create(Society::currentId(), $name, $type, (float) $opening);
+            ActivityLog::log('accounting', 'create', "Created account \"{$name}\"");
             Flash::set('success', "Account \"{$name}\" created.");
         }
         header('Location: /accounting/accounts');
@@ -54,6 +56,7 @@ final class AccountingController
             Flash::set('error', 'Account name and a numeric opening balance are required.');
         } else {
             Account::update((int) $id, $name, $type, (float) $opening);
+            ActivityLog::log('accounting', 'update', "Updated account \"{$name}\" (id {$id})");
             Flash::set('success', 'Account updated.');
         }
         header('Location: /accounting/accounts');
@@ -92,6 +95,7 @@ final class AccountingController
             'created_by' => Auth::id(),
         ]);
 
+        ActivityLog::log('accounting', 'income', "Recorded income of {$amount} ({$category})");
         Flash::set('success', 'Income recorded.');
         header('Location: /accounting/income');
         exit;
@@ -131,6 +135,7 @@ final class AccountingController
             'created_by' => Auth::id(),
         ]);
 
+        ActivityLog::log('accounting', 'expense', "Recorded expense of {$amount} ({$category})");
         Flash::set('success', 'Expense recorded.');
         header('Location: /accounting/expenses');
         exit;
@@ -167,6 +172,7 @@ final class AccountingController
             'email' => trim((string) ($_POST['email'] ?? '')),
             'category' => trim((string) ($_POST['category'] ?? '')),
         ]);
+        ActivityLog::log('accounting', 'create', "Added vendor \"{$name}\"");
         Flash::set('success', "Vendor \"{$name}\" added.");
 
         // Pre-select the newly created vendor back on the asset page, so the admin doesn't
@@ -194,6 +200,7 @@ final class AccountingController
                 'email' => trim((string) ($_POST['email'] ?? '')),
                 'category' => trim((string) ($_POST['category'] ?? '')),
             ]);
+            ActivityLog::log('accounting', 'update', "Updated vendor \"{$name}\" (id {$id})");
             Flash::set('success', 'Vendor updated.');
         }
         header('Location: /accounting/vendors');
@@ -204,6 +211,7 @@ final class AccountingController
     {
         $this->verifyCsrf();
         Vendor::delete((int) $id);
+        ActivityLog::log('accounting', 'delete', "Removed vendor id {$id}");
         Flash::set('success', 'Vendor removed.');
         header('Location: /accounting/vendors');
         exit;

@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Helpers\Auth;
 use App\Helpers\Csrf;
 use App\Helpers\Flash;
+use App\Models\ActivityLog;
 use App\Models\Complaint;
 use App\Models\ComplaintCategory;
 use App\Models\Member;
@@ -58,6 +59,7 @@ final class ComplaintController
             'priority' => $priority,
         ]);
 
+        ActivityLog::log('complaints', 'create', "Registered complaint \"{$subject}\"");
         Flash::set('success', 'Complaint registered.');
         header("Location: /complaints/{$id}");
         exit;
@@ -95,6 +97,7 @@ final class ComplaintController
             null
         );
 
+        ActivityLog::log('complaints', 'status_update', "Complaint id {$id} status set to \"{$status}\"");
         Flash::set('success', 'Complaint updated.');
         header("Location: /complaints/{$id}");
         exit;

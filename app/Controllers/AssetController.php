@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Helpers\Csrf;
 use App\Helpers\Flash;
+use App\Models\ActivityLog;
 use App\Models\Asset;
 use App\Models\AssetAmc;
 use App\Models\AssetCategory;
@@ -52,6 +53,7 @@ final class AssetController
             'location' => trim((string) ($_POST['location'] ?? '')),
         ]);
 
+        ActivityLog::log('assets', 'create', "Added asset \"{$name}\"");
         Flash::set('success', "Asset \"{$name}\" added.");
         header("Location: /assets/{$id}");
         exit;
@@ -96,6 +98,7 @@ final class AssetController
             'location' => trim((string) ($_POST['location'] ?? '')),
         ]);
 
+        ActivityLog::log('assets', 'update', "Updated asset \"{$name}\" (id {$id})");
         Flash::set('success', 'Asset updated.');
         header("Location: /assets/{$id}");
         exit;
@@ -135,6 +138,7 @@ final class AssetController
             is_numeric($cost) ? (float) $cost : null
         );
 
+        ActivityLog::log('assets', 'amc', "Added AMC record for asset id {$id}");
         Flash::set('success', 'AMC record added.');
         header("Location: /assets/{$id}");
         exit;

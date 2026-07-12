@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Helpers\Auth;
 use App\Helpers\Csrf;
 use App\Helpers\Flash;
+use App\Models\ActivityLog;
 use App\Models\FinancialYear;
 use App\Models\MaintenanceBill;
 use App\Models\Receipt;
@@ -49,6 +50,7 @@ final class BillingController
 
         $result = BillingService::generateForPeriod(Society::currentId(), $financialYearId, $periodStart, $periodEnd, $dueDate);
 
+        ActivityLog::log('billing', 'generate', "Generated bills for {$periodStart} to {$periodEnd}: {$result['created']} created, {$result['skipped']} skipped, {$result['noCharge']} no-charge");
         Flash::set('success', "{$result['created']} bill(s) generated, {$result['skipped']} skipped (already billed for this period), {$result['noCharge']} had nothing to charge.");
         header('Location: /billing');
         exit;
@@ -90,6 +92,7 @@ final class BillingController
             Auth::id()
         );
 
+        ActivityLog::log('billing', 'payment', "Recorded payment of {$amount} on bill id {$id}, receipt {$result['receipt_number']}");
         Flash::set('success', "Payment recorded. Receipt {$result['receipt_number']} issued.");
         header("Location: /billing/{$id}");
         exit;

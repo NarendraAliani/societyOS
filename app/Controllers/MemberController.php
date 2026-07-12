@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Helpers\Csrf;
 use App\Helpers\Flash;
+use App\Models\ActivityLog;
 use App\Models\EmergencyContact;
 use App\Models\FamilyMember;
 use App\Models\Flat;
@@ -54,6 +55,7 @@ final class MemberController
             'move_in_date' => $_POST['move_in_date'] ?? '',
         ]);
 
+        ActivityLog::log('members', 'create', "Added resident \"{$name}\"");
         Flash::set('success', "Resident \"{$name}\" added.");
         header("Location: /members/{$id}");
         exit;
@@ -96,6 +98,7 @@ final class MemberController
             'status' => ($_POST['status'] ?? '') === 'inactive' ? 'inactive' : 'active',
         ]);
 
+        ActivityLog::log('members', 'update', "Updated resident \"{$name}\" (id {$id})");
         Flash::set('success', 'Resident updated.');
         header("Location: /members/{$id}");
         exit;
@@ -104,7 +107,9 @@ final class MemberController
     public function destroy(string $id): void
     {
         $this->verifyCsrf();
+        $member = Member::find((int) $id);
         Member::delete((int) $id);
+        ActivityLog::log('members', 'delete', "Removed resident \"" . ($member['name'] ?? $id) . "\"");
         Flash::set('success', 'Resident removed.');
         header('Location: /members');
         exit;

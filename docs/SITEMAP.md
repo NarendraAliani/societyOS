@@ -107,7 +107,7 @@ Status legend: ✅ built this phase · ⬜ planned (routes not yet wired)
 /admin/users                    ✅ GET/POST — Users, inline role/status edit, password reset
 /admin/roles                    ✅ GET — Role list
 /admin/roles/{id}               ✅ GET/POST — Edit a role's permission set (super_admin fixed/uneditable)
-/admin/activity-logs            ✅ GET — Login history (populated); module activity_logs (currently empty — not wired into controllers yet, see DECISIONS.md)
+/admin/activity-logs            ✅ GET — Login history + module activity log, both populated (high-signal write actions instrumented across 10 controllers, see DECISIONS.md)
 /admin/backup                   ⬜ Not built — deferred (see DECISIONS.md)
 
 /profile                        ✅ GET — View own name/email/phone/role/status/last login

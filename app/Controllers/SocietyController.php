@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Helpers\Auth;
 use App\Helpers\Csrf;
 use App\Helpers\Flash;
+use App\Models\ActivityLog;
 use App\Models\Flat;
 use App\Models\Floor;
 use App\Models\MaintenanceHead;
@@ -35,6 +36,7 @@ final class SocietyController
         }
 
         Society::update(Society::currentId(), $_POST);
+        ActivityLog::log('society', 'update', 'Updated society profile');
         Flash::set('success', 'Society profile updated.');
         header('Location: /society');
         exit;
@@ -235,6 +237,7 @@ final class SocietyController
             Flash::set('error', 'Head name and a numeric amount are required.');
         } else {
             MaintenanceHead::create(Society::currentId(), $name, $calculationType, (float) $amount, Auth::id());
+            ActivityLog::log('society', 'create', "Created maintenance head \"{$name}\"");
             Flash::set('success', "Maintenance head \"{$name}\" created.");
         }
         header('Location: /society/maintenance-heads');
@@ -252,6 +255,7 @@ final class SocietyController
             Flash::set('error', 'Head name is required.');
         } else {
             MaintenanceHead::update((int) $id, $name, $calculationType);
+            ActivityLog::log('society', 'update', "Updated maintenance head \"{$name}\" (id {$id})");
             Flash::set('success', 'Maintenance head updated. To change the amount, use "Manage Rates" below.');
         }
         header('Location: /society/maintenance-heads');
@@ -286,6 +290,7 @@ final class SocietyController
 
         try {
             MaintenanceHeadRate::create((int) $id, (float) $amount, $effectiveFrom, Auth::id());
+            ActivityLog::log('society', 'rate_change', "Scheduled rate {$amount} for maintenance head id {$id} effective {$effectiveFrom}");
             Flash::set('success', "Rate change scheduled from {$effectiveFrom}.");
         } catch (\PDOException $e) {
             Flash::set('error', 'A rate is already scheduled for that date. Pick a different date, or remove the existing scheduled entry first.');

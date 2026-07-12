@@ -8,6 +8,7 @@ use App\Helpers\Auth;
 use App\Helpers\Csrf;
 use App\Helpers\FileUpload;
 use App\Helpers\Flash;
+use App\Models\ActivityLog;
 use App\Models\Attendance;
 use App\Models\LeaveRequest;
 use App\Models\Payroll;
@@ -60,6 +61,7 @@ final class StaffController
             'id_proof_path' => $idProofPath,
         ]);
 
+        ActivityLog::log('staff', 'create', "Added staff member \"{$name}\"");
         Flash::set('success', "Staff member \"{$name}\" added.");
         header("Location: /staff/{$id}");
         exit;
@@ -116,6 +118,7 @@ final class StaffController
             Staff::updateIdProof((int) $id, $idProofPath);
         }
 
+        ActivityLog::log('staff', 'update', "Updated staff member \"{$name}\" (id {$id})");
         Flash::set('success', 'Staff details updated.');
         header("Location: /staff/{$id}");
         exit;
@@ -141,6 +144,7 @@ final class StaffController
         }
 
         Staff::updatePoliceVerification((int) $id, $status, $_POST['police_verification_date'] ?? null ?: null, $docPath);
+        ActivityLog::log('staff', 'police_verification', "Staff id {$id} verification set to \"{$status}\"");
 
         Flash::set('success', 'Police verification status updated.');
         header("Location: /staff/{$id}");
@@ -196,7 +200,9 @@ final class StaffController
     public function destroy(string $id): void
     {
         $this->verifyCsrf();
+        $staff = Staff::find((int) $id);
         Staff::delete((int) $id);
+        ActivityLog::log('staff', 'delete', 'Removed staff member "' . ($staff['name'] ?? $id) . '"');
         Flash::set('success', 'Staff member removed.');
         header('Location: /staff');
         exit;

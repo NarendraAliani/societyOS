@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Helpers\Auth;
 use App\Helpers\Csrf;
 use App\Helpers\Flash;
+use App\Models\ActivityLog;
 use App\Models\Flat;
 use App\Models\Member;
 use App\Models\ParkingAllocation;
@@ -65,6 +66,7 @@ final class VehicleController
             'color' => trim((string) ($_POST['color'] ?? '')),
         ]);
 
+        ActivityLog::log('vehicles', 'create', "Added vehicle \"{$registration}\"");
         Flash::set('success', "Vehicle \"{$registration}\" added.");
         header('Location: ' . ($returnToMember ? "/members/{$returnToMember}" : '/vehicles'));
         exit;
@@ -108,7 +110,9 @@ final class VehicleController
 
         $returnToMember = is_numeric($_POST['return_to_member'] ?? '') ? (int) $_POST['return_to_member'] : null;
 
+        $vehicle = Vehicle::find((int) $id);
         Vehicle::delete((int) $id);
+        ActivityLog::log('vehicles', 'delete', 'Removed vehicle "' . ($vehicle['registration_number'] ?? $id) . '"');
         Flash::set('success', 'Vehicle removed.');
         header('Location: ' . ($returnToMember ? "/members/{$returnToMember}" : '/vehicles'));
         exit;
