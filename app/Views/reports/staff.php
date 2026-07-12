@@ -3,7 +3,11 @@ $pageTitle = 'Staff Report';
 ob_start();
 ?>
 <p><a href="/reports">&laquo; Back to Reports</a></p>
-<a href="/reports/staff?format=csv" class="btn btn-outline-secondary btn-sm mb-3"><i class="fa-solid fa-download me-1"></i>Export CSV</a>
+<div class="btn-group mb-3">
+    <a href="/reports/staff?format=csv" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-download me-1"></i>CSV</a>
+    <a href="/reports/staff?format=pdf" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-file-pdf me-1"></i>PDF</a>
+    <a href="/reports/staff?format=xlsx" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-file-excel me-1"></i>Excel</a>
+</div>
 
 <div class="card border-0 shadow-sm">
     <div class="card-body">

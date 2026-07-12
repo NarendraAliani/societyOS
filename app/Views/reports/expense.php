@@ -10,7 +10,11 @@ $to = $_GET['to'] ?? date('Y-m-d');
     <div class="col-4"><input type="date" name="to" class="form-control form-control-sm" value="<?= htmlspecialchars($to) ?>"></div>
     <div class="col-4"><button type="submit" class="btn btn-sm btn-primary w-100">Filter</button></div>
 </form>
-<a href="/reports/expense?from=<?= htmlspecialchars($from) ?>&to=<?= htmlspecialchars($to) ?>&format=csv" class="btn btn-outline-secondary btn-sm mb-3"><i class="fa-solid fa-download me-1"></i>Export CSV</a>
+<div class="btn-group mb-3">
+    <a href="/reports/expense?from=<?= htmlspecialchars($from) ?>&to=<?= htmlspecialchars($to) ?>&format=csv" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-download me-1"></i>CSV</a>
+    <a href="/reports/expense?from=<?= htmlspecialchars($from) ?>&to=<?= htmlspecialchars($to) ?>&format=pdf" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-file-pdf me-1"></i>PDF</a>
+    <a href="/reports/expense?from=<?= htmlspecialchars($from) ?>&to=<?= htmlspecialchars($to) ?>&format=xlsx" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-file-excel me-1"></i>Excel</a>
+</div>
 
 <div class="card border-0 shadow-sm">
     <div class="card-body">

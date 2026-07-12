@@ -102,7 +102,7 @@ Status legend: ✅ built this phase · ⬜ planned (routes not yet wired)
 /reports/assets                 ✅ Register + CSV
 /reports/occupancy              ✅ Flat occupancy + CSV
 /reports/parking                ✅ Slot allocation + CSV
-/reports/*?format=csv           ✅ Every report above supports CSV export — PDF/Excel export not built (see DECISIONS.md)
+/reports/*?format=csv|pdf|xlsx   ✅ Every report above supports CSV, real PDF (Dompdf), and real Excel (PhpSpreadsheet) export — see DECISIONS.md
 
 /admin/users                    ✅ GET/POST — Users, inline role/status edit, password reset
 /admin/roles                    ✅ GET — Role list

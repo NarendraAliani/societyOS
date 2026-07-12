@@ -3,6 +3,11 @@ $pageTitle = 'Defaulter Report';
 ob_start();
 ?>
 <p><a href="/billing">&laquo; Back to Bills</a></p>
+<div class="btn-group mb-3">
+    <a href="/reports/defaulters?format=csv" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-download me-1"></i>CSV</a>
+    <a href="/reports/defaulters?format=pdf" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-file-pdf me-1"></i>PDF</a>
+    <a href="/reports/defaulters?format=xlsx" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-file-excel me-1"></i>Excel</a>
+</div>
 <div class="card border-0 shadow-sm">
     <div class="card-body">
         <table class="table table-hover align-middle">
