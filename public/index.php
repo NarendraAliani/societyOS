@@ -84,6 +84,10 @@ $router->post('/family-members/{id}/delete', [MemberController::class, 'deleteFa
 $router->post('/members/{id}/emergency-contacts', [MemberController::class, 'storeEmergencyContact'], [$auth, $can('members.manage')]);
 $router->post('/emergency-contacts/{id}/delete', [MemberController::class, 'deleteEmergencyContact'], [$auth, $can('members.manage')]);
 
+$router->post('/members/{id}/documents', [MemberController::class, 'storeDocument'], [$auth, $can('members.manage')]);
+$router->post('/documents/{id}/delete', [MemberController::class, 'deleteDocument'], [$auth, $can('members.manage')]);
+$router->get('/documents/{id}/file', [MemberController::class, 'serveDocument'], [$auth, $can('members.view')]);
+
 // Maintenance Billing — static paths must be registered before the /billing/{id} wildcard
 $router->get('/billing', [BillingController::class, 'index'], [$auth, $can('billing.view')]);
 $router->get('/billing/generate', [BillingController::class, 'showGenerateForm'], [$auth, $can('billing.manage')]);

@@ -126,7 +126,7 @@ ob_start();
             </div>
         </div>
 
-        <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
                 <h6>Emergency Contacts</h6>
                 <ul class="list-group list-group-flush mb-3">
@@ -150,6 +150,40 @@ ob_start();
                     <div class="col-3"><input type="text" name="phone" class="form-control form-control-sm" placeholder="Phone" required></div>
                     <div class="col-2"><button type="submit" class="btn btn-sm btn-primary w-100">Add</button></div>
                 </form>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h6>Documents</h6>
+                <ul class="list-group list-group-flush mb-3">
+                    <?php foreach ($documents as $doc): ?>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>
+                                <a href="/documents/<?= (int) $doc['id'] ?>/file" target="_blank"><?= htmlspecialchars($doc['title']) ?></a>
+                                <small class="text-muted">
+                                    <?= htmlspecialchars(strtoupper($doc['file_type'] ?? '')) ?>
+                                    &middot; <?= htmlspecialchars($doc['created_at']) ?>
+                                    <?php if ($doc['uploaded_by_name']): ?>&middot; by <?= htmlspecialchars($doc['uploaded_by_name']) ?><?php endif; ?>
+                                </small>
+                            </span>
+                            <form method="post" action="/documents/<?= (int) $doc['id'] ?>/delete" onsubmit="return confirm('Remove this document?');">
+                                <?= \App\Helpers\Csrf::field() ?>
+                                <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                            </form>
+                        </li>
+                    <?php endforeach; ?>
+                    <?php if (empty($documents)): ?>
+                        <li class="list-group-item text-muted">None uploaded.</li>
+                    <?php endif; ?>
+                </ul>
+                <form method="post" action="/members/<?= (int) $member['id'] ?>/documents" enctype="multipart/form-data" class="row g-2">
+                    <?= \App\Helpers\Csrf::field() ?>
+                    <div class="col-5"><input type="text" name="title" class="form-control form-control-sm" placeholder="Title (e.g. Aadhar Card)" required></div>
+                    <div class="col-5"><input type="file" name="document" accept=".jpg,.jpeg,.png,.pdf" class="form-control form-control-sm" required></div>
+                    <div class="col-2"><button type="submit" class="btn btn-sm btn-primary w-100">Upload</button></div>
+                </form>
+                <div class="form-text mt-1">JPG, PNG, or PDF, up to <?= (int) config()['upload_max_size_mb'] ?> MB.</div>
             </div>
         </div>
     </div>

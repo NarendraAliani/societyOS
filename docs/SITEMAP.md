@@ -27,7 +27,9 @@ Status legend: ✅ built this phase · ⬜ planned (routes not yet wired)
 /members/{id}                   ✅ GET/POST — Detail/edit, POST .../delete
 /members/{id}/family-members    ✅ POST — add family member (inline on detail page)
 /members/tenants                ⬜ Dedicated tenants view (lease dates) — `tenants` table not yet wired
-/members/documents               ⬜ Document upload (needs file-upload validation, not built yet)
+/members/{id}/documents          ✅ POST — Upload a resident document (JPG/PNG/PDF), inline on detail page
+/documents/{id}/delete           ✅ POST — Delete a document (DB row + file)
+/documents/{id}/file             ✅ GET — Authenticated file serving, never linked directly
 /members/{id}/emergency-contacts ✅ POST — add emergency contact (inline on detail page)
 
 /vehicles                       ✅ GET — Vehicles list

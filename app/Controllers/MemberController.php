@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Helpers\Auth;
 use App\Helpers\Csrf;
+use App\Helpers\FileUpload;
 use App\Helpers\Flash;
 use App\Models\ActivityLog;
+use App\Models\Document;
 use App\Models\EmergencyContact;
 use App\Models\FamilyMember;
 use App\Models\Flat;
@@ -73,6 +76,7 @@ final class MemberController
         $familyMembers = FamilyMember::forMember((int) $id);
         $emergencyContacts = EmergencyContact::forMember((int) $id);
         $vehicles = Vehicle::forMember((int) $id);
+        $documents = Document::forMember((int) $id);
         require __DIR__ . '/../Views/members/show.php';
     }
 
@@ -181,6 +185,92 @@ final class MemberController
         EmergencyContact::delete((int) $id);
         Flash::set('success', 'Emergency contact removed.');
         header('Location: /members/' . ($contact['member_id'] ?? ''));
+        exit;
+    }
+
+    public function storeDocument(string $memberId): void
+    {
+        $this->verifyCsrf();
+
+        $title = trim((string) ($_POST['title'] ?? ''));
+        if ($title === '') {
+            Flash::set('error', 'A title is required.');
+            header("Location: /members/{$memberId}");
+            exit;
+        }
+
+        try {
+            $path = FileUpload::storeDocument($_FILES['document'] ?? [], 'documents');
+        } catch (\RuntimeException $e) {
+            Flash::set('error', $e->getMessage());
+            header("Location: /members/{$memberId}");
+            exit;
+        }
+
+        if ($path === null) {
+            Flash::set('error', 'A file is required.');
+            header("Location: /members/{$memberId}");
+            exit;
+        }
+
+        $fileType = strtolower((string) pathinfo($path, PATHINFO_EXTENSION));
+        Document::create(Society::currentId(), (int) $memberId, $title, $path, $fileType, Auth::id());
+
+        ActivityLog::log('members', 'document_upload', "Uploaded document \"{$title}\" for member id {$memberId}");
+        Flash::set('success', 'Document uploaded.');
+        header("Location: /members/{$memberId}");
+        exit;
+    }
+
+    public function deleteDocument(string $id): void
+    {
+        $this->verifyCsrf();
+
+        $document = Document::find((int) $id);
+        if (!$document) {
+            Flash::set('error', 'Document not found.');
+            header('Location: /members');
+            exit;
+        }
+
+        $fullPath = dirname(__DIR__, 2) . '/uploads/' . $document['file_path'];
+        Document::delete((int) $id);
+        if (is_file($fullPath)) {
+            unlink($fullPath);
+        }
+
+        ActivityLog::log('members', 'document_delete', "Deleted document \"{$document['title']}\" for member id {$document['member_id']}");
+        Flash::set('success', 'Document removed.');
+        header('Location: /members/' . $document['member_id']);
+        exit;
+    }
+
+    /**
+     * Streams an uploaded resident document after the route's own auth+permission
+     * middleware has already run — same "never linked directly" pattern as
+     * StaffController::serveFile().
+     */
+    public function serveDocument(string $id): void
+    {
+        $document = Document::find((int) $id);
+        if (!$document) {
+            http_response_code(404);
+            exit('Not found.');
+        }
+
+        $fullPath = dirname(__DIR__, 2) . '/uploads/' . $document['file_path'];
+        if (!is_file($fullPath)) {
+            http_response_code(404);
+            exit('Not found.');
+        }
+
+        $contentTypes = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'pdf' => 'application/pdf'];
+        $extension = strtolower((string) pathinfo($fullPath, PATHINFO_EXTENSION));
+
+        header('Content-Type: ' . ($contentTypes[$extension] ?? 'application/octet-stream'));
+        header('Content-Length: ' . filesize($fullPath));
+        header('X-Content-Type-Options: nosniff');
+        readfile($fullPath);
         exit;
     }
 
