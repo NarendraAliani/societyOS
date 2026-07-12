@@ -1,6 +1,8 @@
 -- =====================================================================
 -- SocietyOS — Database Schema
 -- Single-society installation. One DB per society. MySQL 8.x / InnoDB / utf8mb4.
+-- Last verified against the live database: 2026-07-12 (55 tables, column-by-column,
+-- including all in-place ALTER TABLE migrations documented in docs/DECISIONS.md) — no drift.
 -- =====================================================================
 
 SET NAMES utf8mb4;
