@@ -108,7 +108,12 @@ Status legend: ✅ built this phase · ⬜ planned (routes not yet wired)
 /admin/roles                    ✅ GET — Role list
 /admin/roles/{id}               ✅ GET/POST — Edit a role's permission set (super_admin fixed/uneditable)
 /admin/activity-logs            ✅ GET — Login history + module activity log, both populated (high-signal write actions instrumented across 10 controllers, see DECISIONS.md)
-/admin/backup                   ⬜ Not built — deferred (see DECISIONS.md)
+/admin/backup                   ✅ GET — Backup history + create/upload-restore forms, super_admin only
+/admin/backup                   ✅ POST — Create a new backup
+/admin/backup/{filename}/download ✅ GET — Download a stored backup
+/admin/backup/{filename}/restore  ✅ POST — Restore from a stored backup (auto safety-backup first)
+/admin/backup/{filename}/delete   ✅ POST — Delete a stored backup
+/admin/backup/restore-upload      ✅ POST — Restore from an uploaded .sql file (auto safety-backup first)
 
 /profile                        ✅ GET — View own name/email/phone/role/status/last login
 /profile/edit                   ✅ GET/POST — Edit own name/email/phone (email uniqueness enforced, role/status not self-editable)

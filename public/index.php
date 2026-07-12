@@ -24,6 +24,7 @@ use App\Controllers\StaffController;
 use App\Controllers\AssetController;
 use App\Controllers\ReportController;
 use App\Controllers\AdminController;
+use App\Controllers\BackupController;
 use App\Controllers\ProfileController;
 
 Session::start();
@@ -230,6 +231,16 @@ $router->get('/admin/roles/{id}', [AdminController::class, 'editRole'], [$auth, 
 $router->post('/admin/roles/{id}/permissions', [AdminController::class, 'updateRolePermissions'], [$auth, $can('users.manage')]);
 
 $router->get('/admin/activity-logs', [AdminController::class, 'activityLogs'], [$auth, $can('users.manage')]);
+
+// Backup & Restore — hard-restricted to super_admin inside BackupController itself
+// (Auth::role() check), not merely gated by a grantable permission key, given the blast
+// radius of restore. $auth here only confirms the request is authenticated at all.
+$router->get('/admin/backup', [BackupController::class, 'index'], [$auth]);
+$router->post('/admin/backup', [BackupController::class, 'create'], [$auth]);
+$router->get('/admin/backup/{filename}/download', [BackupController::class, 'download'], [$auth]);
+$router->post('/admin/backup/{filename}/delete', [BackupController::class, 'delete'], [$auth]);
+$router->post('/admin/backup/{filename}/restore', [BackupController::class, 'restoreFromList'], [$auth]);
+$router->post('/admin/backup/restore-upload', [BackupController::class, 'restoreFromUpload'], [$auth]);
 
 // Profile — any authenticated user, no specific permission required
 $router->get('/profile', [ProfileController::class, 'show'], [$auth]);

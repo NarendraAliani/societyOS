@@ -7,6 +7,9 @@ ob_start();
     <div>
         <a href="/admin/roles" class="btn btn-outline-secondary btn-sm me-2">Roles &amp; Permissions</a>
         <a href="/admin/activity-logs" class="btn btn-outline-secondary btn-sm me-2">Activity Logs</a>
+        <?php if (\App\Helpers\Auth::role() === 'super_admin'): ?>
+            <a href="/admin/backup" class="btn btn-outline-secondary btn-sm me-2">Backup &amp; Restore</a>
+        <?php endif; ?>
         <a href="/admin/users/create" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus me-1"></i>Add User</a>
     </div>
 </div>
