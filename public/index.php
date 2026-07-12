@@ -140,6 +140,8 @@ $router->post('/accounting/vendors', [AccountingController::class, 'storeVendor'
 $router->post('/accounting/vendors/{id}/delete', [AccountingController::class, 'deleteVendor'], [$auth, $can('accounting.manage')]);
 $router->post('/accounting/vendors/{id}', [AccountingController::class, 'updateVendor'], [$auth, $can('accounting.manage')]);
 $router->get('/accounting/ledger', [AccountingController::class, 'ledger'], [$auth, $can('accounting.view')]);
+$router->get('/accounting/cash-book', [AccountingController::class, 'cashBook'], [$auth, $can('accounting.view')]);
+$router->get('/accounting/bank-book', [AccountingController::class, 'bankBook'], [$auth, $can('accounting.view')]);
 
 // Visitors & Security
 $router->get('/visitors', [VisitorController::class, 'index'], [$auth, $can('visitors.manage')]);

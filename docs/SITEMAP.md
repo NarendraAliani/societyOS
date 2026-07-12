@@ -57,9 +57,9 @@ Status legend: ✅ built this phase · ⬜ planned (routes not yet wired)
 /accounting/income               ✅ GET/POST — Record income (auto-posts a credit ledger entry)
 /accounting/expenses             ✅ GET/POST — Record expense (auto-posts a debit ledger entry)
 /accounting/vendors              ✅ GET/POST — Vendors, POST .../delete
-/accounting/ledger               ✅ GET — All entries, filterable by account (doubles as cash book / bank book via the filter)
-/accounting/cash-book            ⬜ Dedicated view — covered today by `/accounting/ledger?account_id=`
-/accounting/bank-book            ⬜ Dedicated view — covered today by `/accounting/ledger?account_id=`
+/accounting/ledger               ✅ GET — All entries, filterable by account (raw log; see cash-book/bank-book below for a running-balance view)
+/accounting/cash-book             ✅ GET — Cash accounts, date range + opening/running/closing balance
+/accounting/bank-book             ✅ GET — Bank accounts, date range + opening/running/closing balance
 /accounting/reports              ⬜ Trial balance, P&L, balance sheet — needs a chart-of-accounts model this schema doesn't have (see DECISIONS.md)
 
 /visitors                       ✅ GET/POST — Gate register, filterable by date

@@ -29,6 +29,33 @@ final class Account
         return $stmt->fetch() ?: null;
     }
 
+    public static function allForSocietyByType(int $societyId, string $type): array
+    {
+        $stmt = db()->prepare('SELECT * FROM accounts WHERE society_id = :sid AND account_type = :type ORDER BY name');
+        $stmt->execute(['sid' => $societyId, 'type' => $type]);
+        return $stmt->fetchAll();
+    }
+
+    /** Balance as of the start of $date — opening_balance plus all entries strictly before it. */
+    public static function balanceBefore(int $accountId, string $date): float
+    {
+        $account = self::find($accountId);
+        if (!$account) {
+            return 0.0;
+        }
+
+        $stmt = db()->prepare(
+            'SELECT
+                COALESCE(SUM(CASE WHEN entry_type = "credit" THEN amount ELSE 0 END), 0)
+                - COALESCE(SUM(CASE WHEN entry_type = "debit" THEN amount ELSE 0 END), 0) AS net
+             FROM ledger_entries WHERE account_id = :account_id AND entry_date < :date'
+        );
+        $stmt->execute(['account_id' => $accountId, 'date' => $date]);
+        $net = (float) $stmt->fetchColumn();
+
+        return (float) $account['opening_balance'] + $net;
+    }
+
     public static function create(int $societyId, string $name, string $type, float $openingBalance): int
     {
         $stmt = db()->prepare(

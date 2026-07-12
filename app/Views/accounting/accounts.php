@@ -8,7 +8,9 @@ ob_start();
         <a href="/accounting/income" class="btn btn-outline-success btn-sm me-2">Income</a>
         <a href="/accounting/expenses" class="btn btn-outline-danger btn-sm me-2">Expenses</a>
         <a href="/accounting/vendors" class="btn btn-outline-secondary btn-sm me-2">Vendors</a>
-        <a href="/accounting/ledger" class="btn btn-outline-primary btn-sm">Ledger</a>
+        <a href="/accounting/ledger" class="btn btn-outline-primary btn-sm me-2">Ledger</a>
+        <a href="/accounting/cash-book" class="btn btn-outline-primary btn-sm me-2">Cash Book</a>
+        <a href="/accounting/bank-book" class="btn btn-outline-primary btn-sm">Bank Book</a>
     </div>
 </div>
 <div class="row">

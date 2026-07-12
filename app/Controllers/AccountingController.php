@@ -226,6 +226,54 @@ final class AccountingController
         require __DIR__ . '/../Views/accounting/ledger.php';
     }
 
+    public function cashBook(): void
+    {
+        $this->renderBook('cash', 'Cash Book', '/accounting/cash-book');
+    }
+
+    public function bankBook(): void
+    {
+        $this->renderBook('bank', 'Bank Book', '/accounting/bank-book');
+    }
+
+    /**
+     * A traditional cash/bank book: one account at a time (running balance across several
+     * accounts summed together wouldn't mean anything), oldest-first, with a running balance
+     * column starting from the balance as of the day before the range began.
+     */
+    private function renderBook(string $accountType, string $pageTitle, string $basePath): void
+    {
+        $accounts = Account::allForSocietyByType(Society::currentId(), $accountType);
+
+        $accountId = isset($_GET['account_id']) && $_GET['account_id'] !== ''
+            ? (int) $_GET['account_id']
+            : ($accounts[0]['id'] ?? null);
+
+        $from = $_GET['from'] ?? date('Y-m-01');
+        $to = $_GET['to'] ?? date('Y-m-d');
+
+        $account = null;
+        $entries = [];
+        $openingBalance = 0.0;
+        $closingBalance = 0.0;
+
+        if ($accountId !== null) {
+            $account = Account::find($accountId);
+            $rawEntries = LedgerEntry::forAccountInRange($accountId, $from, $to);
+            $openingBalance = Account::balanceBefore($accountId, $from);
+
+            $running = $openingBalance;
+            foreach ($rawEntries as $entry) {
+                $running += $entry['entry_type'] === 'credit' ? (float) $entry['amount'] : -(float) $entry['amount'];
+                $entry['running_balance'] = $running;
+                $entries[] = $entry;
+            }
+            $closingBalance = $running;
+        }
+
+        require __DIR__ . '/../Views/accounting/book.php';
+    }
+
     private function verifyCsrf(): void
     {
         if (!Csrf::verify($_POST['_csrf'] ?? null)) {

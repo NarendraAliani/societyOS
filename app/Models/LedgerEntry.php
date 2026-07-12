@@ -40,6 +40,18 @@ final class LedgerEntry
         return $stmt->fetchAll();
     }
 
+    /** Oldest-first, for building a running balance (cash/bank book), scoped to a date range. */
+    public static function forAccountInRange(int $accountId, string $from, string $to): array
+    {
+        $stmt = db()->prepare(
+            'SELECT * FROM ledger_entries
+             WHERE account_id = :account_id AND entry_date BETWEEN :from AND :to
+             ORDER BY entry_date, id'
+        );
+        $stmt->execute(['account_id' => $accountId, 'from' => $from, 'to' => $to]);
+        return $stmt->fetchAll();
+    }
+
     public static function allForSociety(int $societyId, ?int $accountId = null): array
     {
         $sql = 'SELECT le.*, a.name AS account_name
