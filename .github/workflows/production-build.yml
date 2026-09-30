@@ -73,3 +73,23 @@ jobs:
 
           git commit -m "Build production deployment from ${GITHUB_SHA::7}"
           git push --force origin deploy
+
+      - name: Deploy production build to BigRock via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./
+          server-dir: ./
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            .env
+            .env.*
+            deployment-cron.log
+            .ftp-deploy-sync-state.json
