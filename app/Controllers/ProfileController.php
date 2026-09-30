@@ -91,6 +91,7 @@ final class ProfileController
         }
 
         User::changeOwnPassword($userId, $new);
+        Auth::clearPasswordChangeRequirement();
 
         Flash::set('success', 'Password changed.');
         header('Location: /profile');
