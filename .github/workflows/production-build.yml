@@ -1,0 +1,74 @@
+name: SocietyOS Production Build
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: societyos-production-build
+  cancel-in-progress: true
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, gd, zip, xml, curl, pdo_mysql
+          coverage: none
+
+      - name: Validate Composer configuration
+        run: composer validate --strict
+
+      - name: Install production dependencies
+        run: composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+      - name: PHP syntax check
+        shell: bash
+        run: |
+          set -euo pipefail
+          find app config public database -type f -name '*.php' -print0 | while IFS= read -r -d '' file; do
+            php -l "$file" >/dev/null
+          done
+
+      - name: Prepare deployment branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          rm -rf /tmp/societyos-deploy
+          mkdir -p /tmp/societyos-deploy
+          rsync -a --exclude='.git/' ./ /tmp/societyos-deploy/
+
+          git branch -D deploy 2>/dev/null || true
+          git switch --orphan deploy
+          git reset
+          git clean -fdx
+          rsync -a --delete /tmp/societyos-deploy/ ./
+
+          # vendor/ is excluded from main but is required on the deployment branch.
+          git add -A
+          git add -f vendor/
+
+          if git diff --cached --quiet; then
+            echo "No deployment changes to publish."
+            exit 0
+          fi
+
+          git commit -m "Build production deployment from ${GITHUB_SHA::7}"
+          git push --force origin deploy
