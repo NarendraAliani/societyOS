@@ -57,9 +57,10 @@ jobs:
 
           git branch -D deploy 2>/dev/null || true
           git switch --orphan deploy
-          git reset
-          git clean -fdx
-          rsync -a --delete /tmp/societyos-deploy/ ./
+          git rm -rf . || true
+
+          # Rehydrate the working tree without deleting the .git directory.
+          rsync -a /tmp/societyos-deploy/ ./
 
           # vendor/ is excluded from main but is required on the deployment branch.
           git add -A
