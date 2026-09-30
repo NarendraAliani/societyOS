@@ -14,5 +14,14 @@ final class AuthMiddleware
             header('Location: /login');
             exit;
         }
+
+        if (Auth::mustChangePassword()) {
+            $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+
+            if ($path !== '/profile/password') {
+                header('Location: /profile/password?required=1');
+                exit;
+            }
+        }
     }
 }
