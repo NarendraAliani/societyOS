@@ -105,7 +105,7 @@ final class Wing
             );
             $flatInsertStmt = $pdo->prepare(
                 'INSERT INTO flats (floor_id, flat_number, flat_type, carpet_area_sqft, occupancy_status)
-                 VALUES (:floor_id, :flat_number, NULL, NULL, "vacant")'
+                 VALUES (:floor_id, :flat_number, NULL, NULL, 'vacant')'
             );
             $floorInsertStmt = $pdo->prepare(
                 'INSERT INTO floors (wing_id, floor_number) VALUES (:wing_id, :floor_number)'
