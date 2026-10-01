@@ -37,7 +37,7 @@ $documentModel = file_get_contents('app/Models/Document.php');
 
 $checks = [
     'resident sidebar exposes My Family' => str_contains($layout, 'href="/resident/family"') && str_contains($layout, '>My Family</a>'),
-    'logout is not rendered in the shared topbar' => !str_contains($layout, 'action="/logout"'),
+    'logout is rendered in the shared topbar' => str_contains($layout, 'action="/logout"') && str_contains($layout, '>Logout</button>'),
     'responsive sidebar toggle exists' => str_contains($layout, 'app-sidebar-toggle') && str_contains($layout, 'id="app-sidebar"'),
     'responsive shell styles exist' => str_contains(file_get_contents('public/static/css/app.css'), '@media (max-width: 991.98px)') && str_contains(file_get_contents('public/static/css/app.css'), 'sidebar-open'),
     'family page is resident-scoped' => str_contains($controller, 'public function family(): void') && str_contains($controller, '$member = $this->member();'),
