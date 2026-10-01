@@ -52,11 +52,8 @@ ob_start();
                 </div>
                 <div class="col-6" id="linked-resident-group">
                     <label class="form-label">Linked Resident <span class="text-danger" id="resident-required">*</span></label>
-                    <select name="member_id" class="form-select">
-                        <option value="0">Not linked</option>
-                        <?php foreach ($residentCandidates ?? [] as $candidate): ?>
-                            <option value="<?= (int) $candidate['id'] ?>"><?= htmlspecialchars($candidate['wing_name'] . '-' . $candidate['flat_number'] . ' — ' . $candidate['name'] . ' (' . $candidate['member_type'] . ')') ?></option>
-                        <?php endforeach; ?>
+                    <select name="member_id" class="form-select" disabled>
+                        <option value="0">Select a role first</option>
                     </select>
                 </div>
                 <div class="col-6">
@@ -76,16 +73,52 @@ ob_start();
     const resident = document.querySelector('select[name="member_id"]');
     const required = document.getElementById('resident-required');
     const group = document.getElementById('linked-resident-group');
-    function syncResidentField() {
+
+    async function loadEligibleHomes() {
         const selected = role.options[role.selectedIndex];
-        const needs = selected && ['resident', 'tenant'].includes(selected.dataset.roleName || '');
-        resident.required = !!needs;
-        required.classList.toggle('d-none', !needs);
-        group.classList.toggle('border-start', !!needs);
-        group.classList.toggle('ps-2', !!needs);
+        const roleName = selected ? (selected.dataset.roleName || '') : '';
+        resident.innerHTML = '';
+        resident.disabled = true;
+
+        if (!['resident', 'tenant'].includes(roleName)) {
+            resident.required = false;
+            required.classList.add('d-none');
+            resident.append(new Option('Not linked', '0'));
+            return;
+        }
+
+        resident.append(new Option('Loading available homes…', '0'));
+        try {
+            const response = await fetch('/admin/users/resident-candidates?role_id=' + encodeURIComponent(role.value), {
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!response.ok) throw new Error('Unable to load available homes.');
+            const data = await response.json();
+            resident.innerHTML = '';
+
+            if (!data.items || data.items.length === 0) {
+                resident.append(new Option('No available homes for this role', '0'));
+                resident.required = false;
+                return;
+            }
+
+            resident.append(new Option('Select home', '0'));
+            data.items.forEach(function (item) {
+                const label = item.wing_name + '-' + item.flat_number + ' — ' + item.name + ' (' + item.member_type + ')';
+                resident.append(new Option(label, item.id));
+            });
+            resident.disabled = false;
+            resident.required = true;
+            required.classList.remove('d-none');
+        } catch (error) {
+            resident.innerHTML = '';
+            resident.append(new Option('Could not load available homes', '0'));
+            resident.required = false;
+        }
     }
-    role.addEventListener('change', syncResidentField);
-    syncResidentField();
+
+    role.addEventListener('change', loadEligibleHomes);
+    loadEligibleHomes();
 })();
 </script>
 <?php
