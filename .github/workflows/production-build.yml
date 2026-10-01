@@ -53,6 +53,9 @@ jobs:
       - name: Multi-role user regression contract
         run: php tests/regression/multi_role_user_accounts.php
 
+      - name: Resident navigation regression contract
+        run: php tests/regression/resident_navigation.php
+
       - name: Prepare deployment branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
