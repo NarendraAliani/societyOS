@@ -33,6 +33,7 @@
                 </div>
                 <?php require __DIR__ . '/../components/captcha.php'; ?>
                 <button type="submit" class="btn btn-primary w-100">Login</button>
+                <div class="text-center mt-3"><a href="/forgot-password">Forgot Password?</a></div>
             </form>
         </div>
     </div>
