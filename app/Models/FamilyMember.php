@@ -24,12 +24,27 @@ final class FamilyMember
             'name' => $name,
             'relation' => $relation,
             'dob' => $dateOfBirth,
-            // A stored age only means anything as a fallback when there's no DOB to compute
-            // it from live — if DOB is given, age is never trusted from input, always derived.
             'age' => $dateOfBirth ? null : $age,
             'phone' => $phone,
         ]);
         return (int) db()->lastInsertId();
+    }
+
+    public static function update(int $id, string $name, ?string $relation, ?string $dateOfBirth, ?int $age, ?string $phone): void
+    {
+        $stmt = db()->prepare(
+            'UPDATE family_members
+             SET name = :name, relation = :relation, date_of_birth = :dob, age = :age, phone = :phone
+             WHERE id = :id'
+        );
+        $stmt->execute([
+            'id' => $id,
+            'name' => $name,
+            'relation' => $relation,
+            'dob' => $dateOfBirth,
+            'age' => $dateOfBirth ? null : $age,
+            'phone' => $phone,
+        ]);
     }
 
     public static function delete(int $id): void
@@ -46,11 +61,6 @@ final class FamilyMember
         return $row ? self::withDisplayAge($row) : null;
     }
 
-    /**
-     * Age is never read from a stored column when date_of_birth is known — it's computed
-     * fresh from today's date every time a row is fetched, so it can't go stale. The `age`
-     * column is only consulted as a fallback when there's no DOB on file.
-     */
     private static function withDisplayAge(array $row): array
     {
         $row['display_age'] = $row['date_of_birth']
