@@ -247,3 +247,36 @@
 **Decision**: `composer.json` requires PHP `>=8.0`, code avoids 8.1-only syntax (enums, readonly properties).
 **Reason**: Discovered during `composer install` that the local XAMPP install runs PHP 8.0.28, not 8.1+. Spec said "PHP 8.x" without pinning a minor version.
 **Impact**: If deploying to a host running PHP 8.1+, no changes needed (code is forward-compatible); if targeting only 8.0, avoid introducing 8.1-only features in later modules without updating this decision.
+
+
+---
+
+## 2026-10-01 — Role-scoped user/member linking
+
+### Decision
+
+User-to-resident/member linking is **role-scoped**, not globally scoped.
+
+The invariant is:
+
+> One member may have at most one user account for a given role.
+
+A member already linked under one role must not be offered again for that same role, but that existing link must not block the member from being used under another role where the workflow permits member linking.
+
+Example:
+
+- Narendra Aliani → Resident → C-404
+- Narendra Aliani must no longer appear as an available Resident for another account.
+- The Resident link does not, by itself, exclude Narendra from other role workflows such as Accountant, Committee Member, or Society Admin.
+
+### Implementation
+
+- The dependent dropdown filters availability by the selected role.
+- Application validation enforces the same rule server-side.
+- Database uniqueness is represented by `users(society_id, role_id, member_id)`.
+- The rule is intentionally based on the **member identity**, not merely the flat. Therefore another member record in the same flat is not automatically treated as the same person.
+- Non-member roles continue to store `member_id = NULL`; MySQL unique indexes permit multiple NULL values, so the role-scoped constraint does not accidentally restrict unrelated staff-only accounts. citeturn3search0
+
+### Migration
+
+`database/migrations/2026-10-01-role-scoped-member-linking.sql` adds the database constraint after an existing-data duplicate audit.
