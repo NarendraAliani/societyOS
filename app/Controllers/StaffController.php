@@ -41,9 +41,6 @@ final class StaffController
             exit;
         }
 
-        $staff = Staff::find((int) $id);
-        if (!$staff || (int) $staff['society_id'] !== Society::currentId()) { Flash::set('error', 'Staff member not found.'); header('Location: /staff'); exit; }
-
         try {
             $photoPath = FileUpload::storeImage($_FILES['photo'] ?? [], 'staff');
             $idProofPath = FileUpload::storeDocument($_FILES['id_proof'] ?? [], 'staff');
@@ -93,6 +90,9 @@ final class StaffController
             header("Location: /staff/{$id}");
             exit;
         }
+
+        $staff = Staff::find((int) $id);
+        if (!$staff || (int) $staff['society_id'] !== Society::currentId()) { Flash::set('error', 'Staff member not found.'); header('Location: /staff'); exit; }
 
         try {
             $photoPath = FileUpload::storeImage($_FILES['photo'] ?? [], 'staff');
