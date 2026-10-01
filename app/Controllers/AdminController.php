@@ -63,6 +63,8 @@ final class AdminController
     public function removeUserRole(string $id,string $roleId): void
     {
         $this->verifyCsrf();
+        $user=User::find((int)$id);
+        if(!$user||(int)$user['society_id']!==Society::currentId()){Flash::set('error','User account not found.');header('Location:/admin/users');exit;}
         if((int)$id===Auth::id()&&(int)$roleId===Auth::roleId()){Flash::set('error','You cannot remove the role currently used by your own session.');header('Location:/admin/users');exit;}
         try{User::removeRole((int)$id,(int)$roleId);}catch(\InvalidArgumentException $e){Flash::set('error',$e->getMessage());header('Location:/admin/users');exit;}
         ActivityLog::log('admin','remove_user_role',"Removed role id {$roleId} from user id {$id}");Flash::set('success','Role removed from user account.');header('Location:/admin/users');exit;
@@ -70,14 +72,18 @@ final class AdminController
 
     public function updateUserStatus(string $id): void
     {
-        $this->verifyCsrf();$status=in_array($_POST['status']??'', ['active','inactive','locked'],true)?$_POST['status']:'active';
+        $this->verifyCsrf();$user=User::find((int)$id);
+        if(!$user||(int)$user['society_id']!==Society::currentId()){Flash::set('error','User account not found.');header('Location:/admin/users');exit;}
+        $status=in_array($_POST['status']??'', ['active','inactive','locked'],true)?$_POST['status']:'active';
         if((int)$id===Auth::id()&&$status!=='active'){Flash::set('error',"You can't deactivate your own account.");header('Location:/admin/users');exit;}
         User::updateStatus((int)$id,$status);ActivityLog::log('admin','update_user_status',"Updated user id {$id} status to \"{$status}\"");Flash::set('success','User status updated.');header('Location:/admin/users');exit;
     }
 
     public function resetPassword(string $id): void
     {
-        $this->verifyCsrf();$password=(string)($_POST['password']??'');
+        $this->verifyCsrf();$user=User::find((int)$id);
+        if(!$user||(int)$user['society_id']!==Society::currentId()){Flash::set('error','User account not found.');header('Location:/admin/users');exit;}
+        $password=(string)($_POST['password']??'');
         if(strlen($password)<8){Flash::set('error','New password must be at least 8 characters.');header('Location:/admin/users');exit;}
         User::resetPassword((int)$id,$password);ActivityLog::log('admin','reset_password',"Reset password for user id {$id}");Flash::set('success','Password reset. The user must change it on next login.');header('Location:/admin/users');exit;
     }

@@ -11,5 +11,6 @@ $checks=[
 'create form documents existing account behavior'=>str_contains(file_get_contents('app/Views/admin/create_user.php'),'email already exists'),
 'admin UI manages role assignments'=>str_contains(file_get_contents('app/Views/admin/users.php'),'rolesForUser'),
 'no stale removed-user route remains'=>!str_contains(file_get_contents('public/index.php'),"AdminController::class, 'updateUser'"),
+'admin user mutations are society scoped'=>preg_match('/public function removeUserRole[\\s\\S]*?society_id.*?Society::currentId\\(\\)/',file_get_contents('app/Controllers/AdminController.php')) && preg_match('/public function updateUserStatus[\\s\\S]*?society_id.*?Society::currentId\\(\\)/',file_get_contents('app/Controllers/AdminController.php')) && preg_match('/public function resetPassword[\\s\\S]*?society_id.*?Society::currentId\\(\\)/',file_get_contents('app/Controllers/AdminController.php')),
 ];
 $failed=false;foreach($checks as $n=>$ok){printf("[%s] %s\n",$ok?'PASS':'FAIL',$n);if(!$ok)$failed=true;}if($failed)exit(1);echo "All multi-role regression contracts passed.\n";
