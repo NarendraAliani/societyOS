@@ -20,6 +20,13 @@ final class Poll
         return $stmt->fetch() ?: null;
     }
 
+    public static function optionBelongsToPoll(int $optionId, int $pollId): bool
+    {
+        $stmt = db()->prepare('SELECT COUNT(*) FROM poll_options WHERE id = :option_id AND poll_id = :poll_id');
+        $stmt->execute(['option_id' => $optionId, 'poll_id' => $pollId]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
     public static function create(int $societyId, string $question, ?string $closesAt, ?int $createdBy, array $options): int
     {
         $pdo = db();
