@@ -170,6 +170,7 @@ ob_start();
         </table>
     </div>
 </div>
+</div>
 <?php
-</div>\n<?php\n$content = ob_get_clean();
+$content = ob_get_clean();
 require __DIR__ . '/../layouts/app.php';
