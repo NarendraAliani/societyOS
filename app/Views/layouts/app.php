@@ -180,6 +180,36 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
             applyFontSize(btn.getAttribute('data-font-size-value'));
         });
     });
+
+    // Any table-row edit/management form that was historically embedded in a
+    // Bootstrap collapse is presented as a modal instead. This keeps list pages
+    // compact and makes the interaction consistent across the application.
+    (function promoteEmbeddedCollapseFormsToModals() {
+        var counter = 0;
+        document.querySelectorAll('[data-bs-toggle="collapse"][data-bs-target^="#"]').forEach(function (trigger) {
+            var selector = trigger.getAttribute('data-bs-target');
+            if (!selector) return;
+            var target;
+            try { target = document.querySelector(selector); } catch (e) { return; }
+            if (!target || !target.querySelector('form[method="post"], form[method="POST"]')) return;
+
+            counter += 1;
+            var modalId = 'societyos-edit-modal-' + counter;
+            var modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.id = modalId;
+            modal.tabIndex = -1;
+            modal.setAttribute('aria-hidden', 'true');
+            modal.innerHTML = '<div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Edit / Manage</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"></div></div></div>';
+            modal.querySelector('.modal-body').appendChild(target.cloneNode(true));
+            document.body.appendChild(modal);
+            target.remove();
+            trigger.setAttribute('data-bs-toggle', 'modal');
+            trigger.setAttribute('data-bs-target', '#' + modalId);
+            trigger.removeAttribute('aria-expanded');
+            trigger.removeAttribute('aria-controls');
+        });
+    })();
 })();
 </script>
 </body>
