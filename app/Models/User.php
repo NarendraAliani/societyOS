@@ -123,6 +123,19 @@ final class User
         return (int) $stmt->fetchColumn() > 0;
     }
 
+    public static function memberIsLinked(int $memberId, int $societyId, ?int $excludingUserId = null): bool
+    {
+        $sql = 'SELECT COUNT(*) FROM users WHERE society_id = :sid AND member_id = :member_id';
+        $params = ['sid' => $societyId, 'member_id' => $memberId];
+        if ($excludingUserId !== null) {
+            $sql .= ' AND id != :excluding_id';
+            $params['excluding_id'] = $excludingUserId;
+        }
+        $stmt = db()->prepare($sql);
+        $stmt->execute($params);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
     public static function resetPassword(int $id, string $newPassword): void
     {
         $stmt = db()->prepare('UPDATE users SET password_hash = :hash, must_change_password = 1 WHERE id = :id');
