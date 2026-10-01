@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Helpers\Auth;
+use App\Helpers\Captcha;
 use App\Helpers\Csrf;
 use App\Models\Society;
 use App\Models\User;
@@ -20,14 +21,25 @@ final class AuthController
             header('Location: /dashboard');
             exit;
         }
+
+        Captcha::refresh();
         require __DIR__ . '/../Views/auth/login.php';
     }
 
     public function login(): void
     {
         if (!Csrf::verify($_POST['_csrf'] ?? null)) {
+            Captcha::refresh();
             http_response_code(419);
             $error = 'Session expired. Please try again.';
+            require __DIR__ . '/../Views/auth/login.php';
+            return;
+        }
+
+        // CAPTCHA is required before any credential or rate-limit decision.
+        if (!Captcha::verify($_POST['captcha_code'] ?? null)) {
+            Captcha::refresh();
+            $error = 'Invalid or expired security code. Please enter the new CAPTCHA code.';
             require __DIR__ . '/../Views/auth/login.php';
             return;
         }
@@ -37,6 +49,7 @@ final class AuthController
         $societyCode = strtoupper(trim((string) ($_POST['society_code'] ?? '')));
 
         if ($email === '' || $password === '') {
+            Captcha::refresh();
             $error = 'Email and password are required.';
             require __DIR__ . '/../Views/auth/login.php';
             return;
@@ -45,12 +58,14 @@ final class AuthController
         $society = $societyCode !== '' ? Society::findByCode($societyCode) : Society::current();
         $societyId = (int) ($society['id'] ?? 0);
         if ($societyId <= 0) {
+            Captcha::refresh();
             $error = 'Invalid society code.';
             require __DIR__ . '/../Views/auth/login.php';
             return;
         }
 
         if ($this->isRateLimited($email, $societyId)) {
+            Captcha::refresh();
             $error = 'Too many failed attempts. Try again later.';
             require __DIR__ . '/../Views/auth/login.php';
             return;
@@ -60,6 +75,7 @@ final class AuthController
 
         if (!$user || $user['status'] !== 'active' || !password_verify($password, $user['password_hash'])) {
             User::logLoginHistory($user['id'] ?? null, $email, 'failed');
+            Captcha::refresh();
             $error = 'Invalid credentials.';
             require __DIR__ . '/../Views/auth/login.php';
             return;
