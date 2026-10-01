@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS users (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     society_id INT UNSIGNED NOT NULL,
     role_id INT UNSIGNED NOT NULL,
-    member_id INT UNSIGNED NULL,             -- linked resident/member, nullable for staff-only roles
+    member_id INT UNSIGNED NULL,             -- linked resident/member; nullable for legacy/bootstrap accounts
     name VARCHAR(150) NOT NULL,
     email VARCHAR(150) NOT NULL,
     phone VARCHAR(20) NULL,
