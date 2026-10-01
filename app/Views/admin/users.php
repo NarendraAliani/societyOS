@@ -51,6 +51,15 @@ ob_start();
                                             </select>
                                         </div>
                                         <div class="col-6">
+                                            <label class="form-label small">Linked Resident</label>
+                                            <select name="member_id" class="form-select form-select-sm">
+                                                <option value="0">Not linked</option>
+                                                <?php foreach ($residentCandidates ?? [] as $candidate): ?>
+                                                    <option value="<?= (int) $candidate['id'] ?>" <?= (int) ($user['member_id'] ?? 0) === (int) $candidate['id'] ? 'selected' : '' ?>><?= htmlspecialchars($candidate['wing_name'] . '-' . $candidate['flat_number'] . ' — ' . $candidate['name']) ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="col-6">
                                             <label class="form-label small">Status</label>
                                             <select name="status" class="form-select form-select-sm">
                                                 <option value="active" <?= $user['status'] === 'active' ? 'selected' : '' ?>>Active</option>
@@ -58,6 +67,7 @@ ob_start();
                                                 <option value="locked" <?= $user['status'] === 'locked' ? 'selected' : '' ?>>Locked</option>
                                             </select>
                                         </div>
+                                        <div class="col-12"><small class="text-muted">Resident/Tenant roles require a linked active resident. Other roles should remain unlinked.</small></div>
                                         <div class="col-12"><button type="submit" class="btn btn-sm btn-primary">Save</button></div>
                                     </div>
                                 </form>
