@@ -79,6 +79,98 @@ final class SocietyController
         exit;
     }
 
+    public function configureWingStructure(string $id): void
+    {
+        $this->verifyCsrf();
+
+        $wingId = (int) $id;
+        $wing = Wing::find($wingId);
+
+        if (!$wing || (int) $wing['society_id'] !== Society::currentId()) {
+            http_response_code(404);
+            require __DIR__ . '/../Views/errors/404.php';
+            return;
+        }
+
+        $floorCount = filter_var(
+            $_POST['floor_count'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1, 'max_range' => 100]]
+        );
+        $defaultFlats = filter_var(
+            $_POST['default_flats_per_new_floor'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1, 'max_range' => 100]]
+        );
+
+        if ($floorCount === false || $defaultFlats === false) {
+            Flash::set('error', 'Floor count and default flats per new floor must be whole numbers between 1 and 100.');
+            header("Location: /society/wings/{$wingId}");
+            exit;
+        }
+
+        $flatCounts = [];
+        foreach ((array) ($_POST['flat_counts'] ?? []) as $floorId => $count) {
+            $validatedFloorId = filter_var(
+                $floorId,
+                FILTER_VALIDATE_INT,
+                ['options' => ['min_range' => 1]]
+            );
+            $validatedCount = filter_var(
+                $count,
+                FILTER_VALIDATE_INT,
+                ['options' => ['min_range' => 1, 'max_range' => 100]]
+            );
+
+            if ($validatedFloorId === false || $validatedCount === false) {
+                Flash::set('error', 'Each floor must have a valid flat count between 1 and 100.');
+                header("Location: /society/wings/{$wingId}");
+                exit;
+            }
+
+            $flatCounts[(int) $validatedFloorId] = (int) $validatedCount;
+        }
+
+        try {
+            $result = Wing::configureStructure(
+                $wingId,
+                (int) $floorCount,
+                (int) $defaultFlats,
+                $flatCounts
+            );
+
+            ActivityLog::log(
+                'society',
+                'configure_structure',
+                sprintf(
+                    'Configured wing "%s": target %d floors, created %d floors and %d flats',
+                    $wing['name'],
+                    $floorCount,
+                    $result['created_floors'],
+                    $result['created_flats']
+                )
+            );
+
+            if ($result['created_floors'] === 0 && $result['created_flats'] === 0) {
+                Flash::set('success', 'Wing structure is already configured as requested.');
+            } else {
+                Flash::set(
+                    'success',
+                    sprintf(
+                        'Wing configured successfully. Created %d floor(s) and %d flat(s).',
+                        $result['created_floors'],
+                        $result['created_flats']
+                    )
+                );
+            }
+        } catch (\Throwable $e) {
+            Flash::set('error', $e->getMessage());
+        }
+
+        header("Location: /society/wings/{$wingId}");
+        exit;
+    }
+
     public function deleteWing(string $id): void
     {
         $this->verifyCsrf();
