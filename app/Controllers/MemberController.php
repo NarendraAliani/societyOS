@@ -155,15 +155,21 @@ final class MemberController
         }
 
         $age = is_numeric($_POST['age'] ?? '') ? (int) $_POST['age'] : null;
-        FamilyMember::create(
-            (int) $memberId,
-            $name,
-            trim((string) ($_POST['relation'] ?? '')) ?: null,
-            $dob,
-            $age,
-            trim((string) ($_POST['phone'] ?? '')) ?: null
-        );
-        Flash::set('success', 'Family member added.');
+        $relation = trim((string) ($_POST['relation'] ?? '')) ?: null;
+        $phone = trim((string) ($_POST['phone'] ?? '')) ?: null;
+        if (!empty($_POST['id'])) {
+            $existing = FamilyMember::find((int) $_POST['id']);
+            if (!$existing || (int) $existing['member_id'] !== (int) $memberId) {
+                Flash::set('error', 'Family member not found.');
+                header("Location: /members/{$memberId}");
+                exit;
+            }
+            FamilyMember::update((int) $_POST['id'], $name, $relation, $dob, $age, $phone);
+            Flash::set('success', 'Family member updated.');
+        } else {
+            FamilyMember::create((int) $memberId, $name, $relation, $dob, $age, $phone);
+            Flash::set('success', 'Family member added.');
+        }
         header("Location: /members/{$memberId}");
         exit;
     }
@@ -184,10 +190,19 @@ final class MemberController
 
         $name = trim((string) ($_POST['name'] ?? ''));
         $phone = trim((string) ($_POST['phone'] ?? ''));
+        $relation = trim((string) ($_POST['relation'] ?? '')) ?: null;
         if ($name === '' || $phone === '') {
             Flash::set('error', 'Name and phone are required.');
+        } elseif (!empty($_POST['id'])) {
+            $existing = EmergencyContact::find((int) $_POST['id']);
+            if (!$existing || (int) $existing['member_id'] !== (int) $memberId) {
+                Flash::set('error', 'Emergency contact not found.');
+            } else {
+                EmergencyContact::update((int) $_POST['id'], $name, $relation, $phone);
+                Flash::set('success', 'Emergency contact updated.');
+            }
         } else {
-            EmergencyContact::create((int) $memberId, $name, trim((string) ($_POST['relation'] ?? '')) ?: null, $phone);
+            EmergencyContact::create((int) $memberId, $name, $relation, $phone);
             Flash::set('success', 'Emergency contact added.');
         }
         header("Location: /members/{$memberId}");
