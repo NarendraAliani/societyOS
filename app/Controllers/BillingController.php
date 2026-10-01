@@ -61,7 +61,7 @@ final class BillingController
     {
         $pageTitle = 'Bill Detail';
         $bill = MaintenanceBill::find((int) $id);
-        if (!$bill) {
+        if (!$bill || (int) $bill['society_id'] !== Society::currentId()) {
             http_response_code(404);
             require __DIR__ . '/../Views/errors/404.php';
             return;
@@ -75,6 +75,13 @@ final class BillingController
     public function recordPayment(string $id): void
     {
         $this->verifyCsrf();
+
+        $bill = MaintenanceBill::find((int) $id);
+        if (!$bill || (int) $bill['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Bill not found.');
+            header('Location: /billing');
+            exit;
+        }
 
         $amount = $_POST['amount'] ?? '';
         $mode = $_POST['payment_mode'] ?? '';
@@ -91,7 +98,8 @@ final class BillingController
             (float) $amount,
             $mode,
             trim((string) ($_POST['reference_number'] ?? '')) ?: null,
-            Auth::id()
+            Auth::id(),
+            Society::currentId()
         );
 
         ActivityLog::log('billing', 'payment', "Recorded payment of {$amount} on bill id {$id}, receipt {$result['receipt_number']}");
