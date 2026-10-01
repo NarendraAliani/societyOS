@@ -47,7 +47,7 @@ ob_start();
                 </div>
                 <div class="col-6" id="linked-resident-group">
                     <label class="form-label">Linked Resident <span class="text-danger" id="resident-required">*</span></label>
-                    <select name="member_id" class="form-select" disabled>
+                    <select name="member_id" class="form-select" disabled required>
                         <option value="0">Select a role first</option>
                     </select>
                 </div>
@@ -56,7 +56,7 @@ ob_start();
                     <input type="password" name="password" class="form-control" minlength="8" required>
                 </div>
             </div>
-            <div id="resident-link-help" class="form-text mt-2">For Resident/Tenant accounts, select the person who occupies the home. <a href="/members/create">Add a resident</a> if they do not exist yet.</div>
+            <div id="resident-link-help" class="form-text mt-2">Select the active resident/member who this user represents. The same resident may be linked under different roles, but a home can be linked only once for each role. <a href="/members/create">Add a resident</a> if they do not exist yet.</div>
             <p class="text-muted small mt-2">The user will be required to change this password on first login.</p>
             <button type="submit" class="btn btn-primary mt-2">Create User</button>
         </form>
@@ -70,18 +70,18 @@ ob_start();
     const group = document.getElementById('linked-resident-group');
 
     async function loadEligibleHomes() {
-        const selected = role.options[role.selectedIndex];
-        const roleName = selected ? (selected.dataset.roleName || '') : '';
-        resident.innerHTML = '';
-        resident.disabled = true;
-
-        if (!['resident', 'tenant'].includes(roleName)) {
+        if (!role.value) {
+            resident.innerHTML = '';
+            resident.append(new Option('Select a role first', '0'));
+            resident.disabled = true;
             resident.required = false;
-            required.classList.add('d-none');
-            resident.append(new Option('Not linked', '0'));
             return;
         }
 
+        resident.innerHTML = '';
+        resident.disabled = true;
+        resident.required = true;
+        required.classList.remove('d-none');
         resident.append(new Option('Loading available homes…', '0'));
         try {
             const response = await fetch('/admin/users/resident-candidates?role_id=' + encodeURIComponent(role.value), {
@@ -94,6 +94,7 @@ ob_start();
             if (!data.items || data.items.length === 0) {
                 resident.append(new Option('No available homes for this role', '0'));
                 resident.required = false;
+                resident.disabled = false;
                 return;
             }
 
