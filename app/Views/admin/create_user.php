@@ -18,7 +18,7 @@ ob_start();
         <?php endif; ?>
         <div class="alert alert-light border small mb-3">
             <i class="fa-solid fa-filter me-1"></i>
-            Choose a role first. For Resident/Tenant, the linked-person list is filtered for that role only. A person already linked as Resident is excluded from Resident, but remains available when another role is selected.
+            Choose a role first. The Linked Resident list is filtered by the selected role. If a resident is already linked under Resident, that does not prevent the same resident from being linked under Accountant, Committee Member, Society Admin, or another role.
         </div>
 
         <form method="post" action="/admin/users">
@@ -47,7 +47,7 @@ ob_start();
                 </div>
                 <div class="col-6" id="linked-resident-group">
                     <label class="form-label">Linked Resident <span class="text-danger" id="resident-required">*</span></label>
-                    <select name="member_id" class="form-select" disabled>
+                    <select name="member_id" class="form-select" disabled required>
                         <option value="0">Select a role first</option>
                     </select>
                 </div>
@@ -56,7 +56,7 @@ ob_start();
                     <input type="password" name="password" class="form-control" minlength="8" required>
                 </div>
             </div>
-            <div id="resident-link-help" class="form-text mt-2">For Resident/Tenant accounts, select the person who occupies the home. Other roles are not linked to a flat.</div>
+            <div id="resident-link-help" class="form-text mt-2">Select the active resident/member who this user represents. The same resident may be linked under different roles, but only once per role.</div>
             <p class="text-muted small mt-2">The user will be required to change this password on first login.</p>
             <button type="submit" class="btn btn-primary mt-2">Create User</button>
         </form>
@@ -74,13 +74,6 @@ ob_start();
         resident.innerHTML = '';
         resident.disabled = true;
 
-        if (!['resident', 'tenant'].includes(roleName)) {
-            resident.required = false;
-            required.classList.add('d-none');
-            resident.append(new Option('Not linked', '0'));
-            return;
-        }
-
         resident.append(new Option('Loading available residents…', '0'));
         try {
             const response = await fetch('/admin/users/resident-candidates?role_id=' + encodeURIComponent(role.value), {
@@ -92,7 +85,7 @@ ob_start();
 
             if (!data.items || data.items.length === 0) {
                 resident.append(new Option('No available residents for this role', '0'));
-                resident.required = false;
+                resident.required = true;
                 return;
             }
 
