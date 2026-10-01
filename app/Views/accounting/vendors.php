@@ -63,9 +63,7 @@ ob_start();
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
+    <div class="col-md-4 d-flex justify-content-md-end align-items-start"><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-app-Views-accounting-vendors-php"><i class="fa-solid fa-plus me-1"></i>Add Vendor</button><div class="modal fade" id="modal-app-Views-accounting-vendors-php" tabindex="-1" aria-labelledby="modal-app-Views-accounting-vendors-php-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="modal-app-Views-accounting-vendors-php-label">Add Vendor</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body">
                 <h6>Add Vendor</h6>
                 <form method="post" action="/accounting/vendors">
                     <?= \App\Helpers\Csrf::field() ?>
@@ -90,10 +88,7 @@ ob_start();
                         <input type="email" name="email" class="form-control">
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Add Vendor</button>
-                </form>
-            </div>
-        </div>
-    </div>
+                </form></div></div></div></div></div>
 </div>
 <?php
 $content = ob_get_clean();
