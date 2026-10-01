@@ -55,4 +55,11 @@ For future bugs, add a regression test to the same release workflow before consi
 
 ## Multi-role user migration
 
-Before production deployment, take a fresh BigRock phpMyAdmin backup and execute `database/migrations/2026-10-01-multi-role-users.sql`. Verify one `user_roles` row exists for each existing user, then test login, role switching, existing-email role addition, same-flat/different-role allowance, and same-flat/same-role rejection. Do not remove legacy `users.role_id/member_id` columns until production verification is complete.
+Before production deployment:
+
+1. Take a fresh BigRock phpMyAdmin backup.
+2. Run `database/migrations/2026-10-01-multi-role-users-preflight.sql` first. **Both result sets must be empty.** If either returns rows, stop and resolve the data issue before continuing.
+3. Execute `database/migrations/2026-10-01-multi-role-users.sql`.
+4. Verify one `user_roles` row exists for each existing user and verify both unique constraints are present.
+5. Test login, role switching, existing-email role addition, same-flat/different-role allowance, and same-flat/same-role rejection.
+6. Do not remove legacy `users.role_id/member_id` columns until production verification is complete.
