@@ -51,6 +51,8 @@ $checks = [
     'modal standard is documented' => is_file('docs/UI_FORM_STANDARD.md'),
     'family routes exist' => str_contains($routes, "ResidentController::class, 'family'") && str_contains($routes, "/resident/family-members"),
     'member detail uses modal-first forms' => str_contains($memberView, 'app-form-modal') && str_contains($memberView, 'Edit Resident') && str_contains($memberView, 'Upload Document'),
+    'member detail sections use requested order' => strpos($memberView, '>Family Members</h5>') < strpos($memberView, '>Documents</h5>') && strpos($memberView, '>Vehicles</h5>') < strpos($memberView, '>Emergency Contacts</h5>'),
+    'resident summary counts family members only' => str_contains(file_get_contents('app/Models/Member.php'), '(SELECT COUNT(*) FROM family_members fm WHERE fm.member_id = m.id) AS member_count') && !str_contains(file_get_contents('app/Models/Member.php'), '1 + (SELECT COUNT(*) FROM family_members fm WHERE fm.member_id = m.id) AS member_count'),
     'member detail supports family and contact edits' => str_contains($memberController, 'FamilyMember::update') && str_contains($memberController, 'EmergencyContact::update'),
     'member detail supports vehicle add and edit modals' => str_contains($memberView, 'id="addVehicleModal"') && str_contains($memberView, 'Edit Vehicle') && str_contains($vehicleController, '$returnToMember'),
     'member detail documents are society-scoped' => str_contains($documentModel, 'member_society_id') && str_contains($memberController, 'document[\'member_society_id\']'),
