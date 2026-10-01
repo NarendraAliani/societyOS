@@ -22,6 +22,14 @@ final class EmergencyContact
         return (int) db()->lastInsertId();
     }
 
+    public static function update(int $id, string $name, ?string $relation, string $phone): void
+    {
+        $stmt = db()->prepare(
+            'UPDATE emergency_contacts SET name = :name, relation = :relation, phone = :phone WHERE id = :id'
+        );
+        $stmt->execute(['id' => $id, 'name' => $name, 'relation' => $relation, 'phone' => $phone]);
+    }
+
     public static function delete(int $id): void
     {
         $stmt = db()->prepare('DELETE FROM emergency_contacts WHERE id = :id');
