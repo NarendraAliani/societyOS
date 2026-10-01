@@ -74,25 +74,26 @@ ob_start();
         <div class="col-xl-6">
             <div class="card resident-section-card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="resident-section-title"><span class="resident-section-icon"><i class="fa-solid fa-phone-volume"></i></span>Emergency Contacts</h5>
-                    <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#addEmergencyModal"><i class="fa-solid fa-plus me-1"></i>Add</button>
+                    <h5 class="resident-section-title"><span class="resident-section-icon"><i class="fa-solid fa-folder-open"></i></span>Documents</h5>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadDocumentModal"><i class="fa-solid fa-upload me-1"></i>Upload</button>
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush resident-list">
-                        <?php foreach ($emergencyContacts as $ec): ?>
+                        <?php foreach ($documents as $doc): ?>
                             <div class="list-group-item d-flex justify-content-between align-items-center gap-2">
                                 <div class="min-w-0">
-                                    <div class="resident-item-title text-truncate"><?= htmlspecialchars($ec['name']) ?></div>
-                                    <div class="resident-item-meta"><?= htmlspecialchars($ec['relation'] ?? 'Emergency contact') ?> &middot; <?= htmlspecialchars($ec['phone']) ?></div>
+                                    <div class="resident-item-title text-truncate"><?= htmlspecialchars($doc['title']) ?></div>
+                                    <div class="resident-item-meta"><?= htmlspecialchars(strtoupper($doc['file_type'] ?? '')) ?> &middot; <?= htmlspecialchars($doc['created_at']) ?><?php if ($doc['uploaded_by_name']): ?> &middot; by <?= htmlspecialchars($doc['uploaded_by_name']) ?><?php endif; ?></div>
                                 </div>
                                 <div class="d-flex gap-1 flex-shrink-0">
-                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editEmergencyModal<?= (int) $ec['id'] ?>" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                                    <form method="post" action="/emergency-contacts/<?= (int) $ec['id'] ?>/delete" onsubmit="return confirm('Remove this emergency contact?');"><?= \App\Helpers\Csrf::field() ?><button class="btn btn-sm btn-outline-danger" title="Remove"><i class="fa-solid fa-trash"></i></button></form>
+                                    <a class="btn btn-sm btn-outline-primary" href="/documents/<?= (int) $doc['id'] ?>/file" target="_blank" title="View"><i class="fa-solid fa-eye"></i></a>
+                                    <form method="post" action="/documents/<?= (int) $doc['id'] ?>/delete" onsubmit="return confirm('Remove this document?');"><?= \App\Helpers\Csrf::field() ?><button class="btn btn-sm btn-outline-danger" title="Remove"><i class="fa-solid fa-trash"></i></button></form>
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                        <?php if (!$emergencyContacts): ?><div class="resident-empty py-4"><i class="fa-solid fa-phone-slash"></i>No emergency contacts added.</div><?php endif; ?>
+                        <?php if (!$documents): ?><div class="resident-empty py-4"><i class="fa-solid fa-folder-open"></i>No documents uploaded.</div><?php endif; ?>
                     </div>
+                    <div class="resident-form-note mt-3">JPG, PNG, or PDF, up to <?= (int) \App\Models\Settings::get((int) $_SESSION['society_id'], 'upload_max_size_mb', config()['upload_max_size_mb']) ?> MB.</div>
                 </div>
             </div>
         </div>
@@ -126,26 +127,25 @@ ob_start();
         <div class="col-xl-6">
             <div class="card resident-section-card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="resident-section-title"><span class="resident-section-icon"><i class="fa-solid fa-folder-open"></i></span>Documents</h5>
-                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadDocumentModal"><i class="fa-solid fa-upload me-1"></i>Upload</button>
+                    <h5 class="resident-section-title"><span class="resident-section-icon"><i class="fa-solid fa-phone-volume"></i></span>Emergency Contacts</h5>
+                    <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#addEmergencyModal"><i class="fa-solid fa-plus me-1"></i>Add</button>
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush resident-list">
-                        <?php foreach ($documents as $doc): ?>
+                        <?php foreach ($emergencyContacts as $ec): ?>
                             <div class="list-group-item d-flex justify-content-between align-items-center gap-2">
                                 <div class="min-w-0">
-                                    <div class="resident-item-title text-truncate"><?= htmlspecialchars($doc['title']) ?></div>
-                                    <div class="resident-item-meta"><?= htmlspecialchars(strtoupper($doc['file_type'] ?? '')) ?> &middot; <?= htmlspecialchars($doc['created_at']) ?><?php if ($doc['uploaded_by_name']): ?> &middot; by <?= htmlspecialchars($doc['uploaded_by_name']) ?><?php endif; ?></div>
+                                    <div class="resident-item-title text-truncate"><?= htmlspecialchars($ec['name']) ?></div>
+                                    <div class="resident-item-meta"><?= htmlspecialchars($ec['relation'] ?? 'Emergency contact') ?> &middot; <?= htmlspecialchars($ec['phone']) ?></div>
                                 </div>
                                 <div class="d-flex gap-1 flex-shrink-0">
-                                    <a class="btn btn-sm btn-outline-primary" href="/documents/<?= (int) $doc['id'] ?>/file" target="_blank" title="View"><i class="fa-solid fa-eye"></i></a>
-                                    <form method="post" action="/documents/<?= (int) $doc['id'] ?>/delete" onsubmit="return confirm('Remove this document?');"><?= \App\Helpers\Csrf::field() ?><button class="btn btn-sm btn-outline-danger" title="Remove"><i class="fa-solid fa-trash"></i></button></form>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editEmergencyModal<?= (int) $ec['id'] ?>" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                    <form method="post" action="/emergency-contacts/<?= (int) $ec['id'] ?>/delete" onsubmit="return confirm('Remove this emergency contact?');"><?= \App\Helpers\Csrf::field() ?><button class="btn btn-sm btn-outline-danger" title="Remove"><i class="fa-solid fa-trash"></i></button></form>
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                        <?php if (!$documents): ?><div class="resident-empty py-4"><i class="fa-solid fa-folder-open"></i>No documents uploaded.</div><?php endif; ?>
+                        <?php if (!$emergencyContacts): ?><div class="resident-empty py-4"><i class="fa-solid fa-phone-slash"></i>No emergency contacts added.</div><?php endif; ?>
                     </div>
-                    <div class="resident-form-note mt-3">JPG, PNG, or PDF, up to <?= (int) \App\Models\Settings::get((int) $_SESSION['society_id'], 'upload_max_size_mb', config()['upload_max_size_mb']) ?> MB.</div>
                 </div>
             </div>
         </div>
