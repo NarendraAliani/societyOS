@@ -1,6 +1,6 @@
 -- =====================================================================
 -- SocietyOS — Database Schema
--- Single-society installation. One DB per society. MySQL 8.x / InnoDB / utf8mb4.
+-- Multi-society installation. One shared DB; every tenant-owned record is scoped by society_id.
 -- Last verified against the live database: 2026-07-12 (55 tables, column-by-column,
 -- including all in-place ALTER TABLE migrations documented in docs/DECISIONS.md) — no drift.
 -- =====================================================================
@@ -14,6 +14,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 CREATE TABLE IF NOT EXISTS society (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(30) NOT NULL UNIQUE,
     name VARCHAR(150) NOT NULL,
     registration_no VARCHAR(100) NULL,
     address VARCHAR(255) NULL,
