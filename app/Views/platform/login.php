@@ -11,7 +11,7 @@
                 <?php if(!empty($error)): ?>
                     <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
                 <?php endif; ?>
-                <form method="post" action="/platform/login">
+                <form method="post" action="/platform/login" autocomplete="off">
                     <?= \App\Helpers\Csrf::field() ?>
                     <div class="mb-3">
                         <label class="form-label">Email</label>
@@ -21,6 +21,7 @@
                         <label class="form-label">Password</label>
                         <input type="password" name="password" class="form-control" required autocomplete="current-password">
                     </div>
+                    <?php require __DIR__ . '/../components/captcha.php'; ?>
                     <button class="btn btn-primary w-100">Sign in</button>
                 </form>
             </div>
