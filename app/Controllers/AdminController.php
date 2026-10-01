@@ -54,6 +54,11 @@ final class AdminController
             header('Location: /admin/users/create');
             exit;
         }
+        if ($needsMember && User::memberIsLinked($memberId, Society::currentId())) {
+            Flash::set('error', 'That resident is already linked to another user account.');
+            header('Location: /admin/users/create');
+            exit;
+        }
         if (!$needsMember) {
             $memberId = null;
         }
@@ -96,6 +101,11 @@ final class AdminController
         $needsMember = $role && in_array($role['name'], ['resident', 'tenant'], true);
         if ($needsMember && ($memberId <= 0 || !User::memberBelongsToSociety($memberId, Society::currentId()))) {
             Flash::set('error', 'A valid active resident must be linked for resident/tenant users.');
+            header('Location: /admin/users');
+            exit;
+        }
+        if ($needsMember && User::memberIsLinked($memberId, Society::currentId(), (int) $id)) {
+            Flash::set('error', 'That resident is already linked to another user account.');
             header('Location: /admin/users');
             exit;
         }
