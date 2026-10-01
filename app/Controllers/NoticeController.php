@@ -54,6 +54,8 @@ final class NoticeController
     public function destroy(string $id): void
     {
         $this->verifyCsrf();
+        $notice = Notice::find((int) $id);
+        if (!$notice || (int) $notice['society_id'] !== Society::currentId()) { Flash::set('error', 'Notice not found.'); header('Location: /notices'); exit; }
         Notice::delete((int) $id);
         ActivityLog::log('notices', 'delete', "Removed notice id {$id}");
         Flash::set('success', 'Notice removed.');
@@ -99,6 +101,8 @@ final class NoticeController
     public function deleteEvent(string $id): void
     {
         $this->verifyCsrf();
+        $event = Event::find((int) $id);
+        if (!$event || (int) $event['society_id'] !== Society::currentId()) { Flash::set('error', 'Event not found.'); header('Location: /notices/events'); exit; }
         Event::delete((int) $id);
         ActivityLog::log('notices', 'delete', "Removed event id {$id}");
         Flash::set('success', 'Event removed.');
@@ -138,7 +142,7 @@ final class NoticeController
     {
         $pageTitle = 'Poll Detail';
         $poll = Poll::find((int) $id);
-        if (!$poll) {
+        if (!$poll || (int) $poll['society_id'] !== Society::currentId()) {
             http_response_code(404);
             require __DIR__ . '/../Views/errors/404.php';
             return;
@@ -157,6 +161,20 @@ final class NoticeController
 
         if ($optionId <= 0 || $memberId <= 0) {
             Flash::set('error', 'A resident and an option are required to vote.');
+            header("Location: /notices/polls/{$id}");
+            exit;
+        }
+
+        $poll = Poll::find((int) $id);
+        $member = Member::find($memberId);
+        if (!$poll || (int) $poll['society_id'] !== Society::currentId() || !$member || (int) $member['society_id'] !== Society::currentId() || !Poll::optionBelongsToPoll($optionId, (int) $id)) {
+            Flash::set('error', 'Poll, option, or resident not found.');
+            header("Location: /notices/polls/{$id}");
+            exit;
+        }
+
+        if (!empty($poll['closes_at']) && strtotime((string) $poll['closes_at']) < time()) {
+            Flash::set('error', 'This poll is closed.');
             header("Location: /notices/polls/{$id}");
             exit;
         }
