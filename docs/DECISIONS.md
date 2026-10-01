@@ -1,3 +1,7 @@
+## 2026-10-01 — Multi-role user account model
+
+One email/password identifies one login account; a user can have multiple role assignments. Role assignments are stored in `user_roles` with role, member, flat, and default-role state. `UNIQUE(flat_id, role_id)` enforces one account per flat per role. The legacy users.role_id/member_id fields remain temporarily for compatibility; application behavior uses user_roles. Login starts in the default role and the user can switch roles without logging in again. Adding an existing email adds a role to that account instead of creating a duplicate login.
+
 ## 2026-10-01 — Linked-home role-scope regression and prevention
 
 **Issue**: The linked-home dependent dropdown worked for Resident/Tenant but was blank/disabled for Accountant and other roles. The immediate cause was an old JavaScript allow-list in `app/Views/admin/create_user.php` that only triggered the candidate AJAX request for `resident` and `tenant`. The controller and model also contained the same historical role restriction, so changing only the UI would not have been sufficient.

@@ -5,6 +5,9 @@ on:
     branches:
       - main
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -47,7 +50,11 @@ jobs:
       - name: Linked-home regression contract
         run: php tests/regression/linked_home_role_scope.php
 
+      - name: Multi-role user regression contract
+        run: php tests/regression/multi_role_user_accounts.php
+
       - name: Prepare deployment branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
         run: |
           set -euo pipefail
@@ -78,6 +85,7 @@ jobs:
           git push --force origin deploy
 
       - name: Deploy production build to BigRock via FTPS
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_SERVER }}
