@@ -29,10 +29,7 @@ $model = file_get_contents('app/Models/User.php');
 
 $checks = [
     'create-user view calls the role-scoped candidate endpoint' =>
-        (bool) preg_match(
-            '/\/admin\/users\/resident-candidates\?role_id['"\\+]/',
-            $view
-        ),
+        str_contains($view, '/admin/users/resident-candidates?role_id='),
     'create-user view does not restrict AJAX loading to resident/tenant roles' =>
         !preg_match('/\[\s*['"]resident['"]\s*,\s*['"]tenant['"]\s*\]\s*\.includes\s*\(/', $view),
     'controller does not restrict candidate lookup to resident/tenant roles' =>
