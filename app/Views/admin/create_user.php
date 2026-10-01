@@ -30,11 +30,20 @@ ob_start();
                     </select>
                 </div>
                 <div class="col-6">
+                    <label class="form-label">Linked Resident</label>
+                    <select name="member_id" class="form-select">
+                        <option value="0">Not linked</option>
+                        <?php foreach ($residentCandidates ?? [] as $candidate): ?>
+                            <option value="<?= (int) $candidate['id'] ?>"><?= htmlspecialchars($candidate['wing_name'] . '-' . $candidate['flat_number'] . ' — ' . $candidate['name'] . ' (' . $candidate['member_type'] . ')') ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-6">
                     <label class="form-label">Password *</label>
                     <input type="password" name="password" class="form-control" minlength="8" required>
                 </div>
             </div>
-            <p class="text-muted small mt-2">User will be required to change this password on first login.</p>
+            <p class="text-muted small mt-2">Resident/Tenant roles require a linked active resident. Other roles can remain unlinked. User will be required to change this password on first login.</p>
             <button type="submit" class="btn btn-primary mt-2">Create User</button>
         </form>
     </div>
