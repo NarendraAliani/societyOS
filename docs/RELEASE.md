@@ -70,3 +70,18 @@ Before production deployment:
 The first multi-society slice adds a unique society code and makes the authenticated session the source of the active society context. Existing single-society login remains backward-compatible when the Society Code field is blank.
 
 Production steps: take a backup, run database/migrations/2026-10-01-multi-society-context.sql, verify the existing society receives SOC-001, then smoke-test login and the dashboard. The society provisioning/admin directory is the next multi-society phase; do not create additional society records manually yet.
+
+
+## Platform administration & society provisioning
+
+The next multi-society phase adds a platform-level administrator console at /platform/login. It is intentionally separate from society-scoped users.
+
+Before using the platform console in production:
+
+1. Take a fresh BigRock phpMyAdmin backup.
+2. Execute database/migrations/2026-10-01-platform-admin-provisioning.sql once.
+3. The migration creates platform administrator tables and bootstraps the first platform administrator from the existing society super_admin credentials. The platform account is forced to change its password on first platform login.
+4. Sign in at /platform/login and change the platform administrator password.
+5. Use Platform → Create Society to provision additional societies. Do not manually insert additional society rows.
+
+Provisioning creates the society boundary, current financial year, default settings, cash account, complaint/asset categories, maintenance heads/rates, and the society's first Super Admin atomically. The new Super Admin then signs in through the normal /login flow using the provisioned Society Code.
