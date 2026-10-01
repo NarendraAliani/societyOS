@@ -43,7 +43,15 @@ $backOffice = fn () => BackOfficeMiddleware::handle();
 $router->get('/', [LandingController::class, 'index']);
 
 $router->get('/login', [AuthController::class, 'showLogin']);
+$router->get('/forgot-password', [AuthController::class, 'showForgotPassword']);
+$router->post('/forgot-password', [AuthController::class, 'requestPasswordReset']);
+$router->get('/reset-password', [AuthController::class, 'showResetPassword']);
+$router->post('/reset-password', [AuthController::class, 'completePasswordReset']);
 $router->get('/platform/login', [PlatformController::class, 'showLogin']);
+$router->get('/platform/forgot-password', [PlatformController::class, 'showForgotPassword']);
+$router->post('/platform/forgot-password', [PlatformController::class, 'requestPasswordReset']);
+$router->get('/platform/reset-password', [PlatformController::class, 'showResetPassword']);
+$router->post('/platform/reset-password', [PlatformController::class, 'completePasswordReset']);
 $router->post('/platform/login', [PlatformController::class, 'login']);
 $router->get('/platform/societies', [PlatformController::class, 'societies'], [fn () => PlatformAdminMiddleware::handle()]);
 $router->get('/platform/societies/create', [PlatformController::class, 'createSociety'], [fn () => PlatformAdminMiddleware::handle()]);
