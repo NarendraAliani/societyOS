@@ -93,7 +93,7 @@ final class AuthController
 
     public function showResetPassword(): void
     {
-        $token=trim((string)($_GET['token']??'')); $type=(string)($_GET['type']??'user');
+        $token=trim((string)($_GET['token']??'')); $type='user';
         $valid=PasswordResetService::validateToken($token,$type);
         require __DIR__ . '/../Views/auth/reset_password.php';
     }
@@ -102,11 +102,11 @@ final class AuthController
     {
         if(!Csrf::verify($_POST['_csrf']??null)){
             http_response_code(419); $error='Session expired. Please try again.';
-            $token=trim((string)($_POST['token']??'')); $type=(string)($_POST['type']??'user');
+            $token=trim((string)($_POST['token']??'')); $type='user';
             require __DIR__ . '/../Views/auth/reset_password.php'; return;
         }
 
-        $token=trim((string)($_POST['token']??'')); $type=(string)($_POST['type']??'user');
+        $token=trim((string)($_POST['token']??'')); $type='user';
         $password=(string)($_POST['password']??''); $confirmation=(string)($_POST['password_confirmation']??'');
         if(strlen($password)<8||$password!==$confirmation){
             $error='Password must be at least 8 characters and both entries must match.';
