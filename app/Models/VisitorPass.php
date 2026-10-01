@@ -9,7 +9,7 @@ final class VisitorPass
     public static function allForSociety(int $societyId): array
     {
         $stmt = db()->prepare(
-            'SELECT vp.*, f.flat_number, w.name AS wing_name
+            'SELECT vp.*, f.flat_number, w.name AS wing_name, w.society_id
              FROM visitor_passes vp
              JOIN flats f ON f.id = vp.flat_id
              JOIN floors fl ON fl.id = f.floor_id
@@ -70,6 +70,16 @@ final class VisitorPass
             'created_by' => $fields['created_by'],
         ]);
         return (int) db()->lastInsertId();
+    }
+
+    public static function flatBelongsToSociety(int $flatId, int $societyId): bool
+    {
+        $stmt = db()->prepare(
+            'SELECT COUNT(*) FROM flats f JOIN floors fl ON fl.id = f.floor_id JOIN wings w ON w.id = fl.wing_id
+             WHERE f.id = :flat_id AND w.society_id = :sid'
+        );
+        $stmt->execute(['flat_id' => $flatId, 'sid' => $societyId]);
+        return (int) $stmt->fetchColumn() > 0;
     }
 
     public static function markUsed(int $id): void
