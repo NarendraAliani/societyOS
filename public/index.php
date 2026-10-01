@@ -252,6 +252,11 @@ $router->get('/reports/parking', [ReportController::class, 'parking'], [$auth, $
 
 // Administration
 $router->get('/admin/users', [AdminController::class, 'users'], [$auth, $backOffice, $can('users.manage')]);
+$router->post('/admin/users/{id}/roles', [AdminController::class, 'addUserRole'], [$auth, $backOffice, $can('users.manage')]);
+$router->post('/admin/users/{id}/roles/{roleId}/default', [AdminController::class, 'setDefaultRole'], [$auth, $backOffice, $can('users.manage')]);
+$router->post('/admin/users/{id}/roles/{roleId}/remove', [AdminController::class, 'removeUserRole'], [$auth, $backOffice, $can('users.manage')]);
+$router->post('/admin/users/{id}/status', [AdminController::class, 'updateUserStatus'], [$auth, $backOffice, $can('users.manage')]);
+
 $router->get('/admin/users/create', [AdminController::class, 'createUser'], [$auth, $backOffice, $can('users.manage')]);
 $router->get('/admin/users/resident-candidates', [AdminController::class, 'availableResidentCandidates'], [$auth, $backOffice, $can('users.manage')]);
 $router->post('/admin/users', [AdminController::class, 'storeUser'], [$auth, $backOffice, $can('users.manage')]);
@@ -283,5 +288,7 @@ $router->get('/profile/edit', [ProfileController::class, 'edit'], [$auth]);
 $router->post('/profile', [ProfileController::class, 'update'], [$auth]);
 $router->get('/profile/password', [ProfileController::class, 'showChangePassword'], [$auth]);
 $router->post('/profile/password', [ProfileController::class, 'updatePassword'], [$auth]);
+$router->post('/switch-role', [AdminController::class, 'switchRole'], [$auth]);
+
 
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
