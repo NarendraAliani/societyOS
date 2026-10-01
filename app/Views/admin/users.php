@@ -60,12 +60,8 @@ ob_start();
                                         </div>
                                         <div class="col-6">
                                             <label class="form-label small">Linked Resident</label>
-                                            <select name="member_id" class="form-select form-select-sm js-linked-home" data-user-id="<?= (int) $user['id'] ?>" data-current-member-id="<?= (int) ($user['member_id'] ?? 0) ?>" <?= in_array($user['role_name'], ['resident', 'tenant'], true) ? '' : 'disabled' ?>>
-                                                <?php if (!in_array($user['role_name'], ['resident', 'tenant'], true)): ?>
-                                                    <option value="0">Not linked</option>
-                                                <?php else: ?>
-                                                    <option value="<?= (int) ($user['member_id'] ?? 0) ?>"><?= htmlspecialchars(($user['linked_wing_name'] ?? '') . '-' . ($user['linked_flat_number'] ?? '') . ' — ' . ($user['linked_member_name'] ?? 'Current resident')) ?></option>
-                                                <?php endif; ?>
+                                            <select name="member_id" class="form-select form-select-sm js-linked-home" data-user-id="<?= (int) $user['id'] ?>" data-current-member-id="<?= (int) ($user['member_id'] ?? 0) ?>" >
+                                                <option value="<?= (int) ($user['member_id'] ?? 0) ?>"><?= htmlspecialchars(($user['linked_wing_name'] ?? '') . '-' . ($user['linked_flat_number'] ?? '') . ' — ' . ($user['linked_member_name'] ?? 'Current resident')) ?></option>
                                             </select>
                                         </div>
                                         <div class="col-6">
