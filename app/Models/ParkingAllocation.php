@@ -6,6 +6,13 @@ namespace App\Models;
 
 final class ParkingAllocation
 {
+    public static function find(int $id): ?array
+    {
+        $stmt = db()->prepare('SELECT * FROM parking_allocations WHERE id = :id');
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch() ?: null;
+    }
+
     public static function activeForSlot(int $slotId): ?array
     {
         $stmt = db()->prepare('SELECT * FROM parking_allocations WHERE parking_slot_id = :slot_id AND allocated_to IS NULL LIMIT 1');
