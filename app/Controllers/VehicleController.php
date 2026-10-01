@@ -166,7 +166,10 @@ final class VehicleController
         $slotNumber = trim((string) ($_POST['slot_number'] ?? ''));
         $slotType = ($_POST['slot_type'] ?? '') === 'two_wheeler' ? 'two_wheeler' : 'four_wheeler';
 
-        if ($slotNumber === '') {
+        $slot = ParkingSlot::find((int) $id);
+        if (!$slot || (int) $slot['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Parking slot not found.');
+        } elseif ($slotNumber === '') {
             Flash::set('error', 'Slot number is required.');
         } else {
             ParkingSlot::update((int) $id, $slotNumber, $slotType);
@@ -179,6 +182,13 @@ final class VehicleController
     public function deleteSlot(string $id): void
     {
         $this->verifyCsrf();
+
+        $slot = ParkingSlot::find((int) $id);
+        if (!$slot || (int) $slot['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Parking slot not found.');
+            header('Location: /vehicles/parking');
+            exit;
+        }
 
         try {
             ParkingSlot::delete((int) $id);
@@ -227,6 +237,13 @@ final class VehicleController
     {
         $this->verifyCsrf();
 
+        $rate = ParkingRate::find((int) $id);
+        if (!$rate || (int) $rate['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Parking rate not found.');
+            header('Location: /vehicles/parking/rates');
+            exit;
+        }
+
         if (ParkingRate::deleteIfFuture((int) $id)) {
             Flash::set('success', 'Scheduled rate change removed.');
         } else {
@@ -241,7 +258,7 @@ final class VehicleController
     {
         $pageTitle = 'Parking Slot Detail';
         $slot = ParkingSlot::find((int) $id);
-        if (!$slot) {
+        if (!$slot || (int) $slot['society_id'] !== Society::currentId()) {
             http_response_code(404);
             require __DIR__ . '/../Views/errors/404.php';
             return;
@@ -261,10 +278,14 @@ final class VehicleController
         $fromDate = $_POST['allocated_from'] ?? date('Y-m-d');
         $isChargeable = ($_POST['billing_status'] ?? 'paid') !== 'free';
 
-        if ($flatId <= 0) {
-            Flash::set('error', 'A flat is required to allocate this slot.');
+        $slot = ParkingSlot::find((int) $id);
+        $flat = $flatId > 0 ? Flat::find($flatId) : null;
+        $vehicle = $vehicleId ? Vehicle::find($vehicleId) : null;
+        $vehicleMember = $vehicle ? Member::find((int) $vehicle['member_id']) : null;
+        $validVehicle = !$vehicleId || ($vehicle && $vehicleMember && (int) $vehicleMember['society_id'] === Society::currentId() && (int) $vehicleMember['flat_id'] === $flatId);
+        if (!$slot || (int) $slot['society_id'] !== Society::currentId() || !$flat || (int) $flat['society_id'] !== Society::currentId() || !$validVehicle) {
+            Flash::set('error', 'A valid society slot, flat, and matching vehicle are required.');
         } else {
-            ParkingAllocation::allocate((int) $id, $flatId, $vehicleId, $fromDate, $isChargeable);
             Flash::set('success', 'Slot allocated.');
         }
         header("Location: /vehicles/parking/{$id}");
@@ -274,7 +295,14 @@ final class VehicleController
     public function release(string $allocationId): void
     {
         $this->verifyCsrf();
-        $slotId = $_POST['slot_id'] ?? '';
+        $slotId = (int) ($_POST['slot_id'] ?? 0);
+        $allocation = ParkingAllocation::find((int) $allocationId);
+        $slot = $allocation ? ParkingSlot::find((int) $allocation['parking_slot_id']) : null;
+        if (!$allocation || !$slot || (int) $slot['society_id'] !== Society::currentId() || (int) $allocation['parking_slot_id'] !== $slotId) {
+            Flash::set('error', 'Parking allocation not found.');
+            header('Location: /vehicles/parking');
+            exit;
+        }
         ParkingAllocation::release((int) $allocationId);
         Flash::set('success', 'Slot released.');
         header("Location: /vehicles/parking/{$slotId}");
