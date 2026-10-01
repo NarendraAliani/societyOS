@@ -4,17 +4,38 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Helpers\Auth;
+
 final class Society
 {
     private static ?array $cached = null;
+    private static ?int $cachedId = null;
 
     public static function current(): array
     {
-        if (self::$cached === null) {
+        $sessionSocietyId = Auth::id() ? Auth::societyId() : null;
+        if ($sessionSocietyId !== null && $sessionSocietyId > 0) {
+            if (self::$cachedId !== $sessionSocietyId) {
+                $stmt = db()->prepare('SELECT * FROM society WHERE id = :id LIMIT 1');
+                $stmt->execute(['id' => $sessionSocietyId]);
+                self::$cached = $stmt->fetch() ?: [];
+                self::$cachedId = $sessionSocietyId;
+            }
+            return self::$cached ?? [];
+        }
+        if (self::$cached === null || self::$cachedId !== null) {
             $stmt = db()->query('SELECT * FROM society ORDER BY id ASC LIMIT 1');
             self::$cached = $stmt->fetch() ?: [];
+            self::$cachedId = null;
         }
         return self::$cached;
+    }
+
+    public static function findByCode(string $code): ?array
+    {
+        $stmt = db()->prepare('SELECT * FROM society WHERE code = :code LIMIT 1');
+        $stmt->execute(['code' => strtoupper(trim($code))]);
+        return $stmt->fetch() ?: null;
     }
 
     public static function currentId(): int
