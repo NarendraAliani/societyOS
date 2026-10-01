@@ -18,11 +18,10 @@ $reports = [
 <div class="row g-3">
     <?php foreach ($reports as $report): ?>
         <div class="col-md-4">
-            <a href="<?= $report['href'] ?>" class="text-decoration-none">
+            <a href="<?= $report['href'] ?>" class="text-decoration-none report-card-link">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
-                        <i class="fa-solid <?= $report['icon'] ?> fa-lg text-primary mb-2"></i>
-                        <h6 class="text-dark"><?= $report['title'] ?></h6>
+                        <h6 class="report-card-heading"><i class="fa-solid <?= $report['icon'] ?> text-primary"></i><span><?= $report['title'] ?></span></h6>
                         <p class="text-muted small mb-0"><?= $report['desc'] ?></p>
                     </div>
                 </div>
