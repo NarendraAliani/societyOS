@@ -12,6 +12,13 @@ final class Role
         return $stmt->fetchAll();
     }
 
+    public static function findByName(string $name): ?array
+    {
+        $stmt = db()->prepare('SELECT * FROM roles WHERE name = :name LIMIT 1');
+        $stmt->execute(['name' => $name]);
+        return $stmt->fetch() ?: null;
+    }
+
     public static function find(int $id): ?array
     {
         $stmt = db()->prepare('SELECT * FROM roles WHERE id = :id');
