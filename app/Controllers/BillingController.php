@@ -61,7 +61,7 @@ final class BillingController
     {
         $pageTitle = 'Bill Detail';
         $bill = MaintenanceBill::find((int) $id);
-        if (!$bill) {
+        if (!$bill || (int) $bill['society_id'] !== Society::currentId()) {
             http_response_code(404);
             require __DIR__ . '/../Views/errors/404.php';
             return;
@@ -76,6 +76,13 @@ final class BillingController
     {
         $this->verifyCsrf();
 
+        $bill = MaintenanceBill::find((int) $id);
+        if (!$bill || (int) $bill['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Bill not found.');
+            header('Location: /billing');
+            exit;
+        }
+
         $amount = $_POST['amount'] ?? '';
         $mode = $_POST['payment_mode'] ?? '';
         $validModes = ['cash', 'cheque', 'upi', 'bank_transfer', 'card'];
@@ -86,13 +93,24 @@ final class BillingController
             exit;
         }
 
-        $result = BillingService::recordPayment(
-            (int) $id,
-            (float) $amount,
-            $mode,
-            trim((string) ($_POST['reference_number'] ?? '')) ?: null,
-            Auth::id()
-        );
+        try {
+            $result = BillingService::recordPayment(
+                (int) $id,
+                (float) $amount,
+                $mode,
+                trim((string) ($_POST['reference_number'] ?? '')) ?: null,
+                Auth::id(),
+                Society::currentId()
+            );
+        } catch (\InvalidArgumentException $e) {
+            Flash::set('error', $e->getMessage());
+            header("Location: /billing/{$id}");
+            exit;
+        } catch (\RuntimeException $e) {
+            Flash::set('error', 'Bill not found.');
+            header('Location: /billing');
+            exit;
+        }
 
         ActivityLog::log('billing', 'payment', "Recorded payment of {$amount} on bill id {$id}, receipt {$result['receipt_number']}");
         Flash::set('success', "Payment recorded. Receipt {$result['receipt_number']} issued.");
