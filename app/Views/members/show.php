@@ -74,58 +74,6 @@ ob_start();
         <div class="col-xl-6">
             <div class="card resident-section-card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="resident-section-title"><span class="resident-section-icon"><i class="fa-solid fa-phone-volume"></i></span>Emergency Contacts</h5>
-                    <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#addEmergencyModal"><i class="fa-solid fa-plus me-1"></i>Add</button>
-                </div>
-                <div class="card-body">
-                    <div class="list-group list-group-flush resident-list">
-                        <?php foreach ($emergencyContacts as $ec): ?>
-                            <div class="list-group-item d-flex justify-content-between align-items-center gap-2">
-                                <div class="min-w-0">
-                                    <div class="resident-item-title text-truncate"><?= htmlspecialchars($ec['name']) ?></div>
-                                    <div class="resident-item-meta"><?= htmlspecialchars($ec['relation'] ?? 'Emergency contact') ?> &middot; <?= htmlspecialchars($ec['phone']) ?></div>
-                                </div>
-                                <div class="d-flex gap-1 flex-shrink-0">
-                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editEmergencyModal<?= (int) $ec['id'] ?>" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                                    <form method="post" action="/emergency-contacts/<?= (int) $ec['id'] ?>/delete" onsubmit="return confirm('Remove this emergency contact?');"><?= \App\Helpers\Csrf::field() ?><button class="btn btn-sm btn-outline-danger" title="Remove"><i class="fa-solid fa-trash"></i></button></form>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                        <?php if (!$emergencyContacts): ?><div class="resident-empty py-4"><i class="fa-solid fa-phone-slash"></i>No emergency contacts added.</div><?php endif; ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-6">
-            <div class="card resident-section-card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="resident-section-title"><span class="resident-section-icon"><i class="fa-solid fa-car"></i></span>Vehicles</h5>
-                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addVehicleModal"><i class="fa-solid fa-plus me-1"></i>Add</button>
-                </div>
-                <div class="card-body">
-                    <div class="list-group list-group-flush resident-list">
-                        <?php foreach ($vehicles as $vehicle): ?>
-                            <div class="list-group-item d-flex justify-content-between align-items-center gap-2">
-                                <div class="min-w-0">
-                                    <div class="resident-item-title text-truncate"><?= htmlspecialchars($vehicle['registration_number']) ?></div>
-                                    <div class="resident-item-meta"><?= $vehicle['vehicle_type'] === 'two_wheeler' ? '2-Wheeler' : '4-Wheeler' ?><?php if ($vehicle['make'] || $vehicle['model']): ?> &middot; <?= htmlspecialchars(trim(($vehicle['make'] ?? '') . ' ' . ($vehicle['model'] ?? ''))) ?><?php endif; ?><?php if ($vehicle['color']): ?> &middot; <?= htmlspecialchars($vehicle['color']) ?><?php endif; ?></div>
-                                </div>
-                                <div class="d-flex gap-1 flex-shrink-0">
-                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editVehicleModal<?= (int) $vehicle['id'] ?>" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                                    <form method="post" action="/vehicles/<?= (int) $vehicle['id'] ?>/delete" onsubmit="return confirm('Remove this vehicle?');"><?= \App\Helpers\Csrf::field() ?><input type="hidden" name="return_to_member" value="<?= (int) $member['id'] ?>"><button class="btn btn-sm btn-outline-danger" title="Remove"><i class="fa-solid fa-trash"></i></button></form>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                        <?php if (!$vehicles): ?><div class="resident-empty py-4"><i class="fa-solid fa-car"></i>No vehicles added.</div><?php endif; ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-6">
-            <div class="card resident-section-card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="resident-section-title"><span class="resident-section-icon"><i class="fa-solid fa-folder-open"></i></span>Documents</h5>
                     <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadDocumentModal"><i class="fa-solid fa-upload me-1"></i>Upload</button>
                 </div>
@@ -274,3 +222,55 @@ ob_start();
 <?php
 $content = ob_get_clean();
 require __DIR__ . '/../layouts/app.php';
+        <div class="col-xl-6">
+            <div class="card resident-section-card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="resident-section-title"><span class="resident-section-icon"><i class="fa-solid fa-car"></i></span>Vehicles</h5>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addVehicleModal"><i class="fa-solid fa-plus me-1"></i>Add</button>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush resident-list">
+                        <?php foreach ($vehicles as $vehicle): ?>
+                            <div class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                                <div class="min-w-0">
+                                    <div class="resident-item-title text-truncate"><?= htmlspecialchars($vehicle['registration_number']) ?></div>
+                                    <div class="resident-item-meta"><?= $vehicle['vehicle_type'] === 'two_wheeler' ? '2-Wheeler' : '4-Wheeler' ?><?php if ($vehicle['make'] || $vehicle['model']): ?> &middot; <?= htmlspecialchars(trim(($vehicle['make'] ?? '') . ' ' . ($vehicle['model'] ?? ''))) ?><?php endif; ?><?php if ($vehicle['color']): ?> &middot; <?= htmlspecialchars($vehicle['color']) ?><?php endif; ?></div>
+                                </div>
+                                <div class="d-flex gap-1 flex-shrink-0">
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editVehicleModal<?= (int) $vehicle['id'] ?>" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                    <form method="post" action="/vehicles/<?= (int) $vehicle['id'] ?>/delete" onsubmit="return confirm('Remove this vehicle?');"><?= \App\Helpers\Csrf::field() ?><input type="hidden" name="return_to_member" value="<?= (int) $member['id'] ?>"><button class="btn btn-sm btn-outline-danger" title="Remove"><i class="fa-solid fa-trash"></i></button></form>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                        <?php if (!$vehicles): ?><div class="resident-empty py-4"><i class="fa-solid fa-car"></i>No vehicles added.</div><?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6">
+            <div class="card resident-section-card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="resident-section-title"><span class="resident-section-icon"><i class="fa-solid fa-phone-volume"></i></span>Emergency Contacts</h5>
+                    <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#addEmergencyModal"><i class="fa-solid fa-plus me-1"></i>Add</button>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush resident-list">
+                        <?php foreach ($emergencyContacts as $ec): ?>
+                            <div class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                                <div class="min-w-0">
+                                    <div class="resident-item-title text-truncate"><?= htmlspecialchars($ec['name']) ?></div>
+                                    <div class="resident-item-meta"><?= htmlspecialchars($ec['relation'] ?? 'Emergency contact') ?> &middot; <?= htmlspecialchars($ec['phone']) ?></div>
+                                </div>
+                                <div class="d-flex gap-1 flex-shrink-0">
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editEmergencyModal<?= (int) $ec['id'] ?>" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                    <form method="post" action="/emergency-contacts/<?= (int) $ec['id'] ?>/delete" onsubmit="return confirm('Remove this emergency contact?');"><?= \App\Helpers\Csrf::field() ?><button class="btn btn-sm btn-outline-danger" title="Remove"><i class="fa-solid fa-trash"></i></button></form>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                        <?php if (!$emergencyContacts): ?><div class="resident-empty py-4"><i class="fa-solid fa-phone-slash"></i>No emergency contacts added.</div><?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
