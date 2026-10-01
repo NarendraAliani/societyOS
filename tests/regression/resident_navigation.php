@@ -9,6 +9,9 @@ $files = [
     'app/Controllers/MemberController.php',
     'app/Controllers/VehicleController.php',
     'app/Models/Document.php',
+    'app/Models/Member.php',
+    'app/Models/Tenant.php',
+    'app/Models/Vehicle.php',
     'public/index.php',
 ];
 
@@ -48,6 +51,11 @@ $checks = [
     'member detail supports vehicle add and edit modals' => str_contains($memberView, 'id="addVehicleModal"') && str_contains($memberView, 'Edit Vehicle') && str_contains($vehicleController, '$returnToMember'),
     'member detail documents are society-scoped' => str_contains($documentModel, 'member_society_id') && str_contains($memberController, 'document[\'member_society_id\']'),
     'member detail lease uses modal' => str_contains($memberView, 'id="leaseModal"') && str_contains($memberView, 'agreement_doc'),
+    'member controller scopes resident operations to current society' => str_contains($memberController, "\$member['society_id']") && str_contains($memberController, 'Society::currentId()'),
+    'member creation validates flat society ownership' => str_contains($memberController, "\$flat['society_id']") && str_contains($memberController, 'Flat::find($flatId)'),
+    'vehicle controller scopes CRUD to current society' => str_contains($vehicleController, "\$vehicleMember['society_id']") && str_contains($vehicleController, 'Vehicle::find((int) $id)'),
+    'lease owner is constrained to tenant flat and society' => str_contains($memberController, "\$owner['flat_id']") && str_contains($memberController, "\$owner['society_id']") && str_contains($memberController, "\$owner['member_type'] !== 'owner'"),
+    'lease agreement is society-scoped' => str_contains($memberController, "\$tenantMember['society_id']") && str_contains($memberController, 'serveLeaseDocument'),
 ];
 
 $failed = false;
