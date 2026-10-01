@@ -148,7 +148,7 @@ final class ResidentController
         }
 
         $member = Member::find($memberId);
-        if (!$member || (int) $member['society_id'] !== (int) $_SESSION['society_id']) {
+        if (!$member || (int) $member['society_id'] !== (int) $_SESSION['society_id'] || $member['status'] !== 'active') {
             http_response_code(403);
             require __DIR__ . '/../Views/errors/403.php';
             exit;
