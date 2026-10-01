@@ -44,7 +44,7 @@ final class ComplaintController
         // flat, so a complaint can never end up tied to a flat the resident doesn't live in.
         $member = $memberId > 0 ? Member::find($memberId) : null;
 
-        if (!$member || $categoryId <= 0 || $subject === '') {
+        if (!$member || (int) $member['society_id'] !== Society::currentId() || $categoryId <= 0 || !ComplaintCategory::belongsToSociety($categoryId, Society::currentId()) || $subject === '') {
             Flash::set('error', 'Resident, category, and subject are required.');
             header('Location: /complaints/create');
             exit;
@@ -69,7 +69,7 @@ final class ComplaintController
     {
         $pageTitle = 'Complaint Detail';
         $complaint = Complaint::find((int) $id);
-        if (!$complaint) {
+        if (!$complaint || (int) $complaint['society_id'] !== Society::currentId()) {
             http_response_code(404);
             require __DIR__ . '/../Views/errors/404.php';
             return;
@@ -81,6 +81,13 @@ final class ComplaintController
     public function addUpdate(string $id): void
     {
         $this->verifyCsrf();
+
+        $complaint = Complaint::find((int) $id);
+        if (!$complaint || (int) $complaint['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Complaint not found.');
+            header('Location: /complaints');
+            exit;
+        }
 
         $status = $_POST['status'] ?? '';
         if (!in_array($status, ['open', 'in_progress', 'resolved', 'closed'], true)) {
@@ -130,7 +137,7 @@ final class ComplaintController
         $this->verifyCsrf();
 
         $name = trim((string) ($_POST['name'] ?? ''));
-        if ($name === '') {
+        if ($name === '' || !ComplaintCategory::belongsToSociety((int) $id, Society::currentId())) {
             Flash::set('error', 'Category name is required.');
         } else {
             ComplaintCategory::update((int) $id, $name);
@@ -143,6 +150,12 @@ final class ComplaintController
     public function deleteCategory(string $id): void
     {
         $this->verifyCsrf();
+
+        if (!ComplaintCategory::belongsToSociety((int) $id, Society::currentId())) {
+            Flash::set('error', 'Category not found.');
+            header('Location: /complaints/categories');
+            exit;
+        }
 
         try {
             ComplaintCategory::delete((int) $id);

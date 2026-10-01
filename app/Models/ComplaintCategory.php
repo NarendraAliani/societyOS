@@ -20,6 +20,13 @@ final class ComplaintCategory
         return (int) db()->lastInsertId();
     }
 
+    public static function belongsToSociety(int $id, int $societyId): bool
+    {
+        $stmt = db()->prepare('SELECT COUNT(*) FROM complaint_categories WHERE id = :id AND society_id = :sid');
+        $stmt->execute(['id' => $id, 'sid' => $societyId]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
     public static function update(int $id, string $name): void
     {
         $stmt = db()->prepare('UPDATE complaint_categories SET name = :name WHERE id = :id');

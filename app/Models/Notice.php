@@ -34,6 +34,13 @@ final class Notice
         return $stmt->fetchAll();
     }
 
+    public static function find(int $id): ?array
+    {
+        $stmt = db()->prepare('SELECT * FROM notices WHERE id = :id');
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch() ?: null;
+    }
+
     public static function create(int $societyId, array $fields): int
     {
         $stmt = db()->prepare(

@@ -31,8 +31,15 @@ final class VisitorController
         $flatId = (int) ($_POST['flat_id'] ?? 0);
         $name = trim((string) ($_POST['name'] ?? ''));
 
-        if ($flatId <= 0 || $name === '') {
+        if ($flatId <= 0 || !VisitorPass::flatBelongsToSociety($flatId, Society::currentId()) || $name === '') {
             Flash::set('error', 'Flat and visitor name are required.');
+            header('Location: /visitors');
+            exit;
+        }
+
+        $flat = Flat::find($flatId);
+        if (!$flat || (int) $flat['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Flat not found.');
             header('Location: /visitors');
             exit;
         }
@@ -54,6 +61,8 @@ final class VisitorController
     public function approve(string $id): void
     {
         $this->verifyCsrf();
+        $visitor = Visitor::find((int) $id);
+        if (!$visitor || (int) $visitor['society_id'] !== Society::currentId()) { Flash::set('error', 'Visitor not found.'); header('Location: /visitors'); exit; }
         Visitor::setApprovalStatus((int) $id, 'approved', null);
         Flash::set('success', 'Visitor approved.');
         header('Location: /visitors');
@@ -63,6 +72,8 @@ final class VisitorController
     public function reject(string $id): void
     {
         $this->verifyCsrf();
+        $visitor = Visitor::find((int) $id);
+        if (!$visitor || (int) $visitor['society_id'] !== Society::currentId()) { Flash::set('error', 'Visitor not found.'); header('Location: /visitors'); exit; }
         Visitor::setApprovalStatus((int) $id, 'rejected', null);
         Flash::set('success', 'Visitor rejected.');
         header('Location: /visitors');
@@ -72,6 +83,8 @@ final class VisitorController
     public function checkout(string $id): void
     {
         $this->verifyCsrf();
+        $visitor = Visitor::find((int) $id);
+        if (!$visitor || (int) $visitor['society_id'] !== Society::currentId()) { Flash::set('error', 'Visitor not found.'); header('Location: /visitors'); exit; }
         Visitor::checkOut((int) $id);
         Flash::set('success', 'Visitor checked out.');
         header('Location: /visitors');
@@ -95,7 +108,7 @@ final class VisitorController
         $validFrom = $_POST['valid_from'] ?? '';
         $validUntil = $_POST['valid_until'] ?? '';
 
-        if ($flatId <= 0 || $visitorName === '' || !$validFrom || !$validUntil) {
+        if ($flatId <= 0 || !VisitorPass::flatBelongsToSociety($flatId, Society::currentId()) || $visitorName === '' || !$validFrom || !$validUntil) {
             Flash::set('error', 'Flat, visitor name, and a valid date range are required.');
             header('Location: /visitors/passes');
             exit;
@@ -127,7 +140,7 @@ final class VisitorController
         $token = strtoupper(trim((string) ($_POST['token'] ?? '')));
         $pass = $token !== '' ? VisitorPass::findByToken($token) : null;
 
-        if (!$pass) {
+        if (!$pass || (int) $pass['society_id'] !== Society::currentId()) {
             Flash::set('error', "No pass found for token \"{$token}\".");
             header('Location: /visitors/passes');
             exit;
@@ -180,6 +193,12 @@ final class VisitorController
             exit;
         }
 
+        if (!VisitorPass::flatBelongsToSociety($flatId, Society::currentId())) {
+            Flash::set('error', 'Flat not found.');
+            header('Location: /visitors/deliveries');
+            exit;
+        }
+
         Delivery::create(Society::currentId(), [
             'flat_id' => $flatId,
             'courier_company' => trim((string) ($_POST['courier_company'] ?? '')),
@@ -195,6 +214,8 @@ final class VisitorController
     public function collectDelivery(string $id): void
     {
         $this->verifyCsrf();
+        $delivery = Delivery::find((int) $id);
+        if (!$delivery || (int) $delivery['society_id'] !== Society::currentId()) { Flash::set('error', 'Delivery not found.'); header('Location: /visitors/deliveries'); exit; }
         Delivery::markCollected((int) $id);
         Flash::set('success', 'Delivery marked as collected.');
         header('Location: /visitors/deliveries');
