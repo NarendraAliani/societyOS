@@ -35,7 +35,7 @@ $checks = [
     'user reset route exists' => str_contains($routes, "post('/reset-password'"),
     'platform forgot route exists' => str_contains($routes, "get('/platform/forgot-password'"),
     'platform reset route exists' => str_contains($routes, "post('/platform/reset-password'"),
-    'user reset service uses hashed token' => str_contains($service, "hash('sha256', $token)"),
+    'user reset service uses hashed token' => str_contains($service, "hash('sha256', \\$token)"),
     'user reset token expires in 60 minutes' => str_contains($service, 'TOKEN_TTL_MINUTES = 60'),
     'reset token is one-time' => str_contains($service, 'used_at IS NULL') && str_contains($service, 'used_at=NOW()'),
     'reset requests are rate limited' => str_contains($service, 'MAX_REQUESTS_PER_HOUR = 5'),
@@ -46,7 +46,7 @@ $checks = [
     'platform reset table in schema' => str_contains($schema, 'CREATE TABLE IF NOT EXISTS platform_password_resets'),
     'platform reset migration exists' => str_contains($migration, 'CREATE TABLE IF NOT EXISTS platform_password_resets'),
     'user reset invalidates tracked sessions' => str_contains($service, 'DELETE FROM user_sessions'),
-    'user reset does not disclose account existence' => str_contains($auth, 'Always show the same response'),
+    'user reset does not disclose account existence' => str_contains($auth, 'If an active account matches those details, a password reset link has been sent to the registered email address.'),
 ];
 
 foreach ($checks as $name => $passed) {
