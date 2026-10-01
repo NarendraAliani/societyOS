@@ -47,6 +47,9 @@ jobs:
       - name: Linked-home regression contract
         run: php tests/regression/linked_home_role_scope.php
 
+      - name: Multi-role user regression contract
+        run: php tests/regression/multi_role_user_accounts.php
+
       - name: Prepare deployment branch
         shell: bash
         run: |
