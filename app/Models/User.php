@@ -9,9 +9,17 @@ final class User
     public static function findByEmail(int $societyId, string $email): ?array
     {
         $stmt = db()->prepare(
-            'SELECT u.*, r.name AS role_name
+            'SELECT u.*, r.name AS role_name,
+                    m.name AS linked_member_name,
+                    m.member_type AS linked_member_type,
+                    f.flat_number AS linked_flat_number,
+                    w.name AS linked_wing_name
              FROM users u
              JOIN roles r ON r.id = u.role_id
+             LEFT JOIN members m ON m.id = u.member_id
+             LEFT JOIN flats f ON f.id = m.flat_id
+             LEFT JOIN floors fl ON fl.id = f.floor_id
+             LEFT JOIN wings w ON w.id = fl.wing_id
              WHERE u.society_id = :society_id AND u.email = :email
              LIMIT 1'
         );
