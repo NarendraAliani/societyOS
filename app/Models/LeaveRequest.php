@@ -28,6 +28,16 @@ final class LeaveRequest
         return (int) db()->lastInsertId();
     }
 
+    public static function belongsToSociety(int $id, int $societyId): bool
+    {
+        $stmt = db()->prepare(
+            'SELECT COUNT(*) FROM leave_requests lr JOIN staff s ON s.id = lr.staff_id
+             WHERE lr.id = :id AND s.society_id = :sid'
+        );
+        $stmt->execute(['id' => $id, 'sid' => $societyId]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
     public static function setStatus(int $id, string $status): void
     {
         $stmt = db()->prepare('UPDATE leave_requests SET status = :status WHERE id = :id');
