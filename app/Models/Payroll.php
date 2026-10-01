@@ -24,6 +24,13 @@ final class Payroll
         return (int) db()->lastInsertId();
     }
 
+    public static function belongsToStaff(int $id, int $staffId): bool
+    {
+        $stmt = db()->prepare('SELECT COUNT(*) FROM payroll WHERE id = :id AND staff_id = :staff_id');
+        $stmt->execute(['id' => $id, 'staff_id' => $staffId]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
     public static function markPaid(int $id): void
     {
         $stmt = db()->prepare('UPDATE payroll SET paid_at = NOW() WHERE id = :id');
