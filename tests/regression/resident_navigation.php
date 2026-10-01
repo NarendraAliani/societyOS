@@ -22,7 +22,9 @@ $routes = file_get_contents('public/index.php');
 
 $checks = [
     'resident sidebar exposes My Family' => str_contains($layout, 'href="/resident/family"') && str_contains($layout, '>My Family</a>'),
-    'logout has one dedicated topbar form' => substr_count($layout, 'action="/logout"') === 1,
+    'logout is not rendered in the shared topbar' => !str_contains($layout, 'action="/logout"'),
+    'responsive sidebar toggle exists' => str_contains($layout, 'app-sidebar-toggle') && str_contains($layout, 'id="app-sidebar"'),
+    'responsive shell styles exist' => str_contains(file_get_contents('public/static/css/app.css'), '@media (max-width: 991.98px)') && str_contains(file_get_contents('public/static/css/app.css'), 'sidebar-open'),
     'family page is resident-scoped' => str_contains($controller, 'public function family(): void') && str_contains($controller, '$member = $this->member();'),
     'family add uses current member' => str_contains($controller, 'FamilyMember::create((int) $member'),
     'family delete checks ownership' => str_contains($controller, '$familyMember') && str_contains($controller, 'Auth::memberId()'),
