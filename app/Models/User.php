@@ -131,6 +131,30 @@ final class User
         return (int) $stmt->fetchColumn() > 0;
     }
 
+    public static function memberEligibleForRole(int $memberId, int $societyId, int $roleId): bool
+    {
+        $role = Role::find($roleId);
+        if (!$role || !in_array($role['name'], ['resident', 'tenant'], true)) {
+            return false;
+        }
+
+        $memberType = $role['name'] === 'tenant' ? 'tenant' : 'owner';
+        $stmt = db()->prepare(
+            'SELECT COUNT(*)
+             FROM members
+             WHERE id = :id
+               AND society_id = :sid
+               AND status = "active"
+               AND member_type = :member_type'
+        );
+        $stmt->execute([
+            'id' => $memberId,
+            'sid' => $societyId,
+            'member_type' => $memberType,
+        ]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
     public static function flatRoleIsLinked(int $memberId, int $societyId, int $roleId, ?int $excludingUserId = null): bool
     {
         $sql = 'SELECT COUNT(*)
