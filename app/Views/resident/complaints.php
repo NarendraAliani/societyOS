@@ -101,16 +101,45 @@ foreach ($complaints as $complaint) {
 
         <div class="col-xl-4">
             <div class="card resident-section-card h-100">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center gap-2">
                     <h5 class="resident-section-title">
                         <span class="resident-section-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
-                        Submit Complaint
+                        Resident Actions
                     </h5>
+                    <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#submitComplaintModal">
+                        <i class="fa-solid fa-plus me-1"></i>Submit Complaint
+                    </button>
                 </div>
                 <div class="card-body">
-                    <form method="post" action="/resident/complaints">
-                        <?= \App\Helpers\Csrf::field() ?>
-                        <div class="mb-3">
+                    <div class="resident-empty py-5">
+                        <i class="fa-solid fa-comments"></i>
+                        <strong>Need to report an issue?</strong>
+                        <div class="small mt-1">Open the form when you're ready and submit the details to the society team.</div>
+                        <button class="btn btn-outline-primary mt-3" type="button" data-bs-toggle="modal" data-bs-target="#submitComplaintModal">
+                            <i class="fa-solid fa-paper-plane me-1"></i>Open Complaint Form
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade app-form-modal" id="submitComplaintModal" tabindex="-1" aria-labelledby="submitComplaintModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <div class="resident-eyebrow">Resident Services</div>
+                    <h5 class="modal-title" id="submitComplaintModalLabel">Submit Complaint</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="/resident/complaints">
+                <?= \App\Helpers\Csrf::field() ?>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
                             <label class="form-label">Category <span class="text-danger">*</span></label>
                             <select name="category_id" class="form-select" required>
                                 <option value="">Select category</option>
@@ -119,11 +148,7 @@ foreach ($complaints as $complaint) {
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Subject <span class="text-danger">*</span></label>
-                            <input name="subject" class="form-control" maxlength="150" required>
-                        </div>
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="form-label">Priority</label>
                             <select name="priority" class="form-select">
                                 <option value="low">Low</option>
@@ -131,19 +156,25 @@ foreach ($complaints as $complaint) {
                                 <option value="high">High</option>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea name="description" class="form-control" rows="5" placeholder="Describe the issue clearly"></textarea>
+                        <div class="col-12">
+                            <label class="form-label">Subject <span class="text-danger">*</span></label>
+                            <input name="subject" class="form-control" maxlength="150" required>
                         </div>
-                        <button class="btn btn-primary w-100" type="submit">
-                            <i class="fa-solid fa-paper-plane me-1"></i>Submit Complaint
-                        </button>
-                    </form>
+                        <div class="col-12">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="6" placeholder="Describe the issue clearly"></textarea>
+                        </div>
+                    </div>
                 </div>
-            </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary" type="submit"><i class="fa-solid fa-paper-plane me-1"></i>Submit Complaint</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
 <?php
 $content = ob_get_clean();
 require __DIR__ . '/../layouts/app.php';
