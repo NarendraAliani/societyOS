@@ -63,3 +63,10 @@ Before production deployment:
 4. Verify one `user_roles` row exists for each existing user and verify both unique constraints are present.
 5. Test login, role switching, existing-email role addition, same-flat/different-role allowance, and same-flat/same-role rejection.
 6. Do not remove legacy `users.role_id/member_id` columns until production verification is complete.
+
+
+## Multi-society context migration
+
+The first multi-society slice adds a unique society code and makes the authenticated session the source of the active society context. Existing single-society login remains backward-compatible when the Society Code field is blank.
+
+Production steps: take a backup, run database/migrations/2026-10-01-multi-society-context.sql, verify the existing society receives SOC-001, then smoke-test login and the dashboard. The society provisioning/admin directory is the next multi-society phase; do not create additional society records manually yet.
