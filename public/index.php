@@ -28,7 +28,9 @@ use App\Controllers\BackupController;
 use App\Controllers\ProfileController;
 use App\Controllers\SettingsController;
 use App\Controllers\ResidentController;
+use App\Controllers\PlatformController;
 use App\Middleware\BackOfficeMiddleware;
+use App\Middleware\PlatformAdminMiddleware;
 
 Session::start();
 
@@ -41,6 +43,15 @@ $backOffice = fn () => BackOfficeMiddleware::handle();
 $router->get('/', [LandingController::class, 'index']);
 
 $router->get('/login', [AuthController::class, 'showLogin']);
+$router->get('/platform/login', [PlatformController::class, 'showLogin']);
+$router->post('/platform/login', [PlatformController::class, 'login']);
+$router->get('/platform/societies', [PlatformController::class, 'societies'], [fn () => PlatformAdminMiddleware::handle()]);
+$router->get('/platform/societies/create', [PlatformController::class, 'createSociety'], [fn () => PlatformAdminMiddleware::handle()]);
+$router->post('/platform/societies', [PlatformController::class, 'storeSociety'], [fn () => PlatformAdminMiddleware::handle()]);
+$router->get('/platform/password', [PlatformController::class, 'password'], [fn () => PlatformAdminMiddleware::handle()]);
+$router->post('/platform/password', [PlatformController::class, 'updatePassword'], [fn () => PlatformAdminMiddleware::handle()]);
+$router->get('/platform/logout', [PlatformController::class, 'logout'], [fn () => PlatformAdminMiddleware::handle()]);
+
 $router->post('/login', [AuthController::class, 'login']);
 $router->post('/logout', [AuthController::class, 'logout']);
 
