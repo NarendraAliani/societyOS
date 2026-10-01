@@ -62,6 +62,9 @@ jobs:
       - name: Platform provisioning regression contract
         run: php tests/regression/platform_provisioning.php
 
+      - name: Theme readability regression contract
+        run: php tests/regression/theme_readability.php
+
       - name: Prepare deployment branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
