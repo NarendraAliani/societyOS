@@ -5,6 +5,10 @@ $files = [
     'app/Views/layouts/app.php',
     'app/Controllers/ResidentController.php',
     'app/Views/resident/family.php',
+    'app/Views/members/show.php',
+    'app/Controllers/MemberController.php',
+    'app/Controllers/VehicleController.php',
+    'app/Models/Document.php',
     'public/index.php',
 ];
 
@@ -19,6 +23,10 @@ $layout = file_get_contents('app/Views/layouts/app.php');
 $controller = file_get_contents('app/Controllers/ResidentController.php');
 $view = file_get_contents('app/Views/resident/family.php');
 $routes = file_get_contents('public/index.php');
+$memberView = file_get_contents('app/Views/members/show.php');
+$memberController = file_get_contents('app/Controllers/MemberController.php');
+$vehicleController = file_get_contents('app/Controllers/VehicleController.php');
+$documentModel = file_get_contents('app/Models/Document.php');
 
 $checks = [
     'resident sidebar exposes My Family' => str_contains($layout, 'href="/resident/family"') && str_contains($layout, '>My Family</a>'),
@@ -35,6 +43,11 @@ $checks = [
     'emergency edit preserves ownership checks' => str_contains($controller, 'EmergencyContact::update') && str_contains($controller, 'contact') && str_contains($controller, 'Auth::memberId()'),
     'modal standard is documented' => is_file('docs/UI_FORM_STANDARD.md'),
     'family routes exist' => str_contains($routes, "ResidentController::class, 'family'") && str_contains($routes, "/resident/family-members"),
+    'member detail uses modal-first forms' => str_contains($memberView, 'app-form-modal') && str_contains($memberView, 'Edit Resident') && str_contains($memberView, 'Upload Document'),
+    'member detail supports family and contact edits' => str_contains($memberController, 'FamilyMember::update') && str_contains($memberController, 'EmergencyContact::update'),
+    'member detail supports vehicle add and edit modals' => str_contains($memberView, 'id="addVehicleModal"') && str_contains($memberView, 'Edit Vehicle') && str_contains($vehicleController, '$returnToMember'),
+    'member detail documents are society-scoped' => str_contains($documentModel, 'member_society_id') && str_contains($memberController, 'document[\'member_society_id\']'),
+    'member detail lease uses modal' => str_contains($memberView, 'id="leaseModal"') && str_contains($memberView, 'agreement_doc'),
 ];
 
 $failed = false;
