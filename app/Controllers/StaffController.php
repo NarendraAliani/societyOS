@@ -71,7 +71,7 @@ final class StaffController
     {
         $pageTitle = 'Staff Detail';
         $staff = Staff::find((int) $id);
-        if (!$staff) {
+        if (!$staff || (int) $staff['society_id'] !== Society::currentId()) {
             http_response_code(404);
             require __DIR__ . '/../Views/errors/404.php';
             return;
@@ -90,6 +90,9 @@ final class StaffController
             header("Location: /staff/{$id}");
             exit;
         }
+
+        $staff = Staff::find((int) $id);
+        if (!$staff || (int) $staff['society_id'] !== Society::currentId()) { Flash::set('error', 'Staff member not found.'); header('Location: /staff'); exit; }
 
         try {
             $photoPath = FileUpload::storeImage($_FILES['photo'] ?? [], 'staff');
@@ -135,6 +138,9 @@ final class StaffController
             exit;
         }
 
+        $staff = Staff::find((int) $id);
+        if (!$staff || (int) $staff['society_id'] !== Society::currentId()) { Flash::set('error', 'Staff member not found.'); header('Location: /staff'); exit; }
+
         try {
             $docPath = FileUpload::storeDocument($_FILES['police_verification_doc'] ?? [], 'staff');
         } catch (\RuntimeException $e) {
@@ -166,7 +172,7 @@ final class StaffController
             'police_doc' => 'police_verification_doc_path',
         ];
 
-        if (!$staff || !isset($columnMap[$type]) || empty($staff[$columnMap[$type]])) {
+        if (!$staff || (int) $staff['society_id'] !== Society::currentId() || !isset($columnMap[$type]) || empty($staff[$columnMap[$type]])) {
             http_response_code(404);
             exit('Not found.');
         }
@@ -191,7 +197,8 @@ final class StaffController
     {
         $this->verifyCsrf();
         $staff = Staff::find((int) $id);
-        Staff::setStatus((int) $id, $staff && $staff['status'] === 'active' ? 'inactive' : 'active');
+        if (!$staff || (int) $staff['society_id'] !== Society::currentId()) { Flash::set('error', 'Staff member not found.'); header('Location: /staff'); exit; }
+        Staff::setStatus((int) $id, $staff['status'] === 'active' ? 'inactive' : 'active');
         Flash::set('success', 'Staff status updated.');
         header('Location: /staff');
         exit;
@@ -201,6 +208,7 @@ final class StaffController
     {
         $this->verifyCsrf();
         $staff = Staff::find((int) $id);
+        if (!$staff || (int) $staff['society_id'] !== Society::currentId()) { Flash::set('error', 'Staff member not found.'); header('Location: /staff'); exit; }
         Staff::delete((int) $id);
         ActivityLog::log('staff', 'delete', 'Removed staff member "' . ($staff['name'] ?? $id) . '"');
         Flash::set('success', 'Staff member removed.');
@@ -224,7 +232,8 @@ final class StaffController
         $statuses = $_POST['status'] ?? [];
 
         foreach ($statuses as $staffId => $status) {
-            if (in_array($status, ['present', 'absent', 'half_day', 'leave'], true)) {
+            $staff = Staff::find((int) $staffId);
+            if ($staff && (int) $staff['society_id'] === Society::currentId() && in_array($status, ['present', 'absent', 'half_day', 'leave'], true)) {
                 Attendance::mark((int) $staffId, $date, $status, Auth::id());
             }
         }
@@ -248,6 +257,9 @@ final class StaffController
             exit;
         }
 
+        $staff = Staff::find((int) $staffId);
+        if (!$staff || (int) $staff['society_id'] !== Society::currentId()) { Flash::set('error', 'Staff member not found.'); header("Location: /staff"); exit; }
+
         Payroll::create((int) $staffId, $period, (float) $basic, is_numeric($deductions) ? (float) $deductions : 0.0);
 
         Flash::set('success', 'Payroll entry added.');
@@ -258,7 +270,10 @@ final class StaffController
     public function markPayrollPaid(string $id): void
     {
         $this->verifyCsrf();
-        $staffId = $_POST['staff_id'] ?? '';
+        $staffId = (int) ($_POST['staff_id'] ?? 0);
+        $staff = $staffId > 0 ? Staff::find($staffId) : null;
+        if (!$staff || (int) $staff['society_id'] !== Society::currentId()) { Flash::set('error', 'Staff member not found.'); header('Location: /staff'); exit; }
+        if (!Payroll::belongsToStaff((int) $id, $staffId)) { Flash::set('error', 'Payroll entry not found.'); header("Location: /staff/{$staffId}"); exit; }
         Payroll::markPaid((int) $id);
         Flash::set('success', 'Marked as paid.');
         header("Location: /staff/{$staffId}");
@@ -281,10 +296,11 @@ final class StaffController
         $fromDate = $_POST['from_date'] ?? '';
         $toDate = $_POST['to_date'] ?? '';
 
-        if ($staffId <= 0 || !$fromDate || !$toDate) {
+        $staff = $staffId > 0 ? Staff::find($staffId) : null;
+        if ($staffId <= 0 || !$fromDate || !$toDate || !$staff || (int) $staff['society_id'] !== Society::currentId()) {
             Flash::set('error', 'Staff and a valid date range are required.');
         } else {
-            LeaveRequest::create($staffId, $fromDate, $toDate, trim((string) ($_POST['reason'] ?? '')) ?: null);
+                LeaveRequest::create($staffId, $fromDate, $toDate, trim((string) ($_POST['reason'] ?? '')) ?: null);
             Flash::set('success', 'Leave request logged.');
         }
         header('Location: /staff/leave');
@@ -295,6 +311,7 @@ final class StaffController
     {
         $this->verifyCsrf();
         $status = ($_POST['status'] ?? '') === 'approved' ? 'approved' : 'rejected';
+        if (!LeaveRequest::belongsToSociety((int) $id, Society::currentId())) { Flash::set('error', 'Leave request not found.'); header('Location: /staff/leave'); exit; }
         LeaveRequest::setStatus((int) $id, $status);
         Flash::set('success', 'Leave request updated.');
         header('Location: /staff/leave');
