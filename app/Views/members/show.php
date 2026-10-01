@@ -101,7 +101,7 @@ ob_start();
             <div class="card resident-section-card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="resident-section-title"><span class="resident-section-icon"><i class="fa-solid fa-car"></i></span>Vehicles</h5>
-                    <a href="/vehicles/create?return_to_member=<?= (int) $member['id'] ?>" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus me-1"></i>Add</a>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addVehicleModal"><i class="fa-solid fa-plus me-1"></i>Add</button>
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush resident-list">
@@ -231,6 +231,16 @@ ob_start();
 <form method="post" action="/members/<?= (int) $member['id'] ?>/emergency-contacts"><div class="modal-body"><?= AppHelpersCsrf::field() ?><input type="hidden" name="id" value="<?= (int) $ec['id'] ?>"><div class="mb-3"><label class="form-label">Name *</label><input name="name" class="form-control" value="<?= htmlspecialchars($ec['name']) ?>" required></div><div class="row g-3"><div class="col-md-6"><label class="form-label">Relation</label><input name="relation" class="form-control" value="<?= htmlspecialchars($ec['relation'] ?? '') ?>"></div><div class="col-md-6"><label class="form-label">Phone *</label><input name="phone" class="form-control" value="<?= htmlspecialchars($ec['phone']) ?>" required></div></div></div><div class="modal-footer"><button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary">Save Changes</button></div></form>
 </div></div></div>
 <?php endforeach; ?>
+
+<!-- Vehicle add -->
+<div class="modal fade app-form-modal" id="addVehicleModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+<div class="modal-header"><div><div class="resident-eyebrow">Vehicle</div><h5 class="modal-title">Add Vehicle</h5></div><button class="btn-close" data-bs-dismiss="modal"></button></div>
+<form method="post" action="/vehicles"><div class="modal-body"><?= \App\Helpers\Csrf::field() ?><input type="hidden" name="member_id" value="<?= (int) $member['id'] ?>"><input type="hidden" name="return_to_member" value="<?= (int) $member['id'] ?>"><div class="row g-3">
+<div class="col-md-6"><label class="form-label">Type *</label><select name="vehicle_type" class="form-select"><option value="four_wheeler">4-Wheeler</option><option value="two_wheeler">2-Wheeler</option></select></div>
+<div class="col-md-6"><label class="form-label">Registration *</label><input name="registration_number" class="form-control" required></div>
+<div class="col-md-4"><label class="form-label">Make</label><input name="make" class="form-control"></div><div class="col-md-4"><label class="form-label">Model</label><input name="model" class="form-control"></div><div class="col-md-4"><label class="form-label">Color</label><input name="color" class="form-control"></div>
+</div></div><div class="modal-footer"><button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary"><i class="fa-solid fa-plus me-1"></i>Add Vehicle</button></div></form>
+</div></div></div>
 
 <!-- Vehicle edit -->
 <?php foreach ($vehicles as $vehicle): ?>
