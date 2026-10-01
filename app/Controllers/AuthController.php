@@ -34,6 +34,7 @@ final class AuthController
 
         $email = trim((string) ($_POST['email'] ?? ''));
         $password = (string) ($_POST['password'] ?? '');
+        $societyCode = strtoupper(trim((string) ($_POST['society_code'] ?? '')));
 
         if ($email === '' || $password === '') {
             $error = 'Email and password are required.';
@@ -41,9 +42,15 @@ final class AuthController
             return;
         }
 
-        $societyId = Society::currentId();
+        $society = $societyCode !== '' ? Society::findByCode($societyCode) : Society::current();
+        $societyId = (int) ($society['id'] ?? 0);
+        if ($societyId <= 0) {
+            $error = 'Invalid society code.';
+            require __DIR__ . '/../Views/auth/login.php';
+            return;
+        }
 
-        if ($this->isRateLimited($email)) {
+        if ($this->isRateLimited($email, $societyId)) {
             $error = 'Too many failed attempts. Try again later.';
             require __DIR__ . '/../Views/auth/login.php';
             return;
@@ -74,14 +81,16 @@ final class AuthController
         exit;
     }
 
-    private function isRateLimited(string $email): bool
+    private function isRateLimited(string $email, int $societyId): bool
     {
         $stmt = db()->prepare(
-            'SELECT COUNT(*) FROM login_history
-             WHERE email_attempted = :email AND status = "failed"
-             AND created_at > (NOW() - INTERVAL :window SECOND)'
+            'SELECT COUNT(*) FROM login_history lh
+             JOIN users u ON u.id = lh.user_id
+             WHERE lh.email_attempted = :email AND u.society_id = :society_id
+             AND lh.status = "failed"
+             AND lh.created_at > (NOW() - INTERVAL :window SECOND)'
         );
-        $stmt->execute(['email' => $email, 'window' => self::LOCKOUT_WINDOW_SECONDS]);
+        $stmt->execute(['email' => $email, 'society_id' => $societyId, 'window' => self::LOCKOUT_WINDOW_SECONDS]);
         return (int) $stmt->fetchColumn() >= self::MAX_LOGIN_ATTEMPTS;
     }
 }
