@@ -38,6 +38,8 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
                 <li class="nav-item"><a class="nav-link text-white" href="/resident/bills"><i class="fa-solid fa-file-invoice-dollar me-2"></i>My Bills</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/resident/visitor-passes"><i class="fa-solid fa-user-plus me-2"></i>Visitor Passes</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/resident/family"><i class="fa-solid fa-people-roof me-2"></i>My Family</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/resident/vehicles"><i class="fa-solid fa-car me-2"></i>My Vehicles</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/resident/documents"><i class="fa-solid fa-folder-open me-2"></i>My Documents</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/resident/complaints"><i class="fa-solid fa-triangle-exclamation me-2"></i>My Complaints</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/resident/notices"><i class="fa-solid fa-bullhorn me-2"></i>Society Notices</a></li>
             <?php else: ?>
