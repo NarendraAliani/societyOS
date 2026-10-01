@@ -50,6 +50,7 @@ $router->post('/society', [SocietyController::class, 'updateProfile'], [$auth, $
 $router->get('/society/wings', [SocietyController::class, 'wings'], [$auth, $can('flats.manage')]);
 $router->post('/society/wings', [SocietyController::class, 'storeWing'], [$auth, $can('flats.manage')]);
 $router->post('/society/wings/{id}/delete', [SocietyController::class, 'deleteWing'], [$auth, $can('flats.manage')]);
+$router->post('/society/wings/{id}/configure', [SocietyController::class, 'configureWingStructure'], [$auth, $can('flats.manage')]);
 $router->post('/society/wings/{id}', [SocietyController::class, 'updateWing'], [$auth, $can('flats.manage')]);
 $router->get('/society/wings/{id}', [SocietyController::class, 'wingDetail'], [$auth, $can('flats.manage')]);
 
