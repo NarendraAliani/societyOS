@@ -50,8 +50,9 @@ final class MemberController
         $flatId = (int) ($_POST['flat_id'] ?? 0);
         $memberType = ($_POST['member_type'] ?? '') === 'tenant' ? 'tenant' : 'owner';
 
-        if ($name === '' || $phone === '' || $flatId <= 0) {
-            Flash::set('error', 'Name, phone, and flat are required.');
+        $flat = $flatId > 0 ? Flat::find($flatId) : null;
+        if ($name === '' || $phone === '' || !$flat || (int) $flat['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Name, phone, and a valid society flat are required.');
             header('Location: /members/create');
             exit;
         }
