@@ -56,6 +56,9 @@ jobs:
       - name: Resident navigation regression contract
         run: php tests/regression/resident_navigation.php
 
+      - name: Multi-society context regression contract
+        run: php tests/regression/multi_society_context.php
+
       - name: Prepare deployment branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
