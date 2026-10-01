@@ -30,7 +30,7 @@ final class Flat
     public static function find(int $id): ?array
     {
         $stmt = db()->prepare(
-            'SELECT f.*, fl.floor_number, fl.wing_id, w.name AS wing_name
+            'SELECT f.*, fl.floor_number, fl.wing_id, w.name AS wing_name, w.society_id
              FROM flats f
              JOIN floors fl ON fl.id = f.floor_id
              JOIN wings w ON w.id = fl.wing_id
