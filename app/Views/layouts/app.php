@@ -99,13 +99,6 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="/profile">Profile</a></li>
                         <li><a class="dropdown-item" href="/profile/password">Change Password</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <form method="post" action="/logout" class="m-0">
-                                <?= \App\Helpers\Csrf::field() ?>
-                                <button class="dropdown-item" type="submit">Logout</button>
-                            </form>
-                        </li>
                     </ul>
                 </div>
                 <form method="post" action="/logout" class="m-0 d-none d-md-block" aria-label="Logout">
