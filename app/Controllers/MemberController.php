@@ -335,6 +335,11 @@ final class MemberController
             exit('Not found.');
         }
 
+        if (Auth::isResident() && (int) $document['member_id'] !== (int) Auth::memberId()) {
+            http_response_code(404);
+            exit('Not found.');
+        }
+
         $fullPath = dirname(__DIR__, 2) . '/uploads/' . $document['file_path'];
         if (!is_file($fullPath)) {
             http_response_code(404);
