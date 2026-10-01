@@ -92,7 +92,7 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
                     </ul>
                 </div>
                 <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fa-solid fa-user-circle me-1"></i><?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -100,16 +100,22 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
                         <li><a class="dropdown-item" href="/profile/password">Change Password</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                            <form method="post" action="/logout">
+                            <form method="post" action="/logout" class="m-0">
                                 <?= \App\Helpers\Csrf::field() ?>
                                 <button class="dropdown-item" type="submit">Logout</button>
                             </form>
                         </li>
                     </ul>
                 </div>
+                <form method="post" action="/logout" class="m-0 d-none d-md-block" aria-label="Logout">
+                    <?= \App\Helpers\Csrf::field() ?>
+                    <button class="btn btn-outline-danger" type="submit" title="Logout">
+                        <i class="fa-solid fa-right-from-bracket me-1"></i>Logout
+                    </button>
+                </form>
             </div>
         </nav>
-        <div class="p-4">
+        <div class="p-4" id="app-content">
             <?php $flash = \App\Helpers\Flash::pull(); ?>
             <?php if ($flash): ?>
                 <div class="alert alert-<?= $flash['type'] === 'error' ? 'danger' : htmlspecialchars($flash['type']) ?> alert-dismissible fade show">
