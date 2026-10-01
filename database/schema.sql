@@ -153,7 +153,21 @@ CREATE TABLE IF NOT EXISTS activity_logs (
     INDEX idx_activity_created (created_at)
 ) ENGINE=InnoDB;
 
--- Platform administrators are separate from society-scoped users.\nCREATE TABLE IF NOT EXISTS platform_admins (\n    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,\n    name VARCHAR(150) NOT NULL,\n    email VARCHAR(150) NOT NULL,\n    password_hash VARCHAR(255) NOT NULL,\n    status ENUM('active','inactive','locked') NOT NULL DEFAULT 'active',\n    must_change_password TINYINT(1) NOT NULL DEFAULT 1,\n    last_login_at TIMESTAMP NULL,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n    UNIQUE KEY uq_platform_admin_email (email)\n) ENGINE=InnoDB;\n\nCREATE TABLE IF NOT EXISTS platform_login_history (\n    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,\n    platform_admin_id INT UNSIGNED NULL,\n    email_attempted VARCHAR(150) NULL,\n    ip_address VARCHAR(45) NULL,\n    user_agent VARCHAR(255) NULL,\n    status ENUM('success','failed') NOT NULL,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (platform_admin_id) REFERENCES platform_admins(id) ON DELETE SET NULL,\n    INDEX idx_platform_login_email_created (email_attempted, created_at)\n) ENGINE=InnoDB;\n\n-- =====================================================================
+-- Platform administrators are separate from society-scoped users.\nCREATE TABLE IF NOT EXISTS platform_admins (\n    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,\n    name VARCHAR(150) NOT NULL,\n    email VARCHAR(150) NOT NULL,\n    password_hash VARCHAR(255) NOT NULL,\n    status ENUM('active','inactive','locked') NOT NULL DEFAULT 'active',\n    must_change_password TINYINT(1) NOT NULL DEFAULT 1,\n    last_login_at TIMESTAMP NULL,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n    UNIQUE KEY uq_platform_admin_email (email)\n) ENGINE=InnoDB;\n\nCREATE TABLE IF NOT EXISTS platform_password_resets (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    platform_admin_id INT UNSIGNED NOT NULL,
+    email_attempted VARCHAR(150) NOT NULL,
+    token_hash VARCHAR(255) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    used_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (platform_admin_id) REFERENCES platform_admins(id) ON DELETE CASCADE,
+    INDEX idx_platform_reset_email_created (email_attempted, created_at),
+    INDEX idx_platform_reset_token (token_hash),
+    INDEX idx_platform_reset_expires (expires_at)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS platform_login_history (\n    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,\n    platform_admin_id INT UNSIGNED NULL,\n    email_attempted VARCHAR(150) NULL,\n    ip_address VARCHAR(45) NULL,\n    user_agent VARCHAR(255) NULL,\n    status ENUM('success','failed') NOT NULL,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (platform_admin_id) REFERENCES platform_admins(id) ON DELETE SET NULL,\n    INDEX idx_platform_login_email_created (email_attempted, created_at)\n) ENGINE=InnoDB;\n\n-- =====================================================================
 -- 2. SOCIETY STRUCTURE (Wings / Floors / Flats / Parking)
 -- =====================================================================
 
