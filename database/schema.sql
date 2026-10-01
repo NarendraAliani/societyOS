@@ -107,6 +107,26 @@ CREATE TABLE IF NOT EXISTS users (
     UNIQUE KEY uq_user_email (society_id, email)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS user_roles (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    society_id INT UNSIGNED NOT NULL,
+    role_id INT UNSIGNED NOT NULL,
+    member_id INT UNSIGNED NOT NULL,
+    flat_id INT UNSIGNED NOT NULL,
+    is_default TINYINT(1) NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (society_id) REFERENCES society(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles(id),
+    FOREIGN KEY (member_id) REFERENCES members(id),
+    FOREIGN KEY (flat_id) REFERENCES flats(id),
+    UNIQUE KEY uq_user_role (user_id, role_id),
+    UNIQUE KEY uq_flat_role (flat_id, role_id),
+    INDEX idx_user_roles_user (user_id),
+    INDEX idx_user_roles_society_role (society_id, role_id)
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS password_resets (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
