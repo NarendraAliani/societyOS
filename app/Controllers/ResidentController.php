@@ -17,6 +17,7 @@ use App\Models\Member;
 use App\Models\Notice;
 use App\Models\VisitorPass;
 use App\Models\Society;
+use App\Models\Vehicle;
 
 final class ResidentController
 {
