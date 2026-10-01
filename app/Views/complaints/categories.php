@@ -36,9 +36,7 @@ ob_start();
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
+    <div class="col-md-5 d-flex justify-content-md-end align-items-start"><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-app-Views-complaints-categories-php"><i class="fa-solid fa-plus me-1"></i>Add Category</button><div class="modal fade" id="modal-app-Views-complaints-categories-php" tabindex="-1" aria-labelledby="modal-app-Views-complaints-categories-php-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="modal-app-Views-complaints-categories-php-label">Add Category</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body">
                 <h6>Add Category</h6>
                 <form method="post" action="/complaints/categories">
                     <?= \App\Helpers\Csrf::field() ?>
@@ -46,10 +44,7 @@ ob_start();
                         <input type="text" name="name" class="form-control" required>
                         <button type="submit" class="btn btn-primary">Add</button>
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
+                </form></div></div></div></div></div>
 </div>
 <?php
 $content = ob_get_clean();
