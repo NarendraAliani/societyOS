@@ -59,6 +59,9 @@ jobs:
       - name: Multi-society context regression contract
         run: php tests/regression/multi_society_context.php
 
+      - name: Platform provisioning regression contract
+        run: php tests/regression/platform_provisioning.php
+
       - name: Prepare deployment branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
