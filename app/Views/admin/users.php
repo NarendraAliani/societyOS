@@ -103,10 +103,6 @@ ob_start();
         </table>
     </div>
 </div>
-<?php
-$content = ob_get_clean();
-require __DIR__ . '/../layouts/app.php';
-
 <script>
 (function () {
     async function loadHomes(form) {
@@ -163,3 +159,6 @@ require __DIR__ . '/../layouts/app.php';
     });
 })();
 </script>
+<?php
+$content = ob_get_clean();
+require __DIR__ . '/../layouts/app.php';
