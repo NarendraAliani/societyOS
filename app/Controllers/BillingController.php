@@ -102,11 +102,11 @@ final class BillingController
                 Auth::id(),
                 Society::currentId()
             );
-        } catch (\\InvalidArgumentException $e) {
+        } catch (\InvalidArgumentException $e) {
             Flash::set('error', $e->getMessage());
             header("Location: /billing/{$id}");
             exit;
-        } catch (\\RuntimeException $e) {
+        } catch (\RuntimeException $e) {
             Flash::set('error', 'Bill not found.');
             header('Location: /billing');
             exit;
