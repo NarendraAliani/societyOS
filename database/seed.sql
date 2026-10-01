@@ -4,8 +4,8 @@
 -- CHANGE THE DEFAULT PASSWORD IMMEDIATELY AFTER FIRST LOGIN.
 -- =====================================================================
 
-INSERT INTO society (name, registration_no, address, city, state, pincode, phone, email)
-VALUES ('Demo Residency', 'REG-0001', '123 Main Road', 'Pune', 'Maharashtra', '411001', '9999999999', 'admin@demoresidency.local');
+INSERT INTO society (code, name, registration_no, address, city, state, pincode, phone, email)
+VALUES ('SOC-001', 'Demo Residency', 'REG-0001', '123 Main Road', 'Pune', 'Maharashtra', '411001', '9999999999', 'admin@demoresidency.local');
 
 SET @society_id = LAST_INSERT_ID();
 
