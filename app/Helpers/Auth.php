@@ -7,6 +7,7 @@ final class Auth
     public static function check(): bool { return !empty($_SESSION['user_id']); }
     public static function id(): ?int { return $_SESSION['user_id'] ?? null; }
     public static function role(): ?string { return $_SESSION['role_name'] ?? null; }
+    public static function societyId(): ?int { return isset($_SESSION['society_id']) ? (int) $_SESSION['society_id'] : null; }
     public static function roleId(): ?int { return isset($_SESSION['role_id']) ? (int)$_SESSION['role_id'] : null; }
     public static function memberId(): ?int { return isset($_SESSION['member_id']) ? (int)$_SESSION['member_id'] : null; }
     public static function isResident(): bool { return in_array(self::role(),['resident','tenant'],true); }
