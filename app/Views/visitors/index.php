@@ -59,9 +59,12 @@ ob_start();
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
+    <div class="col-md-4 d-flex justify-content-md-end align-items-start">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-app-Views-visitors-index-php"><i class="fa-solid fa-plus me-1"></i>Log Visitor</button>
+        <div class="modal fade" id="modal-app-Views-visitors-index-php" tabindex="-1" aria-labelledby="modal-app-Views-visitors-index-php-label" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title" id="modal-app-Views-visitors-index-php-label">Log Visitor</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                <div class="modal-body">
                 <h6>Log Visitor</h6>
                 <form method="post" action="/visitors">
                     <?= \App\Helpers\Csrf::field() ?>
@@ -87,8 +90,8 @@ ob_start();
                         <input type="text" name="purpose" class="form-control" placeholder="e.g. Guest, Plumber">
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Log Visitor</button>
-                </form>
-            </div>
+                </form></div>
+            </div></div>
         </div>
     </div>
 </div>
