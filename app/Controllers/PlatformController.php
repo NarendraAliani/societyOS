@@ -27,7 +27,7 @@ final class PlatformController
             Captcha::refresh(); http_response_code(419); $error='Session expired. Please try again.';
             require __DIR__.'/../Views/platform/login.php'; return;
         }
-        if(!Captcha::verify($_POST['captcha_code']??null)){
+        if(!Captcha::verify($_POST['captcha_code'] ?? null)){
             Captcha::refresh(); $error='Invalid or expired security code. Please enter the new CAPTCHA code.';
             require __DIR__.'/../Views/platform/login.php'; return;
         }
