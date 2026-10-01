@@ -156,6 +156,7 @@ societyOS/
 - RBAC enforced per-route via middleware, not just hidden in the UI — a permission check runs before the controller action, so a raw request without the UI can't bypass it.
 - Backup & Restore is hard-restricted to `super_admin` in code (not merely a grantable permission), and every restore takes an automatic safety backup of the current state first, since the operation is otherwise irreversible.
 - Authentication CAPTCHA is a project-wide security standard: every login requires a server-side, one-time, 6-character CAPTCHA challenge with a 5-minute expiry, in addition to CSRF protection and rate limiting. See `docs/SECURITY_STANDARDS.md`.
+- Email password reset is a project-wide standard: every login surface provides a CAPTCHA-protected Forgot Password flow using single-use, 60-minute email reset links, hashed tokens, rate limiting, and generic anti-enumeration responses. SMTP is configured through `.env` and PHPMailer.
 
 ## Documentation
 
