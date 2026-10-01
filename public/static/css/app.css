@@ -541,3 +541,53 @@ body {
         width: 100%;
     }
 }
+
+/* ===== Global dark-theme readability guard =====
+   Bootstrap's .text-dark is intentionally fixed to a dark color and therefore becomes
+   unreadable when used inside the native dark color mode. Keep semantic text color tied
+   to the active theme so older pages/components cannot silently lose contrast. */
+[data-bs-theme="dark"] .text-dark {
+    color: var(--bs-body-color) !important;
+}
+
+/* Common hard-coded dark surfaces should also follow the active color mode. */
+[data-bs-theme="dark"] .bg-white {
+    background-color: var(--bs-body-bg) !important;
+}
+
+[data-bs-theme="dark"] .border-white {
+    border-color: var(--bs-border-color) !important;
+}
+
+/* ===== Report directory cards ===== */
+.report-card-link {
+    color: inherit;
+}
+
+.report-card-link .card {
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.report-card-link:hover .card {
+    transform: translateY(-1px);
+    box-shadow: 0 .5rem 1.25rem rgba(0, 0, 0, .12) !important;
+}
+
+.report-card-heading {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    margin: 0 0 .35rem;
+    color: var(--bs-heading-color);
+    font-size: 1rem;
+    font-weight: 650;
+}
+
+.report-card-heading i {
+    flex: 0 0 auto;
+}
+
+[data-bs-theme="dark"] .report-card-link:hover .card {
+    box-shadow: 0 .5rem 1.25rem rgba(0, 0, 0, .28) !important;
+}
+
