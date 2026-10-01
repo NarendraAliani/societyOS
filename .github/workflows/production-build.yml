@@ -44,6 +44,9 @@ jobs:
             php -l "$file" >/dev/null
           done
 
+      - name: Linked-home regression contract
+        run: php tests/regression/linked_home_role_scope.php
+
       - name: Prepare deployment branch
         shell: bash
         run: |
