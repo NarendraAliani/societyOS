@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Helpers\Auth;
 use App\Helpers\Csrf;
 use App\Helpers\Flash;
+use App\Helpers\FileUpload;
 use App\Models\Complaint;
 use App\Models\Document;
 use App\Models\EmergencyContact;
@@ -15,8 +16,8 @@ use App\Models\MaintenanceBill;
 use App\Models\Member;
 use App\Models\Notice;
 use App\Models\VisitorPass;
-use App\Models\Vehicle;
 use App\Models\Society;
+use App\Models\Vehicle;
 
 final class ResidentController
 {
@@ -185,6 +186,134 @@ final class ResidentController
         $pageTitle = 'My Maintenance Bills';
         $bills = MaintenanceBill::forMember((int) $member['id']);
         require __DIR__ . '/../Views/resident/bills.php';
+    }
+
+    public function storeVehicle(): void
+    {
+        $this->verifyCsrf();
+        $member = $this->member();
+        $vehicleType = ($_POST['vehicle_type'] ?? '') === 'two_wheeler' ? 'two_wheeler' : 'four_wheeler';
+        $registration = strtoupper(trim((string) ($_POST['registration_number'] ?? '')));
+        if ($registration === '') {
+            Flash::set('error', 'Registration number is required.');
+            header('Location: /resident/vehicles');
+            exit;
+        }
+        if (Vehicle::registrationExists($registration)) {
+            Flash::set('error', "Registration number \"{$registration}\" is already on file.");
+            header('Location: /resident/vehicles');
+            exit;
+        }
+        Vehicle::create([
+            'member_id' => (int) $member['id'],
+            'vehicle_type' => $vehicleType,
+            'registration_number' => $registration,
+            'make' => trim((string) ($_POST['make'] ?? '')),
+            'model' => trim((string) ($_POST['model'] ?? '')),
+            'color' => trim((string) ($_POST['color'] ?? '')),
+        ]);
+        Flash::set('success', "Vehicle \"{$registration}\" added.");
+        header('Location: /resident/vehicles');
+        exit;
+    }
+
+    public function updateVehicle(string $id): void
+    {
+        $this->verifyCsrf();
+        $member = $this->member();
+        $vehicle = Vehicle::find((int) $id);
+        if (!$vehicle || (int) $vehicle['member_id'] !== (int) $member['id']) {
+            http_response_code(404);
+            require __DIR__ . '/../Views/errors/404.php';
+            return;
+        }
+        $vehicleType = ($_POST['vehicle_type'] ?? '') === 'two_wheeler' ? 'two_wheeler' : 'four_wheeler';
+        $registration = strtoupper(trim((string) ($_POST['registration_number'] ?? '')));
+        if ($registration === '') {
+            Flash::set('error', 'Registration number is required.');
+            header('Location: /resident/vehicles');
+            exit;
+        }
+        if (Vehicle::registrationExists($registration, (int) $id)) {
+            Flash::set('error', "Registration number \"{$registration}\" is already on file.");
+            header('Location: /resident/vehicles');
+            exit;
+        }
+        Vehicle::update((int) $id, [
+            'vehicle_type' => $vehicleType,
+            'registration_number' => $registration,
+            'make' => trim((string) ($_POST['make'] ?? '')),
+            'model' => trim((string) ($_POST['model'] ?? '')),
+            'color' => trim((string) ($_POST['color'] ?? '')),
+        ]);
+        Flash::set('success', 'Vehicle updated.');
+        header('Location: /resident/vehicles');
+        exit;
+    }
+
+    public function deleteVehicle(string $id): void
+    {
+        $this->verifyCsrf();
+        $member = $this->member();
+        $vehicle = Vehicle::find((int) $id);
+        if (!$vehicle || (int) $vehicle['member_id'] !== (int) $member['id']) {
+            http_response_code(404);
+            require __DIR__ . '/../Views/errors/404.php';
+            return;
+        }
+        Vehicle::delete((int) $id);
+        Flash::set('success', 'Vehicle removed.');
+        header('Location: /resident/vehicles');
+        exit;
+    }
+
+    public function storeDocument(): void
+    {
+        $this->verifyCsrf();
+        $member = $this->member();
+        $title = trim((string) ($_POST['title'] ?? ''));
+        if ($title === '') {
+            Flash::set('error', 'A document title is required.');
+            header('Location: /resident/documents');
+            exit;
+        }
+        try {
+            $path = FileUpload::storeDocument($_FILES['document'] ?? [], 'documents');
+        } catch (\RuntimeException $e) {
+            Flash::set('error', $e->getMessage());
+            header('Location: /resident/documents');
+            exit;
+        }
+        if ($path === null) {
+            Flash::set('error', 'Please select a JPG, PNG, or PDF file.');
+            header('Location: /resident/documents');
+            exit;
+        }
+        $fileType = strtolower((string) pathinfo($path, PATHINFO_EXTENSION));
+        Document::create(Society::currentId(), (int) $member['id'], $title, $path, $fileType, Auth::id());
+        Flash::set('success', 'Document uploaded.');
+        header('Location: /resident/documents');
+        exit;
+    }
+
+    public function deleteDocument(string $id): void
+    {
+        $this->verifyCsrf();
+        $member = $this->member();
+        $document = Document::find((int) $id);
+        if (!$document || (int) $document['member_society_id'] !== Society::currentId() || (int) $document['member_id'] !== (int) $member['id']) {
+            http_response_code(404);
+            require __DIR__ . '/../Views/errors/404.php';
+            return;
+        }
+        $fullPath = dirname(__DIR__, 2) . '/uploads/' . $document['file_path'];
+        Document::delete((int) $id);
+        if (is_file($fullPath)) {
+            unlink($fullPath);
+        }
+        Flash::set('success', 'Document removed.');
+        header('Location: /resident/documents');
+        exit;
     }
 
     public function documents(): void

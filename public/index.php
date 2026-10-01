@@ -50,7 +50,12 @@ $router->get('/resident', [ResidentController::class, 'home'], [$auth, $can('das
 $router->get('/resident/bills', [ResidentController::class, 'bills'], [$auth, $can('billing.view')]);
 $router->get('/resident/family', [ResidentController::class, 'family'], [$auth, $can('dashboard.view')]);
 $router->get('/resident/vehicles', [ResidentController::class, 'vehicles'], [$auth, $can('dashboard.view')]);
+$router->post('/resident/vehicles', [ResidentController::class, 'storeVehicle'], [$auth, $can('dashboard.view')]);
+$router->post('/resident/vehicles/{id}', [ResidentController::class, 'updateVehicle'], [$auth, $can('dashboard.view')]);
+$router->post('/resident/vehicles/{id}/delete', [ResidentController::class, 'deleteVehicle'], [$auth, $can('dashboard.view')]);
 $router->get('/resident/documents', [ResidentController::class, 'documents'], [$auth, $can('dashboard.view')]);
+$router->post('/resident/documents', [ResidentController::class, 'storeDocument'], [$auth, $can('dashboard.view')]);
+$router->post('/resident/documents/{id}/delete', [ResidentController::class, 'deleteDocument'], [$auth, $can('dashboard.view')]);
 $router->post('/resident/family-members', [ResidentController::class, 'storeFamilyMember'], [$auth, $can('dashboard.view')]);
 $router->post('/resident/family-members/{id}/delete', [ResidentController::class, 'deleteFamilyMember'], [$auth, $can('dashboard.view')]);
 $router->post('/resident/emergency-contacts', [ResidentController::class, 'storeEmergencyContact'], [$auth, $can('dashboard.view')]);
