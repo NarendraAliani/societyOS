@@ -39,8 +39,8 @@ $platformView = file_get_contents('app/Views/platform/login.php');
 $component = file_get_contents('app/Views/components/captcha.php');
 
 $checks += [
-    'user login verifies CAPTCHA' => str_contains($authController, "Captcha::verify($_POST['captcha_code'] ?? null)"),
-    'platform login verifies CAPTCHA' => str_contains($platformController, "Captcha::verify($_POST['captcha_code'] ?? null)"),
+    'user login verifies CAPTCHA' => str_contains($authController, 'Captcha::verify($_POST[\'captcha_code\'] ?? null)'),
+    'platform login verifies CAPTCHA' => str_contains($platformController, 'Captcha::verify($_POST[\'captcha_code\'] ?? null)'),
     'user login includes shared CAPTCHA component' => str_contains($authView, "components/captcha.php"),
     'platform login includes shared CAPTCHA component' => str_contains($platformView, "components/captcha.php"),
     'shared CAPTCHA input is required' => str_contains($component, 'name="captcha_code"') && str_contains($component, 'required'),
