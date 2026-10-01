@@ -76,7 +76,7 @@ final class MemberController
     {
         $pageTitle = 'Resident Detail';
         $member = Member::find((int) $id);
-        if (!$member) {
+        if (!$member || (int) $member['society_id'] !== Society::currentId()) {
             http_response_code(404);
             require __DIR__ . '/../Views/errors/404.php';
             return;
@@ -99,6 +99,13 @@ final class MemberController
     public function update(string $id): void
     {
         $this->verifyCsrf();
+
+        $member = Member::find((int) $id);
+        if (!$member || (int) $member['society_id'] !== Society::currentId()) {
+            http_response_code(404);
+            require __DIR__ . '/../Views/errors/404.php';
+            return;
+        }
 
         $name = trim((string) ($_POST['name'] ?? ''));
         $phone = trim((string) ($_POST['phone'] ?? ''));
@@ -128,6 +135,11 @@ final class MemberController
     {
         $this->verifyCsrf();
         $member = Member::find((int) $id);
+        if (!$member || (int) $member['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Resident not found.');
+            header('Location: /members');
+            exit;
+        }
         Member::delete((int) $id);
         ActivityLog::log('members', 'delete', "Removed resident \"" . ($member['name'] ?? $id) . "\"");
         Flash::set('success', 'Resident removed.');
@@ -138,6 +150,13 @@ final class MemberController
     public function storeFamilyMember(string $memberId): void
     {
         $this->verifyCsrf();
+
+        $member = Member::find((int) $memberId);
+        if (!$member || (int) $member['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Resident not found.');
+            header('Location: /members');
+            exit;
+        }
 
         $name = trim((string) ($_POST['name'] ?? ''));
         $dob = trim((string) ($_POST['date_of_birth'] ?? '')) ?: null;
@@ -178,6 +197,12 @@ final class MemberController
     {
         $this->verifyCsrf();
         $familyMember = FamilyMember::find((int) $id);
+        $familyOwner = $familyMember ? Member::find((int) $familyMember['member_id']) : null;
+        if (!$familyMember || !$familyOwner || (int) $familyOwner['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Family member not found.');
+            header('Location: /members');
+            exit;
+        }
         FamilyMember::delete((int) $id);
         Flash::set('success', 'Family member removed.');
         header('Location: /members/' . ($familyMember['member_id'] ?? ''));
@@ -187,6 +212,13 @@ final class MemberController
     public function storeEmergencyContact(string $memberId): void
     {
         $this->verifyCsrf();
+
+        $member = Member::find((int) $memberId);
+        if (!$member || (int) $member['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Resident not found.');
+            header('Location: /members');
+            exit;
+        }
 
         $name = trim((string) ($_POST['name'] ?? ''));
         $phone = trim((string) ($_POST['phone'] ?? ''));
@@ -213,6 +245,12 @@ final class MemberController
     {
         $this->verifyCsrf();
         $contact = EmergencyContact::find((int) $id);
+        $contactOwner = $contact ? Member::find((int) $contact['member_id']) : null;
+        if (!$contact || !$contactOwner || (int) $contactOwner['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Emergency contact not found.');
+            header('Location: /members');
+            exit;
+        }
         EmergencyContact::delete((int) $id);
         Flash::set('success', 'Emergency contact removed.');
         header('Location: /members/' . ($contact['member_id'] ?? ''));
@@ -222,6 +260,13 @@ final class MemberController
     public function storeDocument(string $memberId): void
     {
         $this->verifyCsrf();
+
+        $member = Member::find((int) $memberId);
+        if (!$member || (int) $member['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Resident not found.');
+            header('Location: /members');
+            exit;
+        }
 
         $title = trim((string) ($_POST['title'] ?? ''));
         if ($title === '') {
@@ -311,9 +356,16 @@ final class MemberController
 
         $member = Member::find((int) $memberId);
         $ownerMemberId = (int) ($_POST['owner_member_id'] ?? 0);
+        $owner = $ownerMemberId > 0 ? Member::find($ownerMemberId) : null;
 
-        if (!$member || $member['member_type'] !== 'tenant' || $ownerMemberId <= 0) {
-            Flash::set('error', 'A flat owner is required to set up lease details.');
+        if (!$member || (int) $member['society_id'] !== Society::currentId() || $member['member_type'] !== 'tenant' || $ownerMemberId <= 0) {
+            Flash::set('error', 'A valid flat owner is required to set up lease details.');
+            header("Location: /members/{$memberId}");
+            exit;
+        }
+
+        if (!$owner || (int) $owner['society_id'] !== Society::currentId() || (int) $owner['flat_id'] !== (int) $member['flat_id'] || $owner['member_type'] !== 'owner' || $owner['status'] !== 'active') {
+            Flash::set('error', 'Selected flat owner is invalid.');
             header("Location: /members/{$memberId}");
             exit;
         }
@@ -346,15 +398,17 @@ final class MemberController
         $this->verifyCsrf();
 
         $tenant = Tenant::find((int) $id);
-        if (!$tenant) {
+        $tenantMember = $tenant ? Member::find((int) $tenant['member_id']) : null;
+        if (!$tenant || !$tenantMember || (int) $tenantMember['society_id'] !== Society::currentId()) {
             Flash::set('error', 'Lease record not found.');
             header('Location: /members');
             exit;
         }
 
         $ownerMemberId = (int) ($_POST['owner_member_id'] ?? 0);
-        if ($ownerMemberId <= 0) {
-            Flash::set('error', 'A flat owner is required.');
+        $owner = $ownerMemberId > 0 ? Member::find($ownerMemberId) : null;
+        if ($ownerMemberId <= 0 || !$owner || (int) $owner['society_id'] !== Society::currentId() || (int) $owner['flat_id'] !== (int) $tenantMember['flat_id'] || $owner['member_type'] !== 'owner' || $owner['status'] !== 'active') {
+            Flash::set('error', 'A valid flat owner is required.');
             header("Location: /members/{$tenant['member_id']}");
             exit;
         }
@@ -386,7 +440,8 @@ final class MemberController
     public function serveLeaseDocument(string $id): void
     {
         $tenant = Tenant::find((int) $id);
-        if (!$tenant || empty($tenant['agreement_doc_path'])) {
+        $tenantMember = $tenant ? Member::find((int) $tenant['member_id']) : null;
+        if (!$tenant || !$tenantMember || (int) $tenantMember['society_id'] !== Society::currentId() || empty($tenant['agreement_doc_path'])) {
             http_response_code(404);
             exit('Not found.');
         }
