@@ -285,7 +285,7 @@ Example:
 | Narendra → C-404 → Resident | Accountant | Yes |
 | Narendra → C-404 → Resident | Committee Member | Yes |
 | Narendra → C-404 → Resident | Society Admin | Yes |
-| Narendra → C-404 → Resident | Tenant | Yes only when the member is an eligible tenant |
+| Narendra → C-404 → Resident | Tenant | Yes |
 
 The linked-resident dropdown is therefore dependent on the **selected role**, not on whether the resident already has any role.
 
