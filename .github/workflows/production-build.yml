@@ -94,9 +94,9 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./
-          # The GitHub FTP account is rooted at the cPanel home directory;
-          # the live subdomain document root is society.dairy-dealer.net.
-          server-dir: society.dairy-dealer.net/
+          # The FTP account is already scoped to the live subdomain document root.
+          # Deploy relative to that FTP root; do not create a nested domain directory.
+          server-dir: ./
           dangerous-clean-slate: false
           security: strict
           exclude: |
