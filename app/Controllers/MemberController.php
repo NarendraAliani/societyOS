@@ -258,7 +258,7 @@ final class MemberController
         $this->verifyCsrf();
 
         $document = Document::find((int) $id);
-        if (!$document) {
+        if (!$document || (int) $document['member_society_id'] !== Society::currentId()) {
             Flash::set('error', 'Document not found.');
             header('Location: /members');
             exit;
@@ -284,7 +284,7 @@ final class MemberController
     public function serveDocument(string $id): void
     {
         $document = Document::find((int) $id);
-        if (!$document) {
+        if (!$document || (int) $document['member_society_id'] !== Society::currentId()) {
             http_response_code(404);
             exit('Not found.');
         }
