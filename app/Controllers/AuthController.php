@@ -129,7 +129,7 @@ final class AuthController
 
     private function isRateLimited(string $email,int $societyId): bool
     {
-        $stmt=db()->prepare('SELECT COUNT(*) FROM login_history lh JOIN users u ON u.id=lh.user_id WHERE lh.email_attempted=:email AND u.society_id=:society_id AND lh.status="failed" AND lh.created_at>(NOW()-INTERVAL :window SECOND)');
+        $stmt=db()->prepare('SELECT COUNT(*) FROM login_history lh JOIN users u ON u.id=lh.user_id WHERE lh.email_attempted=:email AND u.society_id = :society_id AND lh.status="failed" AND lh.created_at>(NOW()-INTERVAL :window SECOND)');
         $stmt->execute(['email'=>$email,'society_id'=>$societyId,'window'=>self::LOCKOUT_WINDOW_SECONDS]);
         return (int)$stmt->fetchColumn()>=self::MAX_LOGIN_ATTEMPTS;
     }
