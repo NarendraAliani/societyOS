@@ -123,17 +123,71 @@ final class User
         return (int) $stmt->fetchColumn() > 0;
     }
 
-    public static function memberIsLinked(int $memberId, int $societyId, ?int $excludingUserId = null): bool
+    public static function flatRoleIsLinked(int $memberId, int $societyId, int $roleId, ?int $excludingUserId = null): bool
     {
-        $sql = 'SELECT COUNT(*) FROM users WHERE society_id = :sid AND member_id = :member_id';
-        $params = ['sid' => $societyId, 'member_id' => $memberId];
+        $sql = 'SELECT COUNT(*)
+                FROM users u
+                JOIN members linked_member ON linked_member.id = u.member_id
+                JOIN members target_member ON target_member.id = :member_id
+                WHERE u.society_id = :sid
+                  AND u.role_id = :role_id
+                  AND linked_member.flat_id = target_member.flat_id';
+        $params = ['member_id' => $memberId, 'sid' => $societyId, 'role_id' => $roleId];
+
         if ($excludingUserId !== null) {
-            $sql .= ' AND id != :excluding_id';
+            $sql .= ' AND u.id != :excluding_id';
             $params['excluding_id'] = $excludingUserId;
         }
+
         $stmt = db()->prepare($sql);
         $stmt->execute($params);
         return (int) $stmt->fetchColumn() > 0;
+    }
+
+    public static function availableMembersForRole(int $societyId, int $roleId, ?int $excludingUserId = null): array
+    {
+        $role = Role::find($roleId);
+        if (!$role || !in_array($role['name'], ['resident', 'tenant'], true)) {
+            return [];
+        }
+
+        $memberType = $role['name'] === 'tenant' ? 'tenant' : 'owner';
+
+        $sql = 'SELECT m.id, m.name, m.member_type, m.email, m.phone,
+                       f.flat_number, w.name AS wing_name
+                FROM members m
+                JOIN flats f ON f.id = m.flat_id
+                JOIN floors fl ON fl.id = f.floor_id
+                JOIN wings w ON w.id = fl.wing_id
+                WHERE m.society_id = :sid
+                  AND m.status = "active"
+                  AND m.member_type = :member_type
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM users u
+                      JOIN members linked_member ON linked_member.id = u.member_id
+                      WHERE u.society_id = :linked_sid
+                        AND u.role_id = :role_id
+                        AND linked_member.flat_id = m.flat_id';
+
+        $params = [
+            'sid' => $societyId,
+            'member_type' => $memberType,
+            'linked_sid' => $societyId,
+            'role_id' => $roleId,
+        ];
+
+        if ($excludingUserId !== null) {
+            $sql .= ' AND u.id != :excluding_id';
+            $params['excluding_id'] = $excludingUserId;
+        }
+
+        $sql .= ')
+                ORDER BY w.name, f.flat_number, m.name';
+
+        $stmt = db()->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
     }
 
     public static function resetPassword(int $id, string $newPassword): void
