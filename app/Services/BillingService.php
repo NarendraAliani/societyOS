@@ -155,12 +155,27 @@ final class BillingService
      *
      * @return array{payment_id:int, receipt_id:int, receipt_number:string}
      */
-    public static function recordPayment(int $billId, float $amount, string $mode, ?string $reference, ?int $receivedBy): array
+    public static function recordPayment(int $billId, float $amount, string $mode, ?string $reference, ?int $receivedBy, int $societyId): array
     {
         $pdo = db();
 
         $pdo->beginTransaction();
         try {
+            $billStmt = $pdo->prepare(
+                'SELECT total_amount, paid_amount, society_id FROM maintenance_bills WHERE id = :id FOR UPDATE'
+            );
+            $billStmt->execute(['id' => $billId]);
+            $bill = $billStmt->fetch();
+
+            if (!$bill || (int) $bill['society_id'] !== $societyId) {
+                throw new \RuntimeException('Bill not found.');
+            }
+
+            $outstanding = max(0.0, (float) $bill['total_amount'] - (float) $bill['paid_amount']);
+            if ($amount > $outstanding + 0.00001) {
+                throw new \InvalidArgumentException('Payment amount exceeds the outstanding bill balance.');
+            }
+
             $paymentId = Payment::create($billId, $amount, $mode, $reference, $receivedBy);
             $receiptNumber = sprintf('RCPT-%06d', $paymentId);
             $receiptId = Receipt::create($paymentId, $receiptNumber);
