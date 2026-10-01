@@ -45,8 +45,9 @@ final class VehicleController
         $returnToMember = is_numeric($_POST['return_to_member'] ?? '') ? (int) $_POST['return_to_member'] : null;
         $backToCreate = '/vehicles/create' . ($returnToMember ? "?return_to_member={$returnToMember}" : '');
 
-        if ($memberId <= 0 || $registration === '') {
-            Flash::set('error', 'Resident and registration number are required.');
+        $member = $memberId > 0 ? Member::find($memberId) : null;
+        if (!$member || (int) $member['society_id'] !== Society::currentId() || $registration === '') {
+            Flash::set('error', 'A valid resident and registration number are required.');
             header("Location: {$backToCreate}");
             exit;
         }
@@ -81,6 +82,14 @@ final class VehicleController
         $returnToMember = is_numeric($_POST['return_to_member'] ?? '') ? (int) $_POST['return_to_member'] : null;
         $returnPath = $returnToMember ? "/members/{$returnToMember}" : '/vehicles';
 
+        $vehicle = Vehicle::find((int) $id);
+        $vehicleMember = $vehicle ? Member::find((int) $vehicle['member_id']) : null;
+        if (!$vehicle || !$vehicleMember || (int) $vehicleMember['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Vehicle not found.');
+            header("Location: {$returnPath}");
+            exit;
+        }
+
         if ($registration === '') {
             Flash::set('error', 'Registration number is required.');
             header("Location: {$returnPath}");
@@ -113,6 +122,12 @@ final class VehicleController
         $returnToMember = is_numeric($_POST['return_to_member'] ?? '') ? (int) $_POST['return_to_member'] : null;
 
         $vehicle = Vehicle::find((int) $id);
+        $vehicleMember = $vehicle ? Member::find((int) $vehicle['member_id']) : null;
+        if (!$vehicle || !$vehicleMember || (int) $vehicleMember['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Vehicle not found.');
+            header('Location: /vehicles');
+            exit;
+        }
         Vehicle::delete((int) $id);
         ActivityLog::log('vehicles', 'delete', 'Removed vehicle "' . ($vehicle['registration_number'] ?? $id) . '"');
         Flash::set('success', 'Vehicle removed.');
