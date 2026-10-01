@@ -83,11 +83,11 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
                 </div>
                 <div class="dropdown">
                     <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fa-solid fa-user-tag me-1"></i><?= htmlspecialchars(AppHelpersAuth::role() ?? 'Role') ?>
+                        <i class="fa-solid fa-user-tag me-1"></i><?= htmlspecialchars(\App\Helpers\Auth::role() ?? 'Role') ?>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <?php foreach (AppHelpersAuth::roles() as $accountRole): ?>
-                            <li><form method="post" action="/switch-role" class="m-0"><?= AppHelpersCsrf::field() ?><input type="hidden" name="role_id" value="<?= (int)$accountRole['role_id'] ?>"><button class="dropdown-item <?= ((int)$accountRole['role_id'] === (int)AppHelpersAuth::roleId()) ? 'active' : '' ?>" type="submit"><?= htmlspecialchars($accountRole['role_name']) ?></button></form></li>
+                        <?php foreach (\App\Helpers\Auth::roles() as $accountRole): ?>
+                            <li><form method="post" action="/switch-role" class="m-0"><?= \App\Helpers\Csrf::field() ?><input type="hidden" name="role_id" value="<?= (int)$accountRole['role_id'] ?>"><button class="dropdown-item <?= ((int)$accountRole['role_id'] === (int)\App\Helpers\Auth::roleId()) ? 'active' : '' ?>" type="submit"><?= htmlspecialchars($accountRole['role_name']) ?></button></form></li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
