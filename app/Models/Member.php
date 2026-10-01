@@ -10,7 +10,7 @@ final class Member
     {
         $stmt = db()->prepare(
             'SELECT m.*, f.flat_number, fl.floor_number, w.name AS wing_name,
-                    1 + (SELECT COUNT(*) FROM family_members fm WHERE fm.member_id = m.id) AS member_count,
+                    (SELECT COUNT(*) FROM family_members fm WHERE fm.member_id = m.id) AS member_count,
                     (SELECT COUNT(*) FROM vehicles v WHERE v.member_id = m.id) AS vehicle_count
              FROM members m
              JOIN flats f ON f.id = m.flat_id
