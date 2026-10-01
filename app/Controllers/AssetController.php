@@ -37,7 +37,7 @@ final class AssetController
         $categoryId = (int) ($_POST['category_id'] ?? 0);
         $name = trim((string) ($_POST['name'] ?? ''));
 
-        if ($categoryId <= 0 || $name === '') {
+        if ($categoryId <= 0 || !AssetCategory::belongsToSociety($categoryId, Society::currentId()) || $name === '') {
             Flash::set('error', 'Category and name are required.');
             header('Location: /assets/create');
             exit;
@@ -143,9 +143,16 @@ final class AssetController
         }
 
         $cost = $_POST['cost'] ?? '';
+        $vendorId = (int) ($_POST['vendor_id'] ?? 0) ?: null;
+        if ($vendorId !== null && !Vendor::belongsToSociety($vendorId, Society::currentId())) {
+            Flash::set('error', 'Vendor not found.');
+            header("Location: /assets/{$id}");
+            exit;
+        }
+
         AssetAmc::create(
             (int) $id,
-            (int) ($_POST['vendor_id'] ?? 0) ?: null,
+            $vendorId,
             $startDate,
             $endDate,
             is_numeric($cost) ? (float) $cost : null
