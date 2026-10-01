@@ -76,7 +76,7 @@ ob_start();
                                                 <option value="locked" <?= $user['status'] === 'locked' ? 'selected' : '' ?>>Locked</option>
                                             </select>
                                         </div>
-                                        <div class="col-12"><small class="text-muted">Resident/Tenant roles require a linked active resident. Other roles remain unlinked. The same resident may hold a different role independently.</small></div>
+                                        <div class="col-12"><small class="text-muted">Every role is linked to an active resident/member. The same resident may hold different roles independently, but only once for each role.</small></div>
                                         <div class="col-12"><button type="submit" class="btn btn-sm btn-primary">Save</button></div>
                                     </div>
                                 </form>
@@ -112,11 +112,6 @@ ob_start();
         const roleName = role.options[role.selectedIndex]?.textContent.trim() || '';
         resident.disabled = true;
         resident.innerHTML = '';
-
-        if (!['resident', 'tenant'].includes(roleName)) {
-            resident.append(new Option('Not linked', '0'));
-            return;
-        }
 
         resident.append(new Option('Loading available residents…', '0'));
         try {
