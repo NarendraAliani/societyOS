@@ -27,7 +27,11 @@ $checks = [
     'family add uses current member' => str_contains($controller, 'FamilyMember::create((int) $member'),
     'family delete checks ownership' => str_contains($controller, '$familyMember') && str_contains($controller, 'Auth::memberId()'),
     'emergency contact delete checks ownership' => str_contains($controller, '$contact') && str_contains($controller, 'Auth::memberId()'),
-    'family view supports add and remove' => str_contains($view, 'Add Family Member') && str_contains($view, '/resident/family-members/'),
+    'family view supports add, edit and remove' => str_contains($view, 'Add Family Member') && str_contains($view, 'Edit Family Member') && str_contains($view, '/resident/family-members/'),
+    'family forms use shared modal pattern' => str_contains($view, 'app-form-modal') && str_contains($view, 'data-bs-toggle="modal"'),
+    'family edit preserves ownership checks' => str_contains($controller, 'FamilyMember::update') && str_contains($controller, 'familyMember') && str_contains($controller, 'Auth::memberId()'),
+    'emergency edit preserves ownership checks' => str_contains($controller, 'EmergencyContact::update') && str_contains($controller, 'contact') && str_contains($controller, 'Auth::memberId()'),
+    'modal standard is documented' => is_file('docs/UI_FORM_STANDARD.md'),
     'family routes exist' => str_contains($routes, "ResidentController::class, 'family'") && str_contains($routes, "/resident/family-members"),
 ];
 

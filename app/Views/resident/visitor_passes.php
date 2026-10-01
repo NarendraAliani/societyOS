@@ -59,32 +59,24 @@ foreach ($passes as $pass) {
     <div class="row g-3">
         <div class="col-xl-4">
             <div class="card resident-section-card h-100">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center gap-2">
                     <h5 class="resident-section-title">
-                        <span class="resident-section-icon"><i class="fa-solid fa-user-plus"></i></span>
-                        Create Visitor Pass
+                        <span class="resident-section-icon"><i class="fa-solid fa-ticket"></i></span>
+                        Resident Actions
                     </h5>
+                    <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#createVisitorPassModal">
+                        <i class="fa-solid fa-plus me-1"></i>Create Visitor Pass
+                    </button>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted small mb-4">Generate a one-time pass for your visitor. The gate can verify the pass from the Visitors module.</p>
-                    <form method="post" action="/resident/visitor-passes">
-                        <?= \App\Helpers\Csrf::field() ?>
-                        <div class="mb-3">
-                            <label class="form-label">Visitor Name <span class="text-danger">*</span></label>
-                            <input name="visitor_name" class="form-control" maxlength="150" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Valid From <span class="text-danger">*</span></label>
-                            <input type="datetime-local" name="valid_from" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Valid Until <span class="text-danger">*</span></label>
-                            <input type="datetime-local" name="valid_until" class="form-control" required>
-                        </div>
-                        <button class="btn btn-primary w-100" type="submit">
-                            <i class="fa-solid fa-qrcode me-1"></i>Create Pass
+                    <div class="resident-empty py-5">
+                        <i class="fa-solid fa-ticket"></i>
+                        <strong>Create a visitor pass when needed.</strong>
+                        <div class="small mt-1">The pass token can be shared with your visitor for gate verification.</div>
+                        <button class="btn btn-outline-primary mt-3" type="button" data-bs-toggle="modal" data-bs-target="#createVisitorPassModal">
+                            <i class="fa-solid fa-qrcode me-1"></i>Open Pass Form
                         </button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -132,6 +124,43 @@ foreach ($passes as $pass) {
         </div>
     </div>
 </div>
+
+<div class="modal fade app-form-modal" id="createVisitorPassModal" tabindex="-1" aria-labelledby="createVisitorPassModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <div class="resident-eyebrow">Resident Services</div>
+                    <h5 class="modal-title" id="createVisitorPassModalLabel">Create Visitor Pass</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="/resident/visitor-passes">
+                <?= \App\Helpers\Csrf::field() ?>
+                <div class="modal-body">
+                    <p class="resident-form-note mb-4">Generate a one-time pass for your visitor. The gate can verify the pass from the Visitors module.</p>
+                    <div class="mb-3">
+                        <label class="form-label">Visitor Name <span class="text-danger">*</span></label>
+                        <input name="visitor_name" class="form-control" maxlength="150" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Valid From <span class="text-danger">*</span></label>
+                        <input type="datetime-local" name="valid_from" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Valid Until <span class="text-danger">*</span></label>
+                        <input type="datetime-local" name="valid_until" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary" type="submit"><i class="fa-solid fa-qrcode me-1"></i>Create Pass</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <?php
 $content = ob_get_clean();
 require __DIR__ . '/../layouts/app.php';

@@ -44,6 +44,42 @@ final class ResidentController
     {
         $this->verifyCsrf();
         $member = $this->member();
+
+        if (!empty($_POST['id'])) {
+            $familyMember = FamilyMember::find((int) $_POST['id']);
+            if (!$familyMember || (int) $familyMember['member_id'] !== (int) Auth::memberId()) {
+                http_response_code(404);
+                require __DIR__ . '/../Views/errors/404.php';
+                return;
+            }
+
+            $name = trim((string) ($_POST['name'] ?? ''));
+            $relation = trim((string) ($_POST['relation'] ?? '')) ?: null;
+            $dob = trim((string) ($_POST['date_of_birth'] ?? '')) ?: null;
+            if ($name === '') {
+                Flash::set('error', 'Family member name is required.');
+                header('Location: /resident/family');
+                exit;
+            }
+            if ($dob !== null && strtotime($dob) > time()) {
+                Flash::set('error', 'Date of birth cannot be in the future.');
+                header('Location: /resident/family');
+                exit;
+            }
+
+            FamilyMember::update(
+                (int) $_POST['id'],
+                $name,
+                $relation,
+                $dob,
+                is_numeric($_POST['age'] ?? '') ? (int) $_POST['age'] : null,
+                trim((string) ($_POST['phone'] ?? '')) ?: null
+            );
+            Flash::set('success', 'Family member updated.');
+            header('Location: /resident/family');
+            exit;
+        }
+
         $name = trim((string) ($_POST['name'] ?? ''));
         $relation = trim((string) ($_POST['relation'] ?? '')) ?: null;
         $dob = trim((string) ($_POST['date_of_birth'] ?? '')) ?: null;
@@ -84,6 +120,34 @@ final class ResidentController
     {
         $this->verifyCsrf();
         $member = $this->member();
+
+        if (!empty($_POST['id'])) {
+            $contact = EmergencyContact::find((int) $_POST['id']);
+            if (!$contact || (int) $contact['member_id'] !== (int) Auth::memberId()) {
+                http_response_code(404);
+                require __DIR__ . '/../Views/errors/404.php';
+                return;
+            }
+
+            $name = trim((string) ($_POST['name'] ?? ''));
+            $phone = trim((string) ($_POST['phone'] ?? ''));
+            if ($name === '' || $phone === '') {
+                Flash::set('error', 'Emergency contact name and phone are required.');
+                header('Location: /resident/family');
+                exit;
+            }
+
+            EmergencyContact::update(
+                (int) $_POST['id'],
+                $name,
+                trim((string) ($_POST['relation'] ?? '')) ?: null,
+                $phone
+            );
+            Flash::set('success', 'Emergency contact updated.');
+            header('Location: /resident/family');
+            exit;
+        }
+
         $name = trim((string) ($_POST['name'] ?? ''));
         $phone = trim((string) ($_POST['phone'] ?? ''));
         if ($name === '' || $phone === '') {
