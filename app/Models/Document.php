@@ -21,7 +21,7 @@ final class Document
 
     public static function find(int $id): ?array
     {
-        $stmt = db()->prepare('SELECT * FROM documents WHERE id = :id');
+        $stmt = db()->prepare('SELECT d.*, m.society_id AS member_society_id FROM documents d JOIN members m ON m.id = d.member_id WHERE d.id = :id');
         $stmt->execute(['id' => $id]);
         return $stmt->fetch() ?: null;
     }
