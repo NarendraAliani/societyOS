@@ -37,7 +37,7 @@ final class AssetController
         $categoryId = (int) ($_POST['category_id'] ?? 0);
         $name = trim((string) ($_POST['name'] ?? ''));
 
-        if ($categoryId <= 0 || $name === '') {
+        if ($categoryId <= 0 || !AssetCategory::belongsToSociety($categoryId, Society::currentId()) || $name === '') {
             Flash::set('error', 'Category and name are required.');
             header('Location: /assets/create');
             exit;
@@ -63,7 +63,7 @@ final class AssetController
     {
         $pageTitle = 'Asset Detail';
         $asset = Asset::find((int) $id);
-        if (!$asset) {
+        if (!$asset || (int) $asset['society_id'] !== Society::currentId()) {
             http_response_code(404);
             require __DIR__ . '/../Views/errors/404.php';
             return;
@@ -79,10 +79,17 @@ final class AssetController
     {
         $this->verifyCsrf();
 
+        $asset = Asset::find((int) $id);
+        if (!$asset || (int) $asset['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Asset not found.');
+            header('Location: /assets');
+            exit;
+        }
+
         $categoryId = (int) ($_POST['category_id'] ?? 0);
         $name = trim((string) ($_POST['name'] ?? ''));
 
-        if ($categoryId <= 0 || $name === '') {
+        if ($categoryId <= 0 || !AssetCategory::belongsToSociety($categoryId, Society::currentId()) || $name === '') {
             Flash::set('error', 'Category and name are required.');
             header("Location: /assets/{$id}");
             exit;
@@ -107,6 +114,9 @@ final class AssetController
     public function setStatus(string $id): void
     {
         $this->verifyCsrf();
+        $asset = Asset::find((int) $id);
+        if (!$asset || (int) $asset['society_id'] !== Society::currentId()) { Flash::set('error', 'Asset not found.'); header('Location: /assets'); exit; }
+
         $status = $_POST['status'] ?? '';
         if (in_array($status, ['active', 'under_repair', 'disposed'], true)) {
             Asset::setStatus((int) $id, $status);
@@ -119,6 +129,9 @@ final class AssetController
     public function storeAmc(string $id): void
     {
         $this->verifyCsrf();
+        $asset = Asset::find((int) $id);
+        if (!$asset || (int) $asset['society_id'] !== Society::currentId()) { Flash::set('error', 'Asset not found.'); header('Location: /assets'); exit; }
+
 
         $startDate = $_POST['start_date'] ?? '';
         $endDate = $_POST['end_date'] ?? '';
@@ -130,9 +143,16 @@ final class AssetController
         }
 
         $cost = $_POST['cost'] ?? '';
+        $vendorId = (int) ($_POST['vendor_id'] ?? 0) ?: null;
+        if ($vendorId !== null && !Vendor::belongsToSociety($vendorId, Society::currentId())) {
+            Flash::set('error', 'Vendor not found.');
+            header("Location: /assets/{$id}");
+            exit;
+        }
+
         AssetAmc::create(
             (int) $id,
-            (int) ($_POST['vendor_id'] ?? 0) ?: null,
+            $vendorId,
             $startDate,
             $endDate,
             is_numeric($cost) ? (float) $cost : null
@@ -147,6 +167,9 @@ final class AssetController
     public function storeService(string $id): void
     {
         $this->verifyCsrf();
+        $asset = Asset::find((int) $id);
+        if (!$asset || (int) $asset['society_id'] !== Society::currentId()) { Flash::set('error', 'Asset not found.'); header('Location: /assets'); exit; }
+
 
         $serviceDate = $_POST['service_date'] ?? '';
         if (!$serviceDate) {
@@ -194,6 +217,8 @@ final class AssetController
     public function updateCategory(string $id): void
     {
         $this->verifyCsrf();
+        if (!AssetCategory::belongsToSociety((int) $id, Society::currentId())) { Flash::set('error', 'Category not found.'); header('Location: /assets/categories'); exit; }
+
 
         $name = trim((string) ($_POST['name'] ?? ''));
         if ($name === '') {
@@ -209,6 +234,8 @@ final class AssetController
     public function deleteCategory(string $id): void
     {
         $this->verifyCsrf();
+        if (!AssetCategory::belongsToSociety((int) $id, Society::currentId())) { Flash::set('error', 'Category not found.'); header('Location: /assets/categories'); exit; }
+
 
         try {
             AssetCategory::delete((int) $id);
