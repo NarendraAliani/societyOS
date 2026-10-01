@@ -19,6 +19,21 @@ final class Notice
         return $stmt->fetchAll();
     }
 
+    public static function activeForSociety(int $societyId, int $limit = 10): array
+    {
+        $limit = max(1, min(50, $limit));
+        $stmt = db()->prepare(
+            "SELECT n.*, u.name AS published_by_name
+             FROM notices n
+             LEFT JOIN users u ON u.id = n.published_by
+             WHERE n.society_id = :sid AND (n.expires_at IS NULL OR n.expires_at >= NOW())
+             ORDER BY n.published_at DESC
+             LIMIT {$limit}"
+        );
+        $stmt->execute(['sid' => $societyId]);
+        return $stmt->fetchAll();
+    }
+
     public static function create(int $societyId, array $fields): int
     {
         $stmt = db()->prepare(
