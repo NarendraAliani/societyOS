@@ -1,158 +1,23 @@
 <?php
-$pageTitle = 'Users';
-ob_start();
-?>
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="mb-0">Users</h5>
-    <div>
-        <a href="/admin/roles" class="btn btn-outline-secondary btn-sm me-2">Roles &amp; Permissions</a>
-        <a href="/admin/activity-logs" class="btn btn-outline-secondary btn-sm me-2">Activity Logs</a>
-        <?php if (\App\Helpers\Auth::can('settings.manage')): ?>
-            <a href="/admin/settings" class="btn btn-outline-secondary btn-sm me-2">Settings</a>
-        <?php endif; ?>
-        <?php if (\App\Helpers\Auth::role() === 'super_admin'): ?>
-            <a href="/admin/backup" class="btn btn-outline-secondary btn-sm me-2">Backup &amp; Restore</a>
-        <?php endif; ?>
-        <a href="/admin/users/create" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus me-1"></i>Add User</a>
-    </div>
-</div>
-<div class="card border-0 shadow-sm">
-    <div class="card-body">
-
-        <table class="table table-hover align-middle">
-            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Resident / Home</th><th>Status</th><th>Last Login</th><th></th></tr></thead>
-            <tbody>
-            <?php foreach ($users as $user): ?>
-                <tr>
-                    <td><?= htmlspecialchars($user['name']) ?></td>
-                    <td><?= htmlspecialchars($user['email']) ?></td>
-                    <td><span class="badge bg-secondary"><?= htmlspecialchars($user['role_name']) ?></span></td>
-                    <td>
-                        <?php if (!empty($user['member_id']) && !empty($user['linked_flat_number'])): ?>
-                            <span class="fw-semibold"><?= htmlspecialchars($user['linked_wing_name'] . '-' . $user['linked_flat_number']) ?></span>
-                            <small class="text-muted d-block"><?= htmlspecialchars($user['linked_member_name']) ?></small>
-                        <?php else: ?>
-                            <span class="text-muted">—</span>
-                        <?php endif; ?>
-                    </td>
-                    <td>
-                        <?php $badge = match ($user['status']) { 'active' => 'success', 'locked' => 'danger', default => 'secondary' }; ?>
-                        <span class="badge bg-<?= $badge ?>"><?= ucfirst($user['status']) ?></span>
-                    </td>
-                    <td><small><?= htmlspecialchars($user['last_login_at'] ?? 'Never') ?></small></td>
-                    <td class="text-end">
-                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#edit-<?= (int) $user['id'] ?>">Edit</button>
-                    </td>
-                </tr>
-                <tr class="collapse" id="edit-<?= (int) $user['id'] ?>">
-                    <td colspan="7">
-                        <div class="row g-3 p-2">
-                            <div class="col-md-6">
-                                <form method="post" action="/admin/users/<?= (int) $user['id'] ?>">
-                                    <?= \App\Helpers\Csrf::field() ?>
-                                    <div class="row g-2">
-                                        <div class="col-6">
-                                            <label class="form-label small">Role</label>
-                                            <select name="role_id" class="form-select form-select-sm">
-                                                <?php foreach ($roles ?? [] as $role): ?>
-                                                    <option value="<?= (int) $role['id'] ?>" <?= $role['id'] === $user['role_id'] ? 'selected' : '' ?>><?= htmlspecialchars($role['name']) ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="form-label small">Linked Resident</label>
-                                            <select name="member_id" class="form-select form-select-sm js-linked-home" data-user-id="<?= (int) $user['id'] ?>" data-current-member-id="<?= (int) ($user['member_id'] ?? 0) ?>">
-                                                <option value="<?= (int) ($user['member_id'] ?? 0) ?>"><?= htmlspecialchars(($user['linked_wing_name'] ?? '') . '-' . ($user['linked_flat_number'] ?? '') . ' — ' . ($user['linked_member_name'] ?? 'Current home')) ?></option>
-                                            </select>
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="form-label small">Status</label>
-                                            <select name="status" class="form-select form-select-sm">
-                                                <option value="active" <?= $user['status'] === 'active' ? 'selected' : '' ?>>Active</option>
-                                                <option value="inactive" <?= $user['status'] === 'inactive' ? 'selected' : '' ?>>Inactive</option>
-                                                <option value="locked" <?= $user['status'] === 'locked' ? 'selected' : '' ?>>Locked</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-12"><small class="text-muted">Every user role is linked to an active resident/member. The same home may be used by different roles, but only once per role.</small></div>
-                                        <div class="col-12"><button type="submit" class="btn btn-sm btn-primary">Save</button></div>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="col-md-6">
-                                <form method="post" action="/admin/users/<?= (int) $user['id'] ?>/reset-password">
-                                    <?= \App\Helpers\Csrf::field() ?>
-                                    <label class="form-label small">Reset Password</label>
-                                    <div class="input-group input-group-sm">
-                                        <input type="password" name="password" class="form-control" placeholder="New password (min 8 chars)" minlength="8" required>
-                                        <button type="submit" class="btn btn-outline-danger">Reset</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-            <?php if (empty($users)): ?>
-                <tr><td colspan="7" class="text-center text-muted py-4">No users yet.</td></tr>
-            <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
-</div>
+$pageTitle='Users';ob_start();?>
+<div class="d-flex justify-content-between align-items-center mb-3"><h5 class="mb-0">Users</h5><div>
+<a href="/admin/roles" class="btn btn-outline-secondary btn-sm me-2">Roles &amp; Permissions</a><a href="/admin/activity-logs" class="btn btn-outline-secondary btn-sm me-2">Activity Logs</a><a href="/admin/users/create" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus me-1"></i>Add User / Role</a></div></div>
+<div class="card border-0 shadow-sm"><div class="card-body"><table class="table table-hover align-middle"><thead><tr><th>Name</th><th>Email</th><th>Roles</th><th>Default Home</th><th>Status</th><th>Last Login</th><th></th></tr></thead><tbody>
+<?php foreach($users as $user): ?><tr><td><?= htmlspecialchars($user['name']) ?></td><td><?= htmlspecialchars($user['email']) ?></td><td><?php foreach(explode(', ',(string)$user['role_names']) as $rn): ?><?php if($rn!==''): ?><span class="badge bg-secondary me-1"><?= htmlspecialchars($rn) ?></span><?php endif; ?><?php endforeach; ?></td>
+<td><?php if(!empty($user['default_member_id'])&&$user['default_flat_number']): ?><span class="fw-semibold"><?= htmlspecialchars(($user['default_wing_name']??'').'-'.$user['default_flat_number']) ?></span><small class="text-muted d-block"><?= htmlspecialchars($user['default_member_name']??'') ?></small><?php else: ?>—<?php endif; ?></td>
+<td><?php $badge=match($user['status']){'active'=>'success','locked'=>'danger',default=>'secondary'}; ?><span class="badge bg-<?= $badge ?>"><?= ucfirst($user['status']) ?></span></td><td><small><?= htmlspecialchars($user['last_login_at']??'Never') ?></small></td>
+<td class="text-end"><button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#manage-<?= (int)$user['id'] ?>">Manage</button></td></tr>
+<tr class="collapse" id="manage-<?= (int)$user['id'] ?>"><td colspan="7"><div class="row g-3 p-2">
+<div class="col-lg-7"><h6>Role assignments</h6><?php $assignments=\App\Models\User::rolesForUser((int)$user['id']);foreach($assignments as $a): ?><div class="d-flex align-items-center justify-content-between border rounded p-2 mb-2"><div><span class="badge bg-primary"><?= htmlspecialchars($a['role_name']) ?></span><?php if(!empty($a['is_default'])): ?><span class="badge bg-success ms-1">Default</span><?php endif; ?><span class="small ms-2"><?= htmlspecialchars(($a['wing_name']??'').'-'.($a['flat_number']??'').' — '.($a['member_name']??'')) ?></span></div><div class="d-flex gap-1">
+<?php if(empty($a['is_default'])): ?><form method="post" action="/admin/users/<?= (int)$user['id'] ?>/roles/<?= (int)$a['role_id'] ?>/default"><?= \App\Helpers\Csrf::field() ?><button class="btn btn-sm btn-outline-success">Default</button></form><?php endif; ?>
+<?php if(count($assignments)>1): ?><form method="post" action="/admin/users/<?= (int)$user['id'] ?>/roles/<?= (int)$a['role_id'] ?>/remove"><?= \App\Helpers\Csrf::field() ?><button class="btn btn-sm btn-outline-danger">Remove</button></form><?php endif; ?></div></div><?php endforeach; ?></div>
+<div class="col-lg-5"><h6>Add role</h6><form method="post" action="/admin/users/<?= (int)$user['id'] ?>/roles"><?= \App\Helpers\Csrf::field() ?><select name="role_id" class="form-select form-select-sm mb-2 js-role-for-user"><option value="">Select role</option><?php foreach($roles as $r): ?><option value="<?= (int)$r['id'] ?>"><?= htmlspecialchars($r['name']) ?></option><?php endforeach; ?></select>
+<select name="member_id" class="form-select form-select-sm mb-2 js-linked-home" data-user-id="<?= (int)$user['id'] ?>" disabled required><option value="0">Select role first</option></select><button class="btn btn-sm btn-primary">Add Role</button></form>
+<hr><h6>Account status</h6><form method="post" action="/admin/users/<?= (int)$user['id'] ?>/status"><?= \App\Helpers\Csrf::field() ?><select name="status" class="form-select form-select-sm mb-2"><option value="active" <?= $user['status']==='active'?'selected':'' ?>>Active</option><option value="inactive" <?= $user['status']==='inactive'?'selected':'' ?>>Inactive</option><option value="locked" <?= $user['status']==='locked'?'selected':'' ?>>Locked</option></select><button class="btn btn-sm btn-outline-secondary">Save Status</button></form>
+<form method="post" action="/admin/users/<?= (int)$user['id'] ?>/reset-password" class="mt-3"><?= \App\Helpers\Csrf::field() ?><div class="input-group input-group-sm"><input type="password" name="password" class="form-control" minlength="8" placeholder="New password" required><button class="btn btn-outline-danger">Reset</button></div></form></div>
+</div></td></tr><?php endforeach; ?><?php if(empty($users)): ?><tr><td colspan="7" class="text-center text-muted py-4">No users yet.</td></tr><?php endif; ?></tbody></table></div></div>
 <script>
-(function () {
-    async function loadHomes(form) {
-        const role = form.querySelector('select[name="role_id"]');
-        const home = form.querySelector('.js-linked-home');
-        if (!role || !home) return;
-
-        home.disabled = true;
-        home.innerHTML = '';
-
-        if (!role.value) {
-            home.append(new Option('Select a role first', '0'));
-            home.disabled = false;
-            return;
-        }
-
-        home.append(new Option('Loading available homes…', '0'));
-        try {
-            const response = await fetch('/admin/users/resident-candidates?role_id=' + encodeURIComponent(role.value) + '&user_id=' + encodeURIComponent(home.dataset.userId), {
-                headers: { 'Accept': 'application/json' }
-            });
-            if (!response.ok) throw new Error();
-            const data = await response.json();
-            home.innerHTML = '';
-
-            if (!data.items || data.items.length === 0) {
-                home.append(new Option('No available homes', '0'));
-                return;
-            }
-
-            home.append(new Option('Select home', '0'));
-            data.items.forEach(function (item) {
-                home.append(new Option(item.wing_name + '-' + item.flat_number + ' — ' + item.name + ' (' + item.member_type + ')', item.id));
-            });
-
-            const current = home.dataset.currentMemberId;
-            if (current && Array.from(home.options).some(function (option) { return option.value === current; })) {
-                home.value = current;
-            }
-            home.disabled = false;
-        } catch (error) {
-            home.innerHTML = '';
-            home.append(new Option('Could not load available homes', '0'));
-        }
-    }
-
-    document.querySelectorAll('tr.collapse form').forEach(function (form) {
-        const role = form.querySelector('select[name="role_id"]');
-        if (!role || !form.querySelector('.js-linked-home')) return;
-        role.addEventListener('change', function () { loadHomes(form); });
-        loadHomes(form);
-    });
-})();
+(function(){async function load(form){const role=form.querySelector('.js-role-for-user'),home=form.querySelector('.js-linked-home');if(!role||!home)return;home.disabled=true;home.innerHTML='<option>Loading available homes…</option>';if(!role.value){home.innerHTML='<option value="0">Select role first</option>';return;}try{const r=await fetch('/admin/users/resident-candidates?role_id='+encodeURIComponent(role.value)+'&user_id='+encodeURIComponent(home.dataset.userId),{headers:{Accept:'application/json'}});if(!r.ok)throw new Error();const d=await r.json();home.innerHTML='';if(!d.items||!d.items.length){home.append(new Option('No available homes for this role','0'));return;}home.append(new Option('Select home','0'));d.items.forEach(i=>home.append(new Option(i.wing_name+'-'+i.flat_number+' — '+i.name+' ('+i.member_type+')',i.id)));home.disabled=false;}catch(e){home.innerHTML='<option value="0">Could not load available homes</option>';}}
+document.querySelectorAll('.js-role-for-user').forEach(r=>r.addEventListener('change',()=>load(r.closest('form'))));})();
 </script>
-<?php
-$content = ob_get_clean();
-require __DIR__ . '/../layouts/app.php';
+<?php $content=ob_get_clean();require __DIR__.'/../layouts/app.php';
