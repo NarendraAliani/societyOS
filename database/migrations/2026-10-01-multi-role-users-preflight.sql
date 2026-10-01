@@ -3,18 +3,22 @@
 -- Both result sets must be EMPTY.
 
 -- 1) Existing users must have an active member with a valid flat.
+--    Exception: the existing system super_admin account may be unlinked.
 SELECT
     u.id,
     u.email,
     u.role_id,
+    r.name AS role_name,
     u.member_id,
     m.status AS member_status,
     m.flat_id
 FROM users u
+JOIN roles r ON r.id=u.role_id
 LEFT JOIN members m ON m.id = u.member_id
-WHERE m.id IS NULL
-   OR m.status <> 'active'
-   OR m.flat_id IS NULL;
+WHERE NOT (
+    (r.name='super_admin' AND u.member_id IS NULL)
+    OR (m.id IS NOT NULL AND m.status='active' AND m.flat_id IS NOT NULL)
+);
 
 -- 2) No existing flat may already have more than one user for the same role.
 SELECT
