@@ -47,19 +47,15 @@ final class AdminController
         }
 
         $role = Role::find($roleId);
-        $needsMember = $role && in_array($role['name'], ['resident', 'tenant'], true);
-        if ($needsMember && ($memberId <= 0 || !User::memberEligibleForRole($memberId, Society::currentId(), $roleId))) {
-            Flash::set('error', 'A valid active resident must be linked for resident/tenant users.');
+        if (!$role || $memberId <= 0 || !User::memberEligibleForRole($memberId, Society::currentId(), $roleId)) {
+            Flash::set('error', 'A valid active resident/member must be linked for every user role.');
             header('Location: /admin/users/create?needs_resident=1');
             exit;
         }
-        if ($needsMember && User::flatRoleIsLinked($memberId, Society::currentId(), $roleId)) {
-            Flash::set('error', 'That resident is already linked to another user account.');
+        if (User::flatRoleIsLinked($memberId, Society::currentId(), $roleId)) {
+            Flash::set('error', 'That home is already linked to another user account for the selected role.');
             header('Location: /admin/users/create');
             exit;
-        }
-        if (!$needsMember) {
-            $memberId = null;
         }
 
         if (User::emailExists(Society::currentId(), $email)) {
@@ -82,7 +78,7 @@ final class AdminController
         $excludingUserId = isset($_GET['user_id']) ? (int) $_GET['user_id'] : null;
 
         $role = Role::find($roleId);
-        if (!$role || !in_array($role['name'], ['resident', 'tenant'], true)) {
+        if (!$role) {
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode(['items' => []]);
             return;
@@ -114,19 +110,15 @@ final class AdminController
         }
 
         $role = Role::find($roleId);
-        $needsMember = $role && in_array($role['name'], ['resident', 'tenant'], true);
-        if ($needsMember && ($memberId <= 0 || !User::memberEligibleForRole($memberId, Society::currentId(), $roleId))) {
-            Flash::set('error', 'A valid active resident must be linked for resident/tenant users.');
+        if (!$role || $memberId <= 0 || !User::memberEligibleForRole($memberId, Society::currentId(), $roleId)) {
+            Flash::set('error', 'A valid active resident/member must be linked for every user role.');
             header('Location: /admin/users');
             exit;
         }
-        if ($needsMember && User::flatRoleIsLinked($memberId, Society::currentId(), $roleId, (int) $id)) {
-            Flash::set('error', 'That resident is already linked to another user account.');
+        if (User::flatRoleIsLinked($memberId, Society::currentId(), $roleId, (int) $id)) {
+            Flash::set('error', 'That home is already linked to another user account for the selected role.');
             header('Location: /admin/users');
             exit;
-        }
-        if (!$needsMember) {
-            $memberId = null;
         }
 
         User::updateRoleAndStatus((int) $id, $roleId, $status, $memberId);
