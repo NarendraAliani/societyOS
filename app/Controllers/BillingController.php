@@ -93,14 +93,24 @@ final class BillingController
             exit;
         }
 
-        $result = BillingService::recordPayment(
-            (int) $id,
-            (float) $amount,
-            $mode,
-            trim((string) ($_POST['reference_number'] ?? '')) ?: null,
-            Auth::id(),
-            Society::currentId()
-        );
+        try {
+            $result = BillingService::recordPayment(
+                (int) $id,
+                (float) $amount,
+                $mode,
+                trim((string) ($_POST['reference_number'] ?? '')) ?: null,
+                Auth::id(),
+                Society::currentId()
+            );
+        } catch (\\InvalidArgumentException $e) {
+            Flash::set('error', $e->getMessage());
+            header("Location: /billing/{$id}");
+            exit;
+        } catch (\\RuntimeException $e) {
+            Flash::set('error', 'Bill not found.');
+            header('Location: /billing');
+            exit;
+        }
 
         ActivityLog::log('billing', 'payment', "Recorded payment of {$amount} on bill id {$id}, receipt {$result['receipt_number']}");
         Flash::set('success', "Payment recorded. Receipt {$result['receipt_number']} issued.");
