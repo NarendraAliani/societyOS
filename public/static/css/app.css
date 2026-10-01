@@ -109,3 +109,183 @@ body {
 
 [data-font-size="small"] { font-size: 14px; }
 [data-font-size="large"] { font-size: 18px; }
+
+
+/* ===== Resident self-service pages ===== */
+.resident-page {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.resident-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.resident-page-header h4 {
+    margin-bottom: .35rem;
+    font-weight: 650;
+}
+
+.resident-page-header .resident-eyebrow {
+    color: var(--bs-primary);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.resident-page-header .resident-subtitle {
+    color: var(--bs-secondary-color);
+    margin-bottom: 0;
+}
+
+.resident-home-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .45rem .7rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 999px;
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-secondary-color);
+    font-size: .85rem;
+    white-space: nowrap;
+}
+
+.resident-section-card {
+    border: 0;
+    box-shadow: 0 .125rem .5rem rgba(0, 0, 0, .06);
+    overflow: hidden;
+}
+
+.resident-section-card .card-header {
+    background: var(--bs-body-bg);
+    border-bottom: 1px solid var(--bs-border-color);
+    padding: 1rem 1.25rem;
+}
+
+.resident-section-card .card-body {
+    padding: 1.25rem;
+}
+
+.resident-section-title {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 650;
+}
+
+.resident-section-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(13, 110, 253, .1);
+    color: var(--bs-primary);
+    flex-shrink: 0;
+}
+
+.resident-stat {
+    min-height: 92px;
+}
+
+.resident-stat .stat-label {
+    color: var(--bs-secondary-color);
+    font-size: .78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.resident-stat .stat-value {
+    margin-top: .2rem;
+    font-size: 1.55rem;
+    line-height: 1.15;
+    font-weight: 700;
+}
+
+.resident-table {
+    margin-bottom: 0;
+}
+
+.resident-table thead th {
+    color: var(--bs-secondary-color);
+    font-size: .76rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.resident-table tbody td {
+    padding-top: .85rem;
+    padding-bottom: .85rem;
+}
+
+.resident-empty {
+    padding: 2.5rem 1rem !important;
+    text-align: center;
+    color: var(--bs-secondary-color);
+}
+
+.resident-empty i {
+    display: block;
+    margin-bottom: .65rem;
+    font-size: 1.65rem;
+    opacity: .65;
+}
+
+.resident-form-note {
+    color: var(--bs-secondary-color);
+    font-size: .82rem;
+}
+
+.resident-list .list-group-item {
+    border-left: 0;
+    border-right: 0;
+    padding: .9rem 0;
+}
+
+.resident-list .list-group-item:first-child {
+    border-top: 0;
+}
+
+.resident-list .list-group-item:last-child {
+    border-bottom: 0;
+}
+
+.resident-item-title {
+    font-weight: 650;
+}
+
+.resident-item-meta {
+    color: var(--bs-secondary-color);
+    font-size: .82rem;
+}
+
+@media (max-width: 767.98px) {
+    .resident-page-header {
+        flex-direction: column;
+    }
+
+    .resident-home-pill {
+        white-space: normal;
+    }
+
+    .resident-section-card .card-body,
+    .resident-section-card .card-header {
+        padding: 1rem;
+    }
+}
+
+[data-bs-theme="dark"] .resident-section-card {
+    box-shadow: 0 .125rem .5rem rgba(0, 0, 0, .22);
+}
