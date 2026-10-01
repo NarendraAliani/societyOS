@@ -69,32 +69,12 @@ ob_start();
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <h6>Add Maintenance Head</h6>
-                <form method="post" action="/society/maintenance-heads">
-                    <?= \App\Helpers\Csrf::field() ?>
-                    <div class="mb-3">
-                        <label class="form-label">Name</label>
-                        <input type="text" name="name" class="form-control" placeholder="e.g. Sinking Fund" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Calculation Type</label>
-                        <select name="calculation_type" class="form-select">
-                            <option value="fixed">Fixed</option>
-                            <option value="per_sqft">Per Sqft</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Initial Amount</label>
-                        <input type="number" step="0.01" name="amount" class="form-control" required>
-                        <div class="form-text">Effective immediately. Future rate changes are scheduled from the head's detail page.</div>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Add Head</button>
-                </form>
-            </div>
-        </div>
+    <div class="col-md-4 d-flex justify-content-md-end align-items-start">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-maintenance-head-add"><i class="fa-solid fa-plus me-1"></i>Add Maintenance Head</button>
+        <div class="modal fade" id="modal-maintenance-head-add" tabindex="-1" aria-labelledby="modal-maintenance-head-add-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="modal-maintenance-head-add-label">Add Maintenance Head</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+            <div class="modal-body"><form method="post" action="/society/maintenance-heads"><?= \App\Helpers\Csrf::field() ?><div class="mb-3"><label class="form-label">Name</label><input type="text" name="name" class="form-control" placeholder="e.g. Sinking Fund" required></div><div class="mb-3"><label class="form-label">Calculation Type</label><select name="calculation_type" class="form-select"><option value="fixed">Fixed</option><option value="per_sqft">Per Sqft</option></select></div><div class="mb-3"><label class="form-label">Initial Amount</label><input type="number" step="0.01" name="amount" class="form-control" required><div class="form-text">Effective immediately. Future rate changes are scheduled from the head's detail page.</div></div><button type="submit" class="btn btn-primary w-100">Add Head</button></form></div>
+        </div></div></div>
     </div>
 </div>
 <?php
