@@ -42,6 +42,34 @@ final class MaintenanceBill
         return $stmt->fetch() ?: null;
     }
 
+    public static function forMember(int $memberId): array
+    {
+        $stmt = db()->prepare(
+            'SELECT b.*, f.flat_number, fl.floor_number, w.name AS wing_name
+             FROM maintenance_bills b
+             JOIN members m ON m.flat_id = b.flat_id
+             JOIN flats f ON f.id = b.flat_id
+             JOIN floors fl ON fl.id = f.floor_id
+             JOIN wings w ON w.id = fl.wing_id
+             WHERE m.id = :member_id
+             ORDER BY b.due_date DESC'
+        );
+        $stmt->execute(['member_id' => $memberId]);
+        return $stmt->fetchAll();
+    }
+
+    public static function outstandingForMember(int $memberId): float
+    {
+        $stmt = db()->prepare(
+            "SELECT COALESCE(SUM(b.total_amount - b.paid_amount), 0)
+             FROM maintenance_bills b
+             JOIN members m ON m.flat_id = b.flat_id
+             WHERE m.id = :member_id AND b.status != 'paid'"
+        );
+        $stmt->execute(['member_id' => $memberId]);
+        return (float) $stmt->fetchColumn();
+    }
+
     public static function existsForFlatAndPeriod(int $flatId, string $periodStart, string $periodEnd): bool
     {
         $stmt = db()->prepare(
