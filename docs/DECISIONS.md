@@ -275,7 +275,7 @@ Example:
 - Application validation enforces the same rule server-side.
 - Database uniqueness is represented by `users(society_id, role_id, member_id)`.
 - The rule is intentionally based on the **member identity**, not merely the flat. Therefore another member record in the same flat is not automatically treated as the same person.
-- Non-member roles continue to store `member_id = NULL`; MySQL unique indexes permit multiple NULL values, so the role-scoped constraint does not accidentally restrict unrelated staff-only accounts. citeturn3search0
+- `member_id` remains nullable for legacy/bootstrap accounts, but the user-management workflow now offers a linked resident/member for every role. MySQL unique indexes permit multiple NULL values, so legacy unlinked accounts do not collide. citeturn0search0
 
 ### Migration
 
