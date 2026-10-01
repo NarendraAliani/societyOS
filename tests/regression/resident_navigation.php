@@ -5,6 +5,8 @@ $files = [
     'app/Views/layouts/app.php',
     'app/Controllers/ResidentController.php',
     'app/Views/resident/family.php',
+    'app/Views/resident/documents.php',
+    'app/Views/resident/vehicles.php',
     'app/Views/members/show.php',
     'app/Controllers/MemberController.php',
     'app/Controllers/VehicleController.php',
@@ -24,6 +26,8 @@ foreach ($files as $file) {
 
 $layout = file_get_contents('app/Views/layouts/app.php');
 $controller = file_get_contents('app/Controllers/ResidentController.php');
+$documentsView = file_get_contents('app/Views/resident/documents.php');
+$vehiclesView = file_get_contents('app/Views/resident/vehicles.php');
 $view = file_get_contents('app/Views/resident/family.php');
 $routes = file_get_contents('public/index.php');
 $memberView = file_get_contents('app/Views/members/show.php');
@@ -50,6 +54,13 @@ $checks = [
     'member detail supports family and contact edits' => str_contains($memberController, 'FamilyMember::update') && str_contains($memberController, 'EmergencyContact::update'),
     'member detail supports vehicle add and edit modals' => str_contains($memberView, 'id="addVehicleModal"') && str_contains($memberView, 'Edit Vehicle') && str_contains($vehicleController, '$returnToMember'),
     'member detail documents are society-scoped' => str_contains($documentModel, 'member_society_id') && str_contains($memberController, 'document[\'member_society_id\']'),
+    'resident sidebar exposes documents' => str_contains($layout, 'href="/resident/documents"') && str_contains($layout, 'My Documents'),
+    'resident sidebar exposes vehicles' => str_contains($layout, 'href="/resident/vehicles"') && str_contains($layout, 'My Vehicles'),
+    'resident documents route exists' => str_contains($routes, "'/resident/documents'") && str_contains($controller, 'public function documents'),
+    'resident vehicles route exists' => str_contains($routes, "'/resident/vehicles'") && str_contains($controller, 'public function vehicles'),
+    'resident document view is ownership-scoped' => str_contains($memberController, 'Auth::isResident()') && str_contains($memberController, "document['member_id']"),
+    'resident documents view is read-only' => str_contains($documentsView, 'My Documents') && str_contains($documentsView, '/documents/'),
+    'resident vehicles view is read-only' => str_contains($vehiclesView, 'My Vehicles') && str_contains($vehiclesView, 'registration_number'),
     'member detail lease uses modal' => str_contains($memberView, 'id="leaseModal"') && str_contains($memberView, 'agreement_doc'),
     'member controller scopes resident operations to current society' => str_contains($memberController, "\$member['society_id']") && str_contains($memberController, 'Society::currentId()'),
     'member creation validates flat society ownership' => str_contains($memberController, "\$flat['society_id']") && str_contains($memberController, 'Flat::find($flatId)'),

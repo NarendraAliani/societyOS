@@ -8,12 +8,14 @@ use App\Helpers\Auth;
 use App\Helpers\Csrf;
 use App\Helpers\Flash;
 use App\Models\Complaint;
+use App\Models\Document;
 use App\Models\EmergencyContact;
 use App\Models\FamilyMember;
 use App\Models\MaintenanceBill;
 use App\Models\Member;
 use App\Models\Notice;
 use App\Models\VisitorPass;
+use App\Models\Vehicle;
 use App\Models\Society;
 
 final class ResidentController
@@ -183,6 +185,22 @@ final class ResidentController
         $pageTitle = 'My Maintenance Bills';
         $bills = MaintenanceBill::forMember((int) $member['id']);
         require __DIR__ . '/../Views/resident/bills.php';
+    }
+
+    public function documents(): void
+    {
+        $member = $this->member();
+        $pageTitle = 'My Documents';
+        $documents = Document::forMember((int) $member['id']);
+        require __DIR__ . '/../Views/resident/documents.php';
+    }
+
+    public function vehicles(): void
+    {
+        $member = $this->member();
+        $pageTitle = 'My Vehicles';
+        $vehicles = Vehicle::forMember((int) $member['id']);
+        require __DIR__ . '/../Views/resident/vehicles.php';
     }
 
     public function notices(): void

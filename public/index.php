@@ -49,6 +49,8 @@ $router->get('/dashboard', [DashboardController::class, 'index'], [$auth]);
 $router->get('/resident', [ResidentController::class, 'home'], [$auth, $can('dashboard.view')]);
 $router->get('/resident/bills', [ResidentController::class, 'bills'], [$auth, $can('billing.view')]);
 $router->get('/resident/family', [ResidentController::class, 'family'], [$auth, $can('dashboard.view')]);
+$router->get('/resident/vehicles', [ResidentController::class, 'vehicles'], [$auth, $can('dashboard.view')]);
+$router->get('/resident/documents', [ResidentController::class, 'documents'], [$auth, $can('dashboard.view')]);
 $router->post('/resident/family-members', [ResidentController::class, 'storeFamilyMember'], [$auth, $can('dashboard.view')]);
 $router->post('/resident/family-members/{id}/delete', [ResidentController::class, 'deleteFamilyMember'], [$auth, $can('dashboard.view')]);
 $router->post('/resident/emergency-contacts', [ResidentController::class, 'storeEmergencyContact'], [$auth, $can('dashboard.view')]);
@@ -107,7 +109,7 @@ $router->post('/emergency-contacts/{id}/delete', [MemberController::class, 'dele
 
 $router->post('/members/{id}/documents', [MemberController::class, 'storeDocument'], [$auth, $backOffice, $can('members.manage')]);
 $router->post('/documents/{id}/delete', [MemberController::class, 'deleteDocument'], [$auth, $backOffice, $can('members.manage')]);
-$router->get('/documents/{id}/file', [MemberController::class, 'serveDocument'], [$auth, $backOffice, $can('members.view')]);
+$router->get('/documents/{id}/file', [MemberController::class, 'serveDocument'], [$auth]);
 
 $router->post('/members/{id}/lease', [MemberController::class, 'storeLease'], [$auth, $backOffice, $can('members.manage')]);
 $router->post('/leases/{id}', [MemberController::class, 'updateLease'], [$auth, $backOffice, $can('members.manage')]);
