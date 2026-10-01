@@ -15,10 +15,7 @@ use App\Models\FamilyMember;
 use App\Models\MaintenanceBill;
 use App\Models\Member;
 use App\Models\Notice;
-use App\Models\Document;
 use App\Models\VisitorPass;
-use App\Models\Vehicle;
-use App\Models\Vehicle;
 use App\Models\Society;
 
 final class ResidentController
