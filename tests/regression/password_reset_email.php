@@ -35,7 +35,7 @@ $checks = [
     'user reset route exists' => str_contains($routes, "post('/reset-password'"),
     'platform forgot route exists' => str_contains($routes, "get('/platform/forgot-password'"),
     'platform reset route exists' => str_contains($routes, "post('/platform/reset-password'"),
-    'user reset service uses hashed token' => str_contains($service, "hash('sha256', \\$token)"),
+    'user reset service uses hashed token' => str_contains($service, 'hash(\'sha256\', $token)'),
     'user reset token expires in 60 minutes' => str_contains($service, 'TOKEN_TTL_MINUTES = 60'),
     'reset token is one-time' => str_contains($service, 'used_at IS NULL') && str_contains($service, 'used_at=NOW()'),
     'reset requests are rate limited' => str_contains($service, 'MAX_REQUESTS_PER_HOUR = 5'),
