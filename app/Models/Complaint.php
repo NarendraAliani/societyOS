@@ -64,6 +64,26 @@ final class Complaint
         return (int) db()->lastInsertId();
     }
 
+    public static function forMember(int $memberId): array
+    {
+        $stmt = db()->prepare(
+            'SELECT c.*, cc.name AS category_name
+             FROM complaints c
+             JOIN complaint_categories cc ON cc.id = c.category_id
+             WHERE c.member_id = :member_id
+             ORDER BY c.created_at DESC'
+        );
+        $stmt->execute(['member_id' => $memberId]);
+        return $stmt->fetchAll();
+    }
+
+    public static function categoriesForSociety(int $societyId): array
+    {
+        $stmt = db()->prepare('SELECT * FROM complaint_categories WHERE society_id = :sid ORDER BY name');
+        $stmt->execute(['sid' => $societyId]);
+        return $stmt->fetchAll();
+    }
+
     public static function summaryByCategory(int $societyId): array
     {
         $stmt = db()->prepare(
