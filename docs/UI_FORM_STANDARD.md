@@ -31,6 +31,20 @@ The reusable modal styling lives in:
 
 Use the `app-form-modal` class for all new project forms that follow this standard.
 
-### Current resident implementation
+### Current implementation
 
 The resident **My Family**, **My Complaints**, and **Visitor Passes** pages follow this modal-first pattern. Family members and emergency contacts also expose Edit actions alongside Remove.
+
+
+### Member / Resident detail standard
+
+Member detail is a dashboard/detail page, not a permanent form page. Resident data and related records should be presented as compact lists/cards with explicit actions:
+
+- Resident details: **Edit** modal
+- Family members: **Add / Edit / Remove**
+- Emergency contacts: **Add / Edit / Remove**
+- Vehicles: **Add / Edit / Remove**
+- Documents: **Upload / View / Remove**
+- Tenant lease: **Set Up / Edit**, with agreement upload/replace inside the modal
+
+Do not place these create/edit forms permanently in the page body.
