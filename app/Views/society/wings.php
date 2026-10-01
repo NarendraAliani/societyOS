@@ -15,6 +15,7 @@ ob_start();
                             <td><?= (int) $wing['floor_count'] ?></td>
                             <td><?= (int) $wing['flat_count'] ?></td>
                             <td class="text-end">
+                                <a class="btn btn-sm btn-outline-primary" href="/society/wings/<?= (int) $wing['id'] ?>">Configure</a>
                                 <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#edit-wing-<?= (int) $wing['id'] ?>"><i class="fa-solid fa-pen"></i></button>
                                 <form method="post" action="/society/wings/<?= (int) $wing['id'] ?>/delete" onsubmit="return confirm('Delete this wing and everything under it?');" class="d-inline">
                                     <?= \App\Helpers\Csrf::field() ?>
