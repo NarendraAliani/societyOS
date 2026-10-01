@@ -122,7 +122,7 @@ final class ComplaintController
         $this->verifyCsrf();
 
         $name = trim((string) ($_POST['name'] ?? ''));
-        if ($name === '' || !ComplaintCategory::belongsToSociety((int) $id, Society::currentId())) {
+        if ($name === '') {
             Flash::set('error', 'Category name is required.');
         } else {
             ComplaintCategory::create(Society::currentId(), $name);
