@@ -1,6 +1,6 @@
 # SocietyOS
 
-A single-society residential management system — maintenance billing, accounting, visitor management, complaints, staff, assets, and admin tooling for one housing society/apartment complex, built as a lightweight custom PHP application (no framework).
+A multi-society residential management system — maintenance billing, accounting, visitor management, complaints, staff, assets, and admin tooling for multiple isolated housing societies/apartment complexes, built as a lightweight custom PHP application (no framework). Platform administration provisions each society as a tenant with its own Society Super Admin and configuration.
 
 ## Tech Stack
 
@@ -22,7 +22,7 @@ No JS framework, no build step, no bundler — Bootstrap/Font Awesome load from 
 
 A hand-rolled MVC, not a framework:
 
-- **`public/index.php`** — single entry point. Registers every route on a custom `Router` (`app/Helpers/Router.php`), which matches `{param}` placeholders via regex. Static paths must be registered before wildcard routes sharing the same segment count (e.g. `/members/tenants` before `/members/{id}`) — order matters.
+- **`public/index.php`** — single entry point. Registers every route on a custom `Router` (`app/Helpers/Router.php`), including a separate `/platform/*` administration surface for tenant provisioning. Static paths must be registered before wildcard routes sharing the same segment count (e.g. `/members/tenants` before `/members/{id}`) — order matters.
 - **Controllers** (`app/Controllers/`) — one per module, thin: validate input, call a Model or Service, set flash messages, redirect or `require` a view.
 - **Models** (`app/Models/`) — static methods wrapping PDO queries. No ORM.
 - **Services** (`app/Services/`) — business logic that spans multiple models/tables (billing generation, penalty calculation, backup/restore, accounting postings).
@@ -49,10 +49,12 @@ public/index.php
 - **Authenticated-only file serving**: every upload (staff photos/ID proofs, resident documents, lease agreements, DB backups) lives under `uploads/`/`storage/` outside the web root and is served exclusively via a controller action that content-sniffs (`finfo_file()`) and auth-checks — never a direct static link.
 - **Settings with config fallback**: admin-editable values (late-payment interest rate, upload size cap, theme/font-size defaults) live in a per-society `settings` key/value table; `Settings::get($societyId, $key, $default)` falls back to the `.env`-backed `config()` value when no override has been saved, so the feature is fully backward compatible with an empty table.
 - **RBAC**: `roles` → `role_permissions` → `permissions`, checked via `Auth::can('module.action')` in views and `PermissionMiddleware::require(...)` on routes. `super_admin` implicitly has every permission.
+- **Multi-society tenancy**: society-owned records carry `society_id`; normal authentication selects the society by Society Code and the active session is the tenant context. Platform administrators use a separate session context and provision new societies atomically.
 
 ## Features
 
 - **Society Setup** — profile, Wings → Floors → Flats hierarchy, maintenance head configuration with effective-dated rate scheduling.
+- **Platform Administration** — separate platform login, society directory, atomic society provisioning, first-Super-Admin creation, default financial/settings/category initialization, and platform session isolation.
 - **Residents** — owners and tenants, family members, emergency contacts, vehicles, document uploads (ID proofs, agreements), and a dedicated Tenants view with lease dates, owner linkage, and expiry-urgency badges.
 - **Maintenance Billing** — bulk bill generation per flat per period (skips flats with nothing billable), payment recording with PDF receipts, a defaulter report, and persisted late-payment interest calculated fresh on every view against a configurable annual rate.
 - **Vehicles & Parking** — vehicle registry, parking slot allocation (paid or free, overriding the slot-type default), effective-dated parking rate history.
