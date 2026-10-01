@@ -51,7 +51,7 @@ final class AdminController
         $needsMember = $role && in_array($role['name'], ['resident', 'tenant'], true);
         if ($needsMember && ($memberId <= 0 || !User::memberBelongsToSociety($memberId, Society::currentId()))) {
             Flash::set('error', 'A valid active resident must be linked for resident/tenant users.');
-            header('Location: /admin/users/create');
+            header('Location: /admin/users/create?needs_resident=1');
             exit;
         }
         if ($needsMember && User::memberIsLinked($memberId, Society::currentId())) {

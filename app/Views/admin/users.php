@@ -18,14 +18,41 @@ ob_start();
 </div>
 <div class="card border-0 shadow-sm">
     <div class="card-body">
+        <?php if (empty($residentCandidates)): ?>
+            <div class="alert alert-info py-2 small">
+                No active residents are currently available for account linking.
+                <a href="/members/create" class="alert-link">Add a resident</a>.
+            </div>
+        <?php endif; ?>
         <table class="table table-hover align-middle">
-            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th></th></tr></thead>
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Resident / Home</th><th>Status</th><th>Last Login</th><th></th></tr></thead>
             <tbody>
             <?php foreach ($users as $user): ?>
                 <tr>
                     <td><?= htmlspecialchars($user['name']) ?></td>
                     <td><?= htmlspecialchars($user['email']) ?></td>
                     <td><span class="badge bg-secondary"><?= htmlspecialchars($user['role_name']) ?></span></td>
+                    <td>
+                        <?php if (!empty($user['member_id'])): ?>
+                            <?php
+                            $linkedResident = null;
+                            foreach ($residentCandidates ?? [] as $candidate) {
+                                if ((int) $candidate['id'] === (int) $user['member_id']) {
+                                    $linkedResident = $candidate;
+                                    break;
+                                }
+                            }
+                            ?>
+                            <?php if ($linkedResident): ?>
+                                <span class="fw-semibold"><?= htmlspecialchars($linkedResident['wing_name'] . '-' . $linkedResident['flat_number']) ?></span>
+                                <small class="text-muted d-block"><?= htmlspecialchars($linkedResident['name']) ?></small>
+                            <?php else: ?>
+                                <span class="text-muted">Linked resident unavailable</span>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <span class="text-muted">—</span>
+                        <?php endif; ?>
+                    </td>
                     <td>
                         <?php $badge = match ($user['status']) { 'active' => 'success', 'locked' => 'danger', default => 'secondary' }; ?>
                         <span class="badge bg-<?= $badge ?>"><?= ucfirst($user['status']) ?></span>
@@ -36,7 +63,7 @@ ob_start();
                     </td>
                 </tr>
                 <tr class="collapse" id="edit-<?= (int) $user['id'] ?>">
-                    <td colspan="6">
+                    <td colspan="7">
                         <div class="row g-3 p-2">
                             <div class="col-md-6">
                                 <form method="post" action="/admin/users/<?= (int) $user['id'] ?>">
@@ -87,7 +114,7 @@ ob_start();
                 </tr>
             <?php endforeach; ?>
             <?php if (empty($users)): ?>
-                <tr><td colspan="6" class="text-center text-muted py-4">No users yet.</td></tr>
+                <tr><td colspan="7" class="text-center text-muted py-4">No users yet.</td></tr>
             <?php endif; ?>
             </tbody>
         </table>
