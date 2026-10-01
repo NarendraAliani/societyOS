@@ -10,12 +10,18 @@
 <div class="d-flex align-items-center justify-content-center vh-100">
     <div class="card shadow-sm" style="width: 380px;">
         <div class="card-body p-4">
-            <h4 class="text-center mb-4"><i class="fa-solid fa-building"></i> SocietyOS</h4>
+            <h4 class="text-center mb-2"><i class="fa-solid fa-building"></i> SocietyOS</h4>
+            <p class="text-center text-muted small mb-4">Sign in to your residential society</p>
             <?php if (!empty($error)): ?>
                 <div class="alert alert-danger py-2"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
             <form method="post" action="/login">
                 <?= \App\Helpers\Csrf::field() ?>
+                <div class="mb-3">
+                    <label class="form-label">Society Code <span class="text-muted">(for multi-society login)</span></label>
+                    <input type="text" name="society_code" class="form-control" maxlength="30" autocomplete="organization" placeholder="e.g. SOC-001">
+                    <div class="form-text">Leave blank for the original single-society installation.</div>
+                </div>
                 <div class="mb-3">
                     <label class="form-label">Email</label>
                     <input type="email" name="email" class="form-control" required autofocus>
