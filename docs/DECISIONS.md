@@ -1,3 +1,13 @@
+## 2026-10-01 — Linked-home role-scope regression and prevention
+
+**Issue**: The linked-home dependent dropdown worked for Resident/Tenant but was blank/disabled for Accountant and other roles. The immediate cause was an old JavaScript allow-list in `app/Views/admin/create_user.php` that only triggered the candidate AJAX request for `resident` and `tenant`. The controller and model also contained the same historical role restriction, so changing only the UI would not have been sufficient.
+
+**Fix**: Made linked-home selection a global role-scoped rule. The UI requests candidates for every selected role; the controller accepts candidate lookup for every role; model eligibility is role-agnostic; application validation rejects a home already linked to another user for the selected role.
+
+**Verification**: Deployed commit `71b2f24` through the successful production workflow and verified live behavior for Resident, Accountant, Committee Member, and Society Admin. Changing the role reloads the linked-home list, and a flat already assigned for one role remains available for other roles.
+
+**Prevention**: Added `tests/regression/linked_home_role_scope.php` and made it a required CI step before the BigRock FTPS deployment. This converts the exact failure mode into an automated regression guard. Added `docs/RELEASE.md` so code deployment, database migrations, production configuration, backup, smoke testing, and regression handling follow one repeatable procedure.
+
 # SocietyOS — Decision Log
 
 ## 2026-07-12 — Settings page: theme/font-size defaults, late-payment interest rate, upload size cap
