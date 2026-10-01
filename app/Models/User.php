@@ -134,23 +134,20 @@ final class User
     public static function memberEligibleForRole(int $memberId, int $societyId, int $roleId): bool
     {
         $role = Role::find($roleId);
-        if (!$role || !in_array($role['name'], ['resident', 'tenant'], true)) {
+        if (!$role) {
             return false;
         }
 
-        $memberType = $role['name'] === 'tenant' ? 'tenant' : 'owner';
         $stmt = db()->prepare(
             'SELECT COUNT(*)
              FROM members
              WHERE id = :id
                AND society_id = :sid
-               AND status = "active"
-               AND member_type = :member_type'
+               AND status = "active"'
         );
         $stmt->execute([
             'id' => $memberId,
             'sid' => $societyId,
-            'member_type' => $memberType,
         ]);
         return (int) $stmt->fetchColumn() > 0;
     }
@@ -179,11 +176,9 @@ final class User
     public static function availableMembersForRole(int $societyId, int $roleId, ?int $excludingUserId = null): array
     {
         $role = Role::find($roleId);
-        if (!$role || !in_array($role['name'], ['resident', 'tenant'], true)) {
+        if (!$role) {
             return [];
         }
-
-        $memberType = $role['name'] === 'tenant' ? 'tenant' : 'owner';
 
         $sql = 'SELECT m.id, m.name, m.member_type, m.email, m.phone,
                        f.flat_number, w.name AS wing_name
@@ -193,7 +188,6 @@ final class User
                 JOIN wings w ON w.id = fl.wing_id
                 WHERE m.society_id = :sid
                   AND m.status = "active"
-                  AND m.member_type = :member_type
                   AND NOT EXISTS (
                       SELECT 1
                       FROM users u
@@ -204,7 +198,6 @@ final class User
 
         $params = [
             'sid' => $societyId,
-            'member_type' => $memberType,
             'linked_sid' => $societyId,
             'role_id' => $roleId,
         ];
