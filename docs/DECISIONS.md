@@ -247,3 +247,8 @@
 **Decision**: `composer.json` requires PHP `>=8.0`, code avoids 8.1-only syntax (enums, readonly properties).
 **Reason**: Discovered during `composer install` that the local XAMPP install runs PHP 8.0.28, not 8.1+. Spec said "PHP 8.x" without pinning a minor version.
 **Impact**: If deploying to a host running PHP 8.1+, no changes needed (code is forward-compatible); if targeting only 8.0, avoid introducing 8.1-only features in later modules without updating this decision.
+
+
+## User-to-home assignment rule
+
+Resident and tenant user accounts follow a global home-assignment rule: a flat may have at most one user account for each resident/tenant role. The linked-home selector is role-dependent and excludes every flat that is already linked to a user for the selected role. Resident accounts use active owner records; tenant accounts use active tenant records. The server enforces the same rule independently of the UI so a crafted request cannot bypass the dependent dropdown.

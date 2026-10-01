@@ -19,7 +19,7 @@ final class AdminController
         $pageTitle = 'Users';
         $users = User::allForSociety(Society::currentId());
         $roles = Role::all();
-        $residentCandidates = User::residentCandidates(Society::currentId());
+        $residentCandidates = [];
         require __DIR__ . '/../Views/admin/users.php';
     }
 
@@ -27,7 +27,6 @@ final class AdminController
     {
         $pageTitle = 'Add User';
         $roles = Role::all();
-        $residentCandidates = User::residentCandidates(Society::currentId());
         require __DIR__ . '/../Views/admin/create_user.php';
     }
 
@@ -49,12 +48,12 @@ final class AdminController
 
         $role = Role::find($roleId);
         $needsMember = $role && in_array($role['name'], ['resident', 'tenant'], true);
-        if ($needsMember && ($memberId <= 0 || !User::memberBelongsToSociety($memberId, Society::currentId()))) {
+        if ($needsMember && ($memberId <= 0 || !User::memberEligibleForRole($memberId, Society::currentId(), $roleId))) {
             Flash::set('error', 'A valid active resident must be linked for resident/tenant users.');
             header('Location: /admin/users/create?needs_resident=1');
             exit;
         }
-        if ($needsMember && User::memberIsLinked($memberId, Society::currentId())) {
+        if ($needsMember && User::flatRoleIsLinked($memberId, Society::currentId(), $roleId)) {
             Flash::set('error', 'That resident is already linked to another user account.');
             header('Location: /admin/users/create');
             exit;
@@ -75,6 +74,23 @@ final class AdminController
         Flash::set('success', "User \"{$name}\" created. They must change their password on first login.");
         header('Location: /admin/users');
         exit;
+    }
+
+    public function availableResidentCandidates(): void
+    {
+        $roleId = (int) ($_GET['role_id'] ?? 0);
+        $excludingUserId = isset($_GET['user_id']) ? (int) $_GET['user_id'] : null;
+
+        $role = Role::find($roleId);
+        if (!$role || !in_array($role['name'], ['resident', 'tenant'], true)) {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['items' => []]);
+            return;
+        }
+
+        $items = User::availableMembersForRole(Society::currentId(), $roleId, $excludingUserId);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['items' => $items], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
     public function updateUser(string $id): void
@@ -99,12 +115,12 @@ final class AdminController
 
         $role = Role::find($roleId);
         $needsMember = $role && in_array($role['name'], ['resident', 'tenant'], true);
-        if ($needsMember && ($memberId <= 0 || !User::memberBelongsToSociety($memberId, Society::currentId()))) {
+        if ($needsMember && ($memberId <= 0 || !User::memberEligibleForRole($memberId, Society::currentId(), $roleId))) {
             Flash::set('error', 'A valid active resident must be linked for resident/tenant users.');
             header('Location: /admin/users');
             exit;
         }
-        if ($needsMember && User::memberIsLinked($memberId, Society::currentId(), (int) $id)) {
+        if ($needsMember && User::flatRoleIsLinked($memberId, Society::currentId(), $roleId, (int) $id)) {
             Flash::set('error', 'That resident is already linked to another user account.');
             header('Location: /admin/users');
             exit;

@@ -18,12 +18,7 @@ ob_start();
 </div>
 <div class="card border-0 shadow-sm">
     <div class="card-body">
-        <?php if (empty($residentCandidates)): ?>
-            <div class="alert alert-info py-2 small">
-                No active residents are currently available for account linking.
-                <a href="/members/create" class="alert-link">Add a resident</a>.
-            </div>
-        <?php endif; ?>
+
         <table class="table table-hover align-middle">
             <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Resident / Home</th><th>Status</th><th>Last Login</th><th></th></tr></thead>
             <tbody>
@@ -33,22 +28,9 @@ ob_start();
                     <td><?= htmlspecialchars($user['email']) ?></td>
                     <td><span class="badge bg-secondary"><?= htmlspecialchars($user['role_name']) ?></span></td>
                     <td>
-                        <?php if (!empty($user['member_id'])): ?>
-                            <?php
-                            $linkedResident = null;
-                            foreach ($residentCandidates ?? [] as $candidate) {
-                                if ((int) $candidate['id'] === (int) $user['member_id']) {
-                                    $linkedResident = $candidate;
-                                    break;
-                                }
-                            }
-                            ?>
-                            <?php if ($linkedResident): ?>
-                                <span class="fw-semibold"><?= htmlspecialchars($linkedResident['wing_name'] . '-' . $linkedResident['flat_number']) ?></span>
-                                <small class="text-muted d-block"><?= htmlspecialchars($linkedResident['name']) ?></small>
-                            <?php else: ?>
-                                <span class="text-muted">Linked resident unavailable</span>
-                            <?php endif; ?>
+                        <?php if (!empty($user['member_id']) && !empty($user['linked_flat_number'])): ?>
+                            <span class="fw-semibold"><?= htmlspecialchars($user['linked_wing_name'] . '-' . $user['linked_flat_number']) ?></span>
+                            <small class="text-muted d-block"><?= htmlspecialchars($user['linked_member_name']) ?></small>
                         <?php else: ?>
                             <span class="text-muted">—</span>
                         <?php endif; ?>
@@ -79,11 +61,12 @@ ob_start();
                                         </div>
                                         <div class="col-6">
                                             <label class="form-label small">Linked Resident</label>
-                                            <select name="member_id" class="form-select form-select-sm">
-                                                <option value="0">Not linked</option>
-                                                <?php foreach ($residentCandidates ?? [] as $candidate): ?>
-                                                    <option value="<?= (int) $candidate['id'] ?>" <?= (int) ($user['member_id'] ?? 0) === (int) $candidate['id'] ? 'selected' : '' ?>><?= htmlspecialchars($candidate['wing_name'] . '-' . $candidate['flat_number'] . ' — ' . $candidate['name']) ?></option>
-                                                <?php endforeach; ?>
+                                            <select name="member_id" class="form-select form-select-sm js-linked-home" data-user-id="<?= (int) $user['id'] ?>" data-current-member-id="<?= (int) ($user['member_id'] ?? 0) ?>" <?= in_array($user['role_name'], ['resident', 'tenant'], true) ? '' : 'disabled' ?>>
+                                                <?php if (!in_array($user['role_name'], ['resident', 'tenant'], true)): ?>
+                                                    <option value="0">Not linked</option>
+                                                <?php else: ?>
+                                                    <option value="<?= (int) ($user['member_id'] ?? 0) ?>"><?= htmlspecialchars(($user['linked_wing_name'] ?? '') . '-' . ($user['linked_flat_number'] ?? '') . ' — ' . ($user['linked_member_name'] ?? 'Current home')) ?></option>
+                                                <?php endif; ?>
                                             </select>
                                         </div>
                                         <div class="col-6">
@@ -120,6 +103,61 @@ ob_start();
         </table>
     </div>
 </div>
+<script>
+(function () {
+    async function loadHomes(form) {
+        const role = form.querySelector('select[name="role_id"]');
+        const home = form.querySelector('.js-linked-home');
+        if (!role || !home) return;
+
+        const selected = role.options[role.selectedIndex];
+        const roleName = selected ? selected.textContent.trim() : '';
+        home.disabled = true;
+        home.innerHTML = '';
+
+        if (!['resident', 'tenant'].includes(roleName)) {
+            home.append(new Option('Not linked', '0'));
+            return;
+        }
+
+        home.append(new Option('Loading available homes…', '0'));
+        try {
+            const response = await fetch('/admin/users/resident-candidates?role_id=' + encodeURIComponent(role.value) + '&user_id=' + encodeURIComponent(home.dataset.userId), {
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!response.ok) throw new Error();
+            const data = await response.json();
+            home.innerHTML = '';
+
+            if (!data.items || data.items.length === 0) {
+                home.append(new Option('No available homes', '0'));
+                return;
+            }
+
+            home.append(new Option('Select home', '0'));
+            data.items.forEach(function (item) {
+                home.append(new Option(item.wing_name + '-' + item.flat_number + ' — ' + item.name + ' (' + item.member_type + ')', item.id));
+            });
+
+            const current = home.dataset.currentMemberId;
+            if (current && Array.from(home.options).some(function (option) { return option.value === current; })) {
+                home.value = current;
+            }
+            home.disabled = false;
+        } catch (error) {
+            home.innerHTML = '';
+            home.append(new Option('Could not load available homes', '0'));
+        }
+    }
+
+    document.querySelectorAll('tr.collapse form').forEach(function (form) {
+        const role = form.querySelector('select[name="role_id"]');
+        if (!role || !form.querySelector('.js-linked-home')) return;
+        role.addEventListener('change', function () { loadHomes(form); });
+        loadHomes(form);
+    });
+})();
+</script>
 <?php
 $content = ob_get_clean();
 require __DIR__ . '/../layouts/app.php';

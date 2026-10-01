@@ -253,6 +253,7 @@ $router->get('/reports/parking', [ReportController::class, 'parking'], [$auth, $
 // Administration
 $router->get('/admin/users', [AdminController::class, 'users'], [$auth, $backOffice, $can('users.manage')]);
 $router->get('/admin/users/create', [AdminController::class, 'createUser'], [$auth, $backOffice, $can('users.manage')]);
+$router->get('/admin/users/resident-candidates', [AdminController::class, 'availableResidentCandidates'], [$auth, $backOffice, $can('users.manage')]);
 $router->post('/admin/users', [AdminController::class, 'storeUser'], [$auth, $backOffice, $can('users.manage')]);
 $router->post('/admin/users/{id}', [AdminController::class, 'updateUser'], [$auth, $backOffice, $can('users.manage')]);
 $router->post('/admin/users/{id}/reset-password', [AdminController::class, 'resetPassword'], [$auth, $backOffice, $can('users.manage')]);
