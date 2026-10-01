@@ -8,6 +8,7 @@ use App\Helpers\Auth;
 use App\Models\Asset;
 use App\Models\AssetAmc;
 use App\Models\Society;
+use App\Controllers\ResidentController;
 
 final class DashboardController
 {
@@ -15,6 +16,11 @@ final class DashboardController
 
     public function index(): void
     {
+        if (Auth::isResident()) {
+            (new ResidentController())->home();
+            return;
+        }
+
         $society = Society::current();
         $societyId = (int) $_SESSION['society_id'];
         $stats = Society::dashboardStats($societyId);
