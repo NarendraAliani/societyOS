@@ -104,7 +104,8 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (society_id) REFERENCES society(id) ON DELETE CASCADE,
     FOREIGN KEY (role_id) REFERENCES roles(id),
-    UNIQUE KEY uq_user_email (society_id, email)
+    UNIQUE KEY uq_user_email (society_id, email),
+    UNIQUE KEY uq_user_role_member (society_id, role_id, member_id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS password_resets (
