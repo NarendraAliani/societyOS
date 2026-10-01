@@ -21,6 +21,17 @@ final class VisitorPass
         return $stmt->fetchAll();
     }
 
+    public static function forFlat(int $flatId): array
+    {
+        $stmt = db()->prepare(
+            'SELECT * FROM visitor_passes
+             WHERE flat_id = :flat_id
+             ORDER BY valid_from DESC'
+        );
+        $stmt->execute(['flat_id' => $flatId]);
+        return $stmt->fetchAll();
+    }
+
     public static function findByToken(string $token): ?array
     {
         $stmt = db()->prepare(

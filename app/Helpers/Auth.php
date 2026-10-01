@@ -21,6 +21,16 @@ final class Auth
         return $_SESSION['role_name'] ?? null;
     }
 
+    public static function memberId(): ?int
+    {
+        return isset($_SESSION['member_id']) ? (int) $_SESSION['member_id'] : null;
+    }
+
+    public static function isResident(): bool
+    {
+        return in_array(self::role(), ['resident', 'tenant'], true);
+    }
+
     public static function mustChangePassword(): bool
     {
         return !empty($_SESSION['must_change_password']);
@@ -48,6 +58,7 @@ final class Auth
         $_SESSION['user_name'] = $user['name'];
         $_SESSION['society_id'] = $user['society_id'];
         $_SESSION['role_name'] = $user['role_name'];
+        $_SESSION['member_id'] = !empty($user['member_id']) ? (int) $user['member_id'] : null;
         $_SESSION['must_change_password'] = !empty($user['must_change_password']);
         self::setPermissions($permissions);
     }

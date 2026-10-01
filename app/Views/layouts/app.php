@@ -32,21 +32,29 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
     <nav class="sidebar bg-dark text-white p-3" style="width:275px;min-height:100vh;">
         <h4 class="mb-4"><i class="fa-solid fa-building"></i> SocietyOS</h4>
         <ul class="nav nav-pills flex-column gap-1">
-            <li class="nav-item"><a class="nav-link text-white" href="/dashboard"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="/society"><i class="fa-solid fa-sliders me-2"></i>Society Setup</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="/society/wings"><i class="fa-solid fa-sitemap me-2"></i>Wings &amp; Flats</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="/society/maintenance-heads"><i class="fa-solid fa-coins me-2"></i>Maintenance Config</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="/members"><i class="fa-solid fa-users me-2"></i>Residents</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="/vehicles"><i class="fa-solid fa-car me-2"></i>Vehicles</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="/billing"><i class="fa-solid fa-file-invoice-dollar me-2"></i>Maintenance</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="/accounting/accounts"><i class="fa-solid fa-scale-balanced me-2"></i>Accounts</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="/visitors"><i class="fa-solid fa-id-card me-2"></i>Visitors</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="/complaints"><i class="fa-solid fa-triangle-exclamation me-2"></i>Complaints</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="/notices"><i class="fa-solid fa-bullhorn me-2"></i>Notices</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="/staff"><i class="fa-solid fa-user-tie me-2"></i>Staff</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="/assets"><i class="fa-solid fa-toolbox me-2"></i>Assets</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="/reports"><i class="fa-solid fa-chart-column me-2"></i>Reports</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="/admin/users"><i class="fa-solid fa-user-shield me-2"></i>Administration</a></li>
+            <?php if (\App\Helpers\Auth::isResident()): ?>
+                <li class="nav-item"><a class="nav-link text-white" href="/dashboard"><i class="fa-solid fa-house me-2"></i>My Home</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/resident/bills"><i class="fa-solid fa-file-invoice-dollar me-2"></i>My Bills</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/resident/visitor-passes"><i class="fa-solid fa-user-plus me-2"></i>Visitor Passes</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/resident/complaints"><i class="fa-solid fa-triangle-exclamation me-2"></i>My Complaints</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/resident/notices"><i class="fa-solid fa-bullhorn me-2"></i>Society Notices</a></li>
+            <?php else: ?>
+                <li class="nav-item"><a class="nav-link text-white" href="/dashboard"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/society"><i class="fa-solid fa-sliders me-2"></i>Society Setup</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/society/wings"><i class="fa-solid fa-sitemap me-2"></i>Wings &amp; Flats</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/society/maintenance-heads"><i class="fa-solid fa-coins me-2"></i>Maintenance Config</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/members"><i class="fa-solid fa-users me-2"></i>Residents</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/vehicles"><i class="fa-solid fa-car me-2"></i>Vehicles</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/billing"><i class="fa-solid fa-file-invoice-dollar me-2"></i>Maintenance</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/accounting/accounts"><i class="fa-solid fa-scale-balanced me-2"></i>Accounts</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/visitors"><i class="fa-solid fa-id-card me-2"></i>Visitors</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/complaints"><i class="fa-solid fa-triangle-exclamation me-2"></i>Complaints</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/notices"><i class="fa-solid fa-bullhorn me-2"></i>Notices</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/staff"><i class="fa-solid fa-user-tie me-2"></i>Staff</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/assets"><i class="fa-solid fa-toolbox me-2"></i>Assets</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/reports"><i class="fa-solid fa-chart-column me-2"></i>Reports</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/admin/users"><i class="fa-solid fa-user-shield me-2"></i>Administration</a></li>
+            <?php endif; ?>
         </ul>
     </nav>
     <main class="flex-grow-1">

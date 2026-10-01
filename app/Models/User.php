@@ -77,15 +77,16 @@ final class User
         $stmt->execute(['name' => $name, 'email' => $email, 'phone' => $phone, 'id' => $id]);
     }
 
-    public static function create(int $societyId, string $name, string $email, ?string $phone, int $roleId, string $password): int
+    public static function create(int $societyId, string $name, string $email, ?string $phone, int $roleId, string $password, ?int $memberId = null): int
     {
         $stmt = db()->prepare(
-            'INSERT INTO users (society_id, role_id, name, email, phone, password_hash, status, must_change_password)
-             VALUES (:sid, :role_id, :name, :email, :phone, :hash, "active", 1)'
+            'INSERT INTO users (society_id, role_id, member_id, name, email, phone, password_hash, status, must_change_password)
+             VALUES (:sid, :role_id, :member_id, :name, :email, :phone, :hash, "active", 1)'
         );
         $stmt->execute([
             'sid' => $societyId,
             'role_id' => $roleId,
+            'member_id' => $memberId,
             'name' => $name,
             'email' => $email,
             'phone' => $phone,
@@ -94,10 +95,45 @@ final class User
         return (int) db()->lastInsertId();
     }
 
-    public static function updateRoleAndStatus(int $id, int $roleId, string $status): void
+    public static function updateRoleAndStatus(int $id, int $roleId, string $status, ?int $memberId = null): void
     {
-        $stmt = db()->prepare('UPDATE users SET role_id = :role_id, status = :status WHERE id = :id');
-        $stmt->execute(['role_id' => $roleId, 'status' => $status, 'id' => $id]);
+        $stmt = db()->prepare('UPDATE users SET role_id = :role_id, status = :status, member_id = :member_id WHERE id = :id');
+        $stmt->execute(['role_id' => $roleId, 'status' => $status, 'member_id' => $memberId, 'id' => $id]);
+    }
+
+    public static function residentCandidates(int $societyId): array
+    {
+        $stmt = db()->prepare(
+            'SELECT m.id, m.name, m.member_type, m.email, m.phone, f.flat_number, w.name AS wing_name
+             FROM members m
+             JOIN flats f ON f.id = m.flat_id
+             JOIN floors fl ON fl.id = f.floor_id
+             JOIN wings w ON w.id = fl.wing_id
+             WHERE m.society_id = :sid AND m.status = "active"
+             ORDER BY w.name, f.flat_number, m.name'
+        );
+        $stmt->execute(['sid' => $societyId]);
+        return $stmt->fetchAll();
+    }
+
+    public static function memberBelongsToSociety(int $memberId, int $societyId): bool
+    {
+        $stmt = db()->prepare('SELECT COUNT(*) FROM members WHERE id = :id AND society_id = :sid AND status = "active"');
+        $stmt->execute(['id' => $memberId, 'sid' => $societyId]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    public static function memberIsLinked(int $memberId, int $societyId, ?int $excludingUserId = null): bool
+    {
+        $sql = 'SELECT COUNT(*) FROM users WHERE society_id = :sid AND member_id = :member_id';
+        $params = ['sid' => $societyId, 'member_id' => $memberId];
+        if ($excludingUserId !== null) {
+            $sql .= ' AND id != :excluding_id';
+            $params['excluding_id'] = $excludingUserId;
+        }
+        $stmt = db()->prepare($sql);
+        $stmt->execute($params);
+        return (int) $stmt->fetchColumn() > 0;
     }
 
     public static function resetPassword(int $id, string $newPassword): void

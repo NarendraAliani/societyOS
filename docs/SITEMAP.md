@@ -127,10 +127,16 @@ Status legend: ✅ built this phase · ⬜ planned (routes not yet wired)
 /profile                        ✅ GET — View own name/email/phone/role/status/last login
 /profile/edit                   ✅ GET/POST — Edit own name/email/phone (email uniqueness enforced, role/status not self-editable)
 /profile/password               ✅ GET/POST — Self-service password change (requires current password)
+/resident                       ✅ GET — Resident/tenant home dashboard (linked member only)
+/resident/bills                 ✅ GET — Own maintenance bills only
+/resident/notices               ✅ GET — Active society notices
+/resident/complaints            ✅ GET/POST — Own complaints and complaint submission
+/resident/visitor-passes        ✅ GET/POST — Own flat visitor passes
+
 ```
 
 Full target hierarchy (module → sub-items) is documented in the original spec; this file tracks build status against it.
 
 **Phase 2 note**: Society Setup and Residents are functionally complete (CRUD verified end-to-end against a live DB — see `docs/DECISIONS.md`), but forms are plain POST + page reload, not the AJAX/DataTables/SweetAlert2 pattern named in the tech stack. That polish is deferred; see decision log.
 
-**Phases 6–10 note**: Complaints, Notices/Events/Polls, Staff, Assets, Reports, and Admin (Users/Roles/Activity Logs) are all built and verified end-to-end against a live DB through the real Apache vhost — see `docs/DECISIONS.md` for what's deferred in each (scannable QR, self-service profile).
+**Resident portal note**: Resident/tenant accounts are linked to a member record, receive a member-scoped home dashboard, and are blocked from back-office modules.\n\n**Phases 6–10 note**: Complaints, Notices/Events/Polls, Staff, Assets, Reports, and Admin (Users/Roles/Activity Logs) are all built and verified end-to-end against a live DB through the real Apache vhost — see `docs/DECISIONS.md` for what's deferred in each (scannable QR, self-service profile).
