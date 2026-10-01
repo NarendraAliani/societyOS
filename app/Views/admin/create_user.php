@@ -16,16 +16,11 @@ ob_start();
                 </div>
             </div>
         <?php endif; ?>
-        <?php if (empty($residentCandidates)): ?>
-            <div class="alert alert-info d-flex align-items-start gap-3" role="alert">
-                <i class="fa-solid fa-circle-info mt-1"></i>
-                <div>
-                    <div class="fw-semibold">No active residents available to link.</div>
-                    <div class="small mb-2">If you are creating a Resident or Tenant account, add the resident record first.</div>
-                    <a class="btn btn-sm btn-outline-primary" href="/members/create"><i class="fa-solid fa-user-plus me-1"></i>Add Resident</a>
-                </div>
-            </div>
-        <?php endif; ?>
+        <div class="alert alert-light border small mb-3">
+            <i class="fa-solid fa-filter me-1"></i>
+            Choose a role first. The Linked Resident list will then show only eligible homes for that role; homes already assigned to that role are automatically excluded.
+        </div>
+
         <form method="post" action="/admin/users">
             <?= \App\Helpers\Csrf::field() ?>
             <div class="row g-3">
