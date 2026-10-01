@@ -150,7 +150,6 @@ ob_start();
         }
     }
 
-    document.querySelectorAll('#edit-' + '0').length; // keep this script harmless on pages without edit rows
     document.querySelectorAll('tr.collapse form').forEach(function (form) {
         const role = form.querySelector('select[name="role_id"]');
         if (!role || !form.querySelector('.js-linked-home')) return;
