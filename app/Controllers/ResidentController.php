@@ -8,6 +8,8 @@ use App\Helpers\Auth;
 use App\Helpers\Csrf;
 use App\Helpers\Flash;
 use App\Models\Complaint;
+use App\Models\EmergencyContact;
+use App\Models\FamilyMember;
 use App\Models\MaintenanceBill;
 use App\Models\Member;
 use App\Models\Notice;
@@ -27,6 +29,88 @@ final class ResidentController
         $passes = VisitorPass::forFlat((int) $member['flat_id']);
 
         require __DIR__ . '/../Views/resident/home.php';
+    }
+
+    public function family(): void
+    {
+        $member = $this->member();
+        $pageTitle = 'My Family';
+        $familyMembers = FamilyMember::forMember((int) $member['id']);
+        $emergencyContacts = EmergencyContact::forMember((int) $member['id']);
+        require __DIR__ . '/../Views/resident/family.php';
+    }
+
+    public function storeFamilyMember(): void
+    {
+        $this->verifyCsrf();
+        $member = $this->member();
+        $name = trim((string) ($_POST['name'] ?? ''));
+        $relation = trim((string) ($_POST['relation'] ?? '')) ?: null;
+        $dob = trim((string) ($_POST['date_of_birth'] ?? '')) ?: null;
+        $age = is_numeric($_POST['age'] ?? '') ? (int) $_POST['age'] : null;
+        if ($name === '') {
+            Flash::set('error', 'Family member name is required.');
+            header('Location: /resident/family');
+            exit;
+        }
+        if ($dob !== null && strtotime($dob) > time()) {
+            Flash::set('error', 'Date of birth cannot be in the future.');
+            header('Location: /resident/family');
+            exit;
+        }
+        FamilyMember::create((int) $member['id'], $name, $relation, $dob, $age, trim((string) ($_POST['phone'] ?? '')) ?: null);
+        Flash::set('success', 'Family member added.');
+        header('Location: /resident/family');
+        exit;
+    }
+
+    public function deleteFamilyMember(string $id): void
+    {
+        $this->verifyCsrf();
+        $this->member();
+        $familyMember = FamilyMember::find((int) $id);
+        if (!$familyMember || (int) $familyMember['member_id'] !== (int) Auth::memberId()) {
+            http_response_code(404);
+            require __DIR__ . '/../Views/errors/404.php';
+            return;
+        }
+        FamilyMember::delete((int) $id);
+        Flash::set('success', 'Family member removed.');
+        header('Location: /resident/family');
+        exit;
+    }
+
+    public function storeEmergencyContact(): void
+    {
+        $this->verifyCsrf();
+        $member = $this->member();
+        $name = trim((string) ($_POST['name'] ?? ''));
+        $phone = trim((string) ($_POST['phone'] ?? ''));
+        if ($name === '' || $phone === '') {
+            Flash::set('error', 'Emergency contact name and phone are required.');
+            header('Location: /resident/family');
+            exit;
+        }
+        EmergencyContact::create((int) $member['id'], $name, trim((string) ($_POST['relation'] ?? '')) ?: null, $phone);
+        Flash::set('success', 'Emergency contact added.');
+        header('Location: /resident/family');
+        exit;
+    }
+
+    public function deleteEmergencyContact(string $id): void
+    {
+        $this->verifyCsrf();
+        $this->member();
+        $contact = EmergencyContact::find((int) $id);
+        if (!$contact || (int) $contact['member_id'] !== (int) Auth::memberId()) {
+            http_response_code(404);
+            require __DIR__ . '/../Views/errors/404.php';
+            return;
+        }
+        EmergencyContact::delete((int) $id);
+        Flash::set('success', 'Emergency contact removed.');
+        header('Location: /resident/family');
+        exit;
     }
 
     public function bills(): void

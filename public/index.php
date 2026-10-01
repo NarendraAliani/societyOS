@@ -48,6 +48,11 @@ $router->get('/dashboard', [DashboardController::class, 'index'], [$auth]);
 
 $router->get('/resident', [ResidentController::class, 'home'], [$auth, $can('dashboard.view')]);
 $router->get('/resident/bills', [ResidentController::class, 'bills'], [$auth, $can('billing.view')]);
+$router->get('/resident/family', [ResidentController::class, 'family'], [$auth, $can('dashboard.view')]);
+$router->post('/resident/family-members', [ResidentController::class, 'storeFamilyMember'], [$auth, $can('dashboard.view')]);
+$router->post('/resident/family-members/{id}/delete', [ResidentController::class, 'deleteFamilyMember'], [$auth, $can('dashboard.view')]);
+$router->post('/resident/emergency-contacts', [ResidentController::class, 'storeEmergencyContact'], [$auth, $can('dashboard.view')]);
+$router->post('/resident/emergency-contacts/{id}/delete', [ResidentController::class, 'deleteEmergencyContact'], [$auth, $can('dashboard.view')]);
 $router->get('/resident/notices', [ResidentController::class, 'notices'], [$auth, $can('dashboard.view')]);
 $router->get('/resident/complaints', [ResidentController::class, 'complaints'], [$auth, $can('complaints.view')]);
 $router->post('/resident/complaints', [ResidentController::class, 'storeComplaint'], [$auth, $can('complaints.view')]);

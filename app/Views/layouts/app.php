@@ -36,6 +36,7 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
                 <li class="nav-item"><a class="nav-link text-white" href="/dashboard"><i class="fa-solid fa-house me-2"></i>My Home</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/resident/bills"><i class="fa-solid fa-file-invoice-dollar me-2"></i>My Bills</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/resident/visitor-passes"><i class="fa-solid fa-user-plus me-2"></i>Visitor Passes</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/resident/family"><i class="fa-solid fa-people-roof me-2"></i>My Family</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/resident/complaints"><i class="fa-solid fa-triangle-exclamation me-2"></i>My Complaints</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/resident/notices"><i class="fa-solid fa-bullhorn me-2"></i>Society Notices</a></li>
             <?php else: ?>
@@ -98,13 +99,6 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="/profile">Profile</a></li>
                         <li><a class="dropdown-item" href="/profile/password">Change Password</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <form method="post" action="/logout" class="m-0">
-                                <?= \App\Helpers\Csrf::field() ?>
-                                <button class="dropdown-item" type="submit">Logout</button>
-                            </form>
-                        </li>
                     </ul>
                 </div>
                 <form method="post" action="/logout" class="m-0 d-none d-md-block" aria-label="Logout">
