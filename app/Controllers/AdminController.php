@@ -36,6 +36,7 @@ final class AdminController
         $name = trim((string) ($_POST['name'] ?? ''));
         $email = trim((string) ($_POST['email'] ?? ''));
         $roleId = (int) ($_POST['role_id'] ?? 0);
+        $memberId = (int) ($_POST['member_id'] ?? 0);
         $password = (string) ($_POST['password'] ?? '');
 
         if ($name === '' || $email === '' || $roleId <= 0 || strlen($password) < 8) {
@@ -44,13 +45,39 @@ final class AdminController
             exit;
         }
 
+        $role = Role::find($roleId);
+        $needsMember = $role && in_array($role['name'], ['resident', 'tenant'], true);
+        if ($needsMember && ($memberId <= 0 || !User::memberEligibleForRole($memberId, Society::currentId(), $roleId))) {
+            Flash::set('error', 'A valid active resident must be linked for resident/tenant users.');
+            header('Location: /admin/users/create?needs_resident=1');
+            exit;
+        }
+
+        if ($needsMember && User::memberRoleIsLinked($memberId, Society::currentId(), $roleId)) {
+            Flash::set('error', 'This resident is already linked to a user account for the selected role.');
+            header('Location: /admin/users/create');
+            exit;
+        }
+
+        if (!$needsMember) {
+            $memberId = null;
+        }
+
         if (User::emailExists(Society::currentId(), $email)) {
             Flash::set('error', "A user with email \"{$email}\" already exists.");
             header('Location: /admin/users/create');
             exit;
         }
 
-        User::create(Society::currentId(), $name, $email, trim((string) ($_POST['phone'] ?? '')) ?: null, $roleId, $password);
+        User::create(
+            Society::currentId(),
+            $name,
+            $email,
+            trim((string) ($_POST['phone'] ?? '')) ?: null,
+            $roleId,
+            $password,
+            $memberId
+        );
 
         ActivityLog::log('admin', 'create_user', "Created user \"{$name}\" ({$email})");
         Flash::set('success', "User \"{$name}\" created. They must change their password on first login.");
@@ -58,11 +85,29 @@ final class AdminController
         exit;
     }
 
+    public function availableResidentCandidates(): void
+    {
+        $roleId = (int) ($_GET['role_id'] ?? 0);
+        $excludingUserId = isset($_GET['user_id']) ? (int) $_GET['user_id'] : null;
+
+        $role = Role::find($roleId);
+        if (!$role || !in_array($role['name'], ['resident', 'tenant'], true)) {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['items' => []]);
+            return;
+        }
+
+        $items = User::availableMembersForRole(Society::currentId(), $roleId, $excludingUserId);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['items' => $items], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+
     public function updateUser(string $id): void
     {
         $this->verifyCsrf();
 
         $roleId = (int) ($_POST['role_id'] ?? 0);
+        $memberId = (int) ($_POST['member_id'] ?? 0);
         $status = in_array($_POST['status'] ?? '', ['active', 'inactive', 'locked'], true) ? $_POST['status'] : 'active';
 
         if ($roleId <= 0) {
@@ -77,7 +122,25 @@ final class AdminController
             exit;
         }
 
-        User::updateRoleAndStatus((int) $id, $roleId, $status);
+        $role = Role::find($roleId);
+        $needsMember = $role && in_array($role['name'], ['resident', 'tenant'], true);
+        if ($needsMember && ($memberId <= 0 || !User::memberEligibleForRole($memberId, Society::currentId(), $roleId))) {
+            Flash::set('error', 'A valid active resident must be linked for resident/tenant users.');
+            header('Location: /admin/users');
+            exit;
+        }
+
+        if ($needsMember && User::memberRoleIsLinked($memberId, Society::currentId(), $roleId, (int) $id)) {
+            Flash::set('error', 'This resident is already linked to another user account for the selected role.');
+            header('Location: /admin/users');
+            exit;
+        }
+
+        if (!$needsMember) {
+            $memberId = null;
+        }
+
+        User::updateRoleAndStatus((int) $id, $roleId, $status, $memberId);
         ActivityLog::log('admin', 'update_user', "Updated user id {$id}: role_id {$roleId}, status \"{$status}\"");
         Flash::set('success', 'User updated.');
         header('Location: /admin/users');
