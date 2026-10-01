@@ -78,16 +78,18 @@ final class VehicleController
 
         $vehicleType = ($_POST['vehicle_type'] ?? '') === 'two_wheeler' ? 'two_wheeler' : 'four_wheeler';
         $registration = strtoupper(trim((string) ($_POST['registration_number'] ?? '')));
+        $returnToMember = is_numeric($_POST['return_to_member'] ?? '') ? (int) $_POST['return_to_member'] : null;
+        $returnPath = $returnToMember ? "/members/{$returnToMember}" : '/vehicles';
 
         if ($registration === '') {
             Flash::set('error', 'Registration number is required.');
-            header('Location: /vehicles');
+            header("Location: {$returnPath}");
             exit;
         }
 
         if (Vehicle::registrationExists($registration, (int) $id)) {
             Flash::set('error', "Registration number \"{$registration}\" is already on file.");
-            header('Location: /vehicles');
+            header("Location: {$returnPath}");
             exit;
         }
 
@@ -100,7 +102,7 @@ final class VehicleController
         ]);
 
         Flash::set('success', 'Vehicle updated.');
-        header('Location: /vehicles');
+        header("Location: {$returnPath}");
         exit;
     }
 
