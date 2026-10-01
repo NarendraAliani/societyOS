@@ -84,36 +84,6 @@ jobs:
           git commit -m "Build production deployment from ${GITHUB_SHA::7}"
           git push --force origin deploy
 
-      - name: Detect BigRock FTP document-root path
-        id: detect-ftp-root
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq lftp
-
-          listing="$(
-            lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "ftps://$FTP_SERVER" -e \
-              "set ftp:ssl-force true; set ssl:verify-certificate true; cls -1; bye" \
-              2>/dev/null
-          )"
-
-          # BigRock's document root for this domain is /home1/dairyikh/society.dairy-dealer.net.
-          # If the FTP account is rooted at /home1/dairyikh, deploy into that directory.
-          # If the FTP account is already jailed to the domain directory, deploy at ./ instead.
-          if printf '%s\n' "$listing" | grep -Fxq 'society.dairy-dealer.net'; then
-            echo 'Detected FTP account root above the domain document root.'
-            echo 'server_dir=society.dairy-dealer.net/' >> "$GITHUB_OUTPUT"
-          else
-            echo 'Detected FTP account already rooted at the domain document root.'
-            echo 'server_dir=./' >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Deploy production build to BigRock via FTPS
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
@@ -124,7 +94,9 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./
-          server-dir: ${{ steps.detect-ftp-root.outputs.server_dir }}
+          # The GitHub FTP account is rooted at the cPanel home directory;
+          # the live subdomain document root is society.dairy-dealer.net.
+          server-dir: society.dairy-dealer.net/
           dangerous-clean-slate: false
           security: strict
           exclude: |
