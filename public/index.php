@@ -240,6 +240,7 @@ $router->get('/reports/parking', [ReportController::class, 'parking'], [$auth, $
 $router->get('/admin/users', [AdminController::class, 'users'], [$auth, $can('users.manage')]);
 $router->get('/admin/users/create', [AdminController::class, 'createUser'], [$auth, $can('users.manage')]);
 $router->post('/admin/users', [AdminController::class, 'storeUser'], [$auth, $can('users.manage')]);
+$router->get('/admin/users/resident-candidates', [AdminController::class, 'availableResidentCandidates'], [$auth, $can('users.manage')]);
 $router->post('/admin/users/{id}', [AdminController::class, 'updateUser'], [$auth, $can('users.manage')]);
 $router->post('/admin/users/{id}/reset-password', [AdminController::class, 'resetPassword'], [$auth, $can('users.manage')]);
 
