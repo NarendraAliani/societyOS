@@ -44,15 +44,16 @@ final class User
 
     public static function allForSociety(int $societyId): array
     {
-        $stmt=db()->prepare('SELECT u.*, GROUP_CONCAT(DISTINCT r.name ORDER BY ur.is_default DESC,r.name SEPARATOR ", ") AS role_names,
+        $stmt=db()->prepare('SELECT u.*,
+                    (SELECT GROUP_CONCAT(DISTINCT r2.name ORDER BY ur2.is_default DESC,r2.name SEPARATOR ", ")
+                     FROM user_roles ur2 JOIN roles r2 ON r2.id=ur2.role_id WHERE ur2.user_id=u.id) AS role_names,
                     d.role_id AS default_role_id,d.member_id AS default_member_id,d.flat_id AS default_flat_id,
                     dm.name AS default_member_name,df.flat_number AS default_flat_number,dw.name AS default_wing_name
-             FROM users u JOIN user_roles ur ON ur.user_id=u.id JOIN roles r ON r.id=ur.role_id
+             FROM users u
              LEFT JOIN user_roles d ON d.user_id=u.id AND d.is_default=1
              LEFT JOIN members dm ON dm.id=d.member_id LEFT JOIN flats df ON df.id=d.flat_id
              LEFT JOIN floors dfl ON dfl.id=df.floor_id LEFT JOIN wings dw ON dw.id=dfl.wing_id
-             WHERE u.society_id=:sid
-             GROUP BY u.id,d.role_id,d.member_id,d.flat_id,dm.name,df.flat_number,dw.name ORDER BY u.name');
+             WHERE u.society_id=:sid ORDER BY u.name');
         $stmt->execute(['sid'=>$societyId]); return $stmt->fetchAll();
     }
 
