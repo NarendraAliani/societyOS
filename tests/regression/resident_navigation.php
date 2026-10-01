@@ -24,7 +24,7 @@ $checks = [
     'resident sidebar exposes My Family' => str_contains($layout, 'href="/resident/family"') && str_contains($layout, '>My Family</a>'),
     'logout has one dedicated topbar form' => substr_count($layout, 'action="/logout"') === 1,
     'family page is resident-scoped' => str_contains($controller, 'public function family(): void') && str_contains($controller, '$member = $this->member();'),
-    'family add uses current member' => str_contains($controller, 'FamilyMember::create((int) $member['id']'),
+    'family add uses current member' => str_contains($controller, "FamilyMember::create((int) $member['id']"),
     'family delete checks ownership' => str_contains($controller, '(int) $familyMember['member_id'] !== (int) Auth::memberId()'),
     'emergency contact delete checks ownership' => str_contains($controller, '(int) $contact['member_id'] !== (int) Auth::memberId()'),
     'family view supports add and remove' => str_contains($view, 'Add Family Member') && str_contains($view, '/resident/family-members/'),
