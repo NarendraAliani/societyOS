@@ -277,6 +277,18 @@ Example:
 - The rule is intentionally based on the **member identity**, not merely the flat. Therefore another member record in the same flat is not automatically treated as the same person.
 - `member_id` remains nullable for legacy/bootstrap accounts, but the user-management workflow now offers a linked resident/member for every role. MySQL unique indexes permit multiple NULL values, so legacy unlinked accounts do not collide. citeturn0search0
 
+### Expected behavior
+
+| Existing link | Selected role | Same resident appears? |
+|---|---|---|
+| Narendra → C-404 → Resident | Resident | No |
+| Narendra → C-404 → Resident | Accountant | Yes |
+| Narendra → C-404 → Resident | Committee Member | Yes |
+| Narendra → C-404 → Resident | Society Admin | Yes |
+| Narendra → C-404 → Resident | Tenant | Yes only when the member is an eligible tenant |
+
+The linked-resident dropdown is therefore dependent on the **selected role**, not on whether the resident already has any role.
+
 ### Migration
 
 `database/migrations/2026-10-01-role-scoped-member-linking.sql` adds the database constraint after an existing-data duplicate audit.
