@@ -281,7 +281,7 @@ final class ResidentController
         }
         try {
             $path = FileUpload::storeDocument($_FILES['document'] ?? [], 'documents');
-        } catch (\\RuntimeException $e) {
+        } catch (\RuntimeException $e) {
             Flash::set('error', $e->getMessage());
             header('Location: /resident/documents');
             exit;
