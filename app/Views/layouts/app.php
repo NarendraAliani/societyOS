@@ -29,7 +29,8 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
 </head>
 <body>
 <div class="d-flex" id="app-shell">
-    <nav class="sidebar bg-dark text-white p-3" style="width:275px;min-height:100vh;">
+    <nav class="sidebar bg-dark text-white p-3" id="app-sidebar" aria-label="Primary navigation">
+
         <h4 class="mb-4"><i class="fa-solid fa-building"></i> SocietyOS</h4>
         <ul class="nav nav-pills flex-column gap-1">
             <?php if (\App\Helpers\Auth::isResident()): ?>
@@ -59,9 +60,14 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
         </ul>
     </nav>
     <main class="flex-grow-1">
-        <nav class="navbar app-topbar border-bottom px-3">
-            <span class="navbar-text"><?= htmlspecialchars($pageTitle ?? '') ?></span>
-            <div class="d-flex align-items-center gap-2">
+        <nav class="navbar app-topbar border-bottom px-3" aria-label="Application toolbar">
+            <div class="d-flex align-items-center gap-2 min-w-0">
+                <button class="btn btn-outline-secondary app-sidebar-toggle d-lg-none" type="button" aria-label="Open navigation" aria-controls="app-sidebar" aria-expanded="false">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <span class="navbar-text text-truncate"><?= htmlspecialchars($pageTitle ?? '') ?></span>
+            </div>
+            <div class="d-flex align-items-center gap-2 app-topbar-actions">
                 <div class="dropdown">
                     <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" title="Theme">
                         <i class="fa-solid fa-circle-half-stroke me-1"></i>Theme
@@ -101,12 +107,6 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
                         <li><a class="dropdown-item" href="/profile/password">Change Password</a></li>
                     </ul>
                 </div>
-                <form method="post" action="/logout" class="m-0 d-none d-md-block" aria-label="Logout">
-                    <?= \App\Helpers\Csrf::field() ?>
-                    <button class="btn btn-outline-danger" type="submit" title="Logout">
-                        <i class="fa-solid fa-right-from-bracket me-1"></i>Logout
-                    </button>
-                </form>
             </div>
         </nav>
         <div class="p-4" id="app-content">
@@ -124,6 +124,32 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 (function () {
+    var shell = document.getElementById('app-shell');
+    var sidebarToggle = document.querySelector('.app-sidebar-toggle');
+    var sidebar = document.getElementById('app-sidebar');
+
+    function setSidebarOpen(open) {
+        if (!shell || !sidebarToggle) return;
+        shell.classList.toggle('sidebar-open', open);
+        sidebarToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function () {
+            setSidebarOpen(!shell.classList.contains('sidebar-open'));
+        });
+    }
+
+    document.addEventListener('click', function (event) {
+        if (!shell || !shell.classList.contains('sidebar-open') || !sidebar) return;
+        if (sidebar.contains(event.target) || sidebarToggle.contains(event.target)) return;
+        if (window.innerWidth < 992) setSidebarOpen(false);
+    });
+
+    window.addEventListener('resize', function () {
+        if (window.innerWidth >= 992) setSidebarOpen(false);
+    });
+
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-bs-theme', theme === 'dark' ? 'dark' : 'light');
         if (theme === 'mid') {

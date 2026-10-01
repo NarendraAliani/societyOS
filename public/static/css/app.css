@@ -342,3 +342,175 @@ body {
         padding: 1rem;
     }
 }
+
+
+/* ===== Global responsive application shell ===== */
+#app-shell {
+    min-height: 100vh;
+}
+
+#app-shell > main {
+    min-width: 0;
+}
+
+.sidebar {
+    width: 275px;
+    min-height: 100vh;
+    flex: 0 0 275px;
+}
+
+.app-topbar {
+    min-height: 58px;
+}
+
+.app-topbar-actions {
+    flex-wrap: nowrap;
+}
+
+.app-sidebar-toggle {
+    flex: 0 0 auto;
+}
+
+#app-content {
+    min-width: 0;
+    overflow-x: hidden;
+}
+
+@media (max-width: 991.98px) {
+    #app-shell {
+        display: block !important;
+    }
+
+    .sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        z-index: 1045;
+        width: min(82vw, 290px);
+        min-height: 100vh;
+        transform: translateX(-100%);
+        transition: transform .2s ease;
+        box-shadow: 0 0 1.5rem rgba(0, 0, 0, .18);
+        overflow-y: auto;
+    }
+
+    #app-shell.sidebar-open .sidebar {
+        transform: translateX(0);
+    }
+
+    #app-shell.sidebar-open::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 1040;
+        background: rgba(0, 0, 0, .45);
+    }
+
+    #app-shell > main {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .app-topbar {
+        position: sticky;
+        top: 0;
+        z-index: 1035;
+        padding-left: .75rem !important;
+        padding-right: .75rem !important;
+    }
+
+    .app-topbar-actions {
+        gap: .35rem !important;
+    }
+
+    .app-topbar-actions > .dropdown > .btn {
+        padding: .35rem .5rem;
+        white-space: nowrap;
+    }
+
+    #app-content {
+        padding: 1rem !important;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .app-topbar .navbar-text {
+        max-width: 32vw;
+        font-size: .9rem;
+    }
+
+    .app-topbar-actions > .dropdown > .btn {
+        font-size: .8rem;
+    }
+
+    .app-topbar-actions > .dropdown:nth-child(1) .btn,
+    .app-topbar-actions > .dropdown:nth-child(2) .btn {
+        width: 42px;
+        overflow: hidden;
+        font-size: 0;
+    }
+
+    .app-topbar-actions > .dropdown:nth-child(1) .btn i,
+    .app-topbar-actions > .dropdown:nth-child(2) .btn i {
+        margin: 0 !important;
+        font-size: .9rem;
+    }
+
+    .app-topbar-actions > .dropdown:nth-child(3) .btn {
+        max-width: 110px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .app-topbar-actions > .dropdown:nth-child(4) .btn {
+        max-width: 125px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .app-topbar {
+        min-height: 52px;
+    }
+
+    .app-topbar .navbar-text {
+        max-width: 28vw;
+        font-size: .82rem;
+    }
+
+    .app-topbar-actions > .dropdown:nth-child(3) .btn {
+        width: 42px;
+        padding-left: .5rem;
+        padding-right: .5rem;
+        font-size: 0;
+    }
+
+    .app-topbar-actions > .dropdown:nth-child(3) .btn i {
+        margin: 0 !important;
+        font-size: .9rem;
+    }
+
+    .app-topbar-actions > .dropdown:nth-child(4) .btn {
+        width: 42px;
+        padding-left: .5rem;
+        padding-right: .5rem;
+        font-size: 0;
+    }
+
+    .app-topbar-actions > .dropdown:nth-child(4) .btn i {
+        margin: 0 !important;
+        font-size: .9rem;
+    }
+
+    #app-content {
+        padding: .75rem !important;
+    }
+
+    .resident-page-header .btn {
+        width: 100%;
+    }
+
+    .resident-page-header > div:last-child {
+        width: 100%;
+    }
+}
