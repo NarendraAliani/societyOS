@@ -39,19 +39,12 @@ ob_start();
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <h6>Add Category</h6>
-                <form method="post" action="/assets/categories">
-                    <?= \App\Helpers\Csrf::field() ?>
-                    <div class="input-group">
-                        <input type="text" name="name" class="form-control" required>
-                        <button type="submit" class="btn btn-primary">Add</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+    <div class="col-md-6 d-flex justify-content-md-end align-items-start">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-asset-category-add"><i class="fa-solid fa-plus me-1"></i>Add Category</button>
+        <div class="modal fade" id="modal-asset-category-add" tabindex="-1" aria-labelledby="modal-asset-category-add-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="modal-asset-category-add-label">Add Category</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+            <div class="modal-body"><form method="post" action="/assets/categories"><?= \App\Helpers\Csrf::field() ?><div class="input-group"><input type="text" name="name" class="form-control" required><button type="submit" class="btn btn-primary">Add</button></div></form></div>
+        </div></div></div>
     </div>
 </div>
 <?php
