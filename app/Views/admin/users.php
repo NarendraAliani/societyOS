@@ -61,12 +61,8 @@ ob_start();
                                         </div>
                                         <div class="col-6">
                                             <label class="form-label small">Linked Resident</label>
-                                            <select name="member_id" class="form-select form-select-sm js-linked-home" data-user-id="<?= (int) $user['id'] ?>" data-current-member-id="<?= (int) ($user['member_id'] ?? 0) ?>" <?= in_array($user['role_name'], ['resident', 'tenant'], true) ? '' : 'disabled' ?>>
-                                                <?php if (!in_array($user['role_name'], ['resident', 'tenant'], true)): ?>
-                                                    <option value="0">Not linked</option>
-                                                <?php else: ?>
-                                                    <option value="<?= (int) ($user['member_id'] ?? 0) ?>"><?= htmlspecialchars(($user['linked_wing_name'] ?? '') . '-' . ($user['linked_flat_number'] ?? '') . ' — ' . ($user['linked_member_name'] ?? 'Current home')) ?></option>
-                                                <?php endif; ?>
+                                            <select name="member_id" class="form-select form-select-sm js-linked-home" data-user-id="<?= (int) $user['id'] ?>" data-current-member-id="<?= (int) ($user['member_id'] ?? 0) ?>">
+                                                <option value="<?= (int) ($user['member_id'] ?? 0) ?>"><?= htmlspecialchars(($user['linked_wing_name'] ?? '') . '-' . ($user['linked_flat_number'] ?? '') . ' — ' . ($user['linked_member_name'] ?? 'Current home')) ?></option>
                                             </select>
                                         </div>
                                         <div class="col-6">
@@ -77,7 +73,7 @@ ob_start();
                                                 <option value="locked" <?= $user['status'] === 'locked' ? 'selected' : '' ?>>Locked</option>
                                             </select>
                                         </div>
-                                        <div class="col-12"><small class="text-muted">Resident/Tenant roles require a linked active resident. Other roles should remain unlinked.</small></div>
+                                        <div class="col-12"><small class="text-muted">Every user role is linked to an active resident/member. The same home may be used by different roles, but only once per role.</small></div>
                                         <div class="col-12"><button type="submit" class="btn btn-sm btn-primary">Save</button></div>
                                     </div>
                                 </form>
@@ -110,13 +106,12 @@ ob_start();
         const home = form.querySelector('.js-linked-home');
         if (!role || !home) return;
 
-        const selected = role.options[role.selectedIndex];
-        const roleName = selected ? selected.textContent.trim() : '';
         home.disabled = true;
         home.innerHTML = '';
 
-        if (!['resident', 'tenant'].includes(roleName)) {
-            home.append(new Option('Not linked', '0'));
+        if (!role.value) {
+            home.append(new Option('Select a role first', '0'));
+            home.disabled = false;
             return;
         }
 
