@@ -152,7 +152,7 @@ societyOS/
 - All DB access via PDO prepared statements (`ATTR_EMULATE_PREPARES => false`) — no string-interpolated SQL.
 - CSRF token on every state-changing form (`\App\Helpers\Csrf::field()` / `Csrf::verify()`).
 - File uploads validated by actual content (`finfo_file()`), never client-supplied MIME type or filename; stored under a random filename outside the web root; served only through auth-checked streaming routes.
-- Passwords hashed via PHP's `password_hash()`; login attempts are CAPTCHA-protected, rate-limited, and logged to `login_history`. The same CAPTCHA standard applies to platform administration login and all future login surfaces.
+- Passwords hashed via PHP's `password_hash()`; login attempts are CAPTCHA-protected, rate-limited, and logged to `login_history`. The same CAPTCHA standard applies to platform administration login and all future login surfaces. Session cookies, browser security headers, safe exception handling and authenticated state-change audit logging are also enforced globally.
 - RBAC enforced per-route via middleware, not just hidden in the UI — a permission check runs before the controller action, so a raw request without the UI can't bypass it.
 - Backup & Restore is hard-restricted to `super_admin` in code (not merely a grantable permission), and every restore takes an automatic safety backup of the current state first, since the operation is otherwise irreversible.
 - Authentication CAPTCHA is a project-wide security standard: every login requires a server-side, one-time, 6-character CAPTCHA challenge with a 5-minute expiry, in addition to CSRF protection and rate limiting. See `docs/SECURITY_STANDARDS.md`.
