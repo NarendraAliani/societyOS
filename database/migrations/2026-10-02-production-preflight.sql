@@ -2,6 +2,7 @@
 -- Run this FIRST in BigRock phpMyAdmin.
 -- This script makes NO changes.
 -- Expected: duplicate/invalid-result queries should return EMPTY result sets.
+-- This file intentionally avoids information_schema for BigRock shared hosting.
 
 SELECT DATABASE() AS current_database, NOW() AS checked_at;
 
@@ -26,27 +27,23 @@ HAVING COUNT(*) > 1;
 
 SELECT id, code FROM society ORDER BY id;
 
-SELECT 'user_roles' AS object_name, IF(COUNT(*) > 0, 'PRESENT', 'MISSING') AS status
-FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'user_roles'
-UNION ALL
-SELECT 'platform_admins', IF(COUNT(*) > 0, 'PRESENT', 'MISSING')
-FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'platform_admins'
-UNION ALL
-SELECT 'platform_login_history', IF(COUNT(*) > 0, 'PRESENT', 'MISSING')
-FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'platform_login_history'
-UNION ALL
-SELECT 'platform_password_resets', IF(COUNT(*) > 0, 'PRESENT', 'MISSING')
-FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'platform_password_resets';
+-- Shared-hosting compatibility: do not query information_schema here.
+-- Some BigRock/cPanel MySQL accounts deny access to information_schema
+-- even when the account has full privileges on its own application database.
+SHOW TABLES LIKE 'user_roles';
+SHOW TABLES LIKE 'platform_admins';
+SHOW TABLES LIKE 'platform_login_history';
+SHOW TABLES LIKE 'platform_password_resets';
 
-SELECT table_name, index_name, column_name, seq_in_index
-FROM information_schema.statistics
-WHERE table_schema = DATABASE()
-  AND index_name IN (
-    'uq_society_code','uq_user_role','uq_flat_role',
-    'idx_users_society_status','idx_members_society_status_flat',
-    'idx_bills_society_due_status','idx_visitors_society_checkin',
-    'idx_complaints_society_status_created','idx_activity_society_created',
-    'idx_parking_alloc_slot_active','idx_documents_member_created',
-    'idx_password_resets_token_used_expiry'
-  )
-ORDER BY table_name, index_name, seq_in_index;
+-- These SHOW INDEX checks are intentionally limited to tables that should
+-- already exist before the consolidated migration is run.
+SHOW INDEX FROM society;
+SHOW INDEX FROM users;
+SHOW INDEX FROM members;
+SHOW INDEX FROM maintenance_bills;
+SHOW INDEX FROM visitors;
+SHOW INDEX FROM complaints;
+SHOW INDEX FROM activity_logs;
+SHOW INDEX FROM parking_allocations;
+SHOW INDEX FROM documents;
+SHOW INDEX FROM password_resets;
