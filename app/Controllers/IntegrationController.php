@@ -77,7 +77,8 @@ final class IntegrationController
     public function razorpayWebhook(): void
     {
         $sid=(int)($_GET['society_id']??0);$payload=file_get_contents('php://input')?:'';$sig=$_SERVER['HTTP_X_RAZORPAY_SIGNATURE']??'';
-        if($sid<=0||!IntegrationService::verifyWebhook($sid,$payload,$sig)){http_response_code(401);exit('Invalid webhook.');}
+        if($sid<=0){http_response_code(401);exit('Invalid webhook.');}
+        try{IntegrationService::processRazorpayWebhook($sid,$payload,$sig);}catch(\Throwable $e){http_response_code(401);exit('Invalid webhook.');}
         http_response_code(200);echo 'ok';
     }
     public function upiQr(string $billId): void
