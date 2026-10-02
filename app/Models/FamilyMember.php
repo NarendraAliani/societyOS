@@ -55,8 +55,8 @@ final class FamilyMember
 
     public static function find(int $id): ?array
     {
-        $stmt = db()->prepare('SELECT * FROM family_members WHERE id = :id');
-        $stmt->execute(['id' => $id]);
+        $stmt = db()->prepare('SELECT fm.* FROM family_members fm JOIN members m ON m.id = fm.member_id WHERE fm.id = :id AND m.society_id = :sid');
+        $stmt->execute(['id' => $id, 'sid' => Society::currentId()]);
         $row = $stmt->fetch();
         return $row ? self::withDisplayAge($row) : null;
     }
