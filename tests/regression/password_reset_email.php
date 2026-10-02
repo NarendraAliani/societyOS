@@ -38,6 +38,7 @@ $checks = [
     'user reset service uses hashed token' => str_contains($service, 'hash(\'sha256\', $token)'),
     'user reset token expires in 60 minutes' => str_contains($service, 'TOKEN_TTL_MINUTES = 60'),
     'reset token is one-time' => str_contains($service, 'used_at IS NULL') && str_contains($service, 'used_at=NOW()'),
+    'reset token consumption is transaction-locked' => str_contains($service, 'FOR UPDATE'),
     'reset requests are rate limited' => str_contains($service, 'MAX_REQUESTS_PER_HOUR = 5'),
     'reset request uses SMTP mailer' => str_contains($service, 'Mailer::sendPasswordReset'),
     'mailer uses SMTP' => str_contains($mailer, '$mail->isSMTP()'),
