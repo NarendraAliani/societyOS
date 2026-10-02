@@ -71,7 +71,7 @@ final class IntegrationController
     public function razorpayVerify(): void
     {
         $this->csrf();
-        try{$id=IntegrationService::verifyRazorpayPayment(Society::currentId(),(int)($_POST['bill_id']??0),(float)($_POST['amount']??0),(string)($_POST['razorpay_order_id']??''),(string)($_POST['razorpay_payment_id']??''),(string)($_POST['razorpay_signature']??''),(int)(Auth::memberId()??0),Auth::id());$this->json(['ok'=>true,'payment_id'=>$id]);}
+        try{$id=IntegrationService::verifyRazorpayPayment(Society::currentId(),(string)($_POST['razorpay_payment_id']??''),(string)($_POST['razorpay_signature']??''),Auth::id());$this->json(['ok'=>true,'payment_id'=>$id]);}
         catch(\Throwable $e){http_response_code(422);$this->json(['ok'=>false,'message'=>$e->getMessage()]);}
     }
     public function razorpayWebhook(): void
