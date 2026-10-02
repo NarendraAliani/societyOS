@@ -40,16 +40,16 @@ final class VisitorPass
              JOIN flats f ON f.id = vp.flat_id
              JOIN floors fl ON fl.id = f.floor_id
              JOIN wings w ON w.id = fl.wing_id
-             WHERE vp.qr_token = :token'
+             WHERE vp.qr_token = :token AND w.society_id = :sid'
         );
-        $stmt->execute(['token' => $token]);
+        $stmt->execute(['token' => $token, 'sid' => Society::currentId()]);
         return $stmt->fetch() ?: null;
     }
 
     public static function find(int $id): ?array
     {
-        $stmt = db()->prepare('SELECT * FROM visitor_passes WHERE id = :id');
-        $stmt->execute(['id' => $id]);
+        $stmt = db()->prepare('SELECT vp.* FROM visitor_passes vp JOIN flats f ON f.id = vp.flat_id JOIN floors fl ON fl.id = f.floor_id JOIN wings w ON w.id = fl.wing_id WHERE vp.id = :id AND w.society_id = :sid');
+        $stmt->execute(['id' => $id, 'sid' => Society::currentId()]);
         return $stmt->fetch() ?: null;
     }
 
