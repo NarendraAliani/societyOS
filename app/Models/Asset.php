@@ -25,9 +25,9 @@ final class Asset
             'SELECT a.*, ac.name AS category_name
              FROM assets a
              JOIN asset_categories ac ON ac.id = a.category_id
-             WHERE a.id = :id'
+             WHERE a.id = :id AND a.society_id = :sid'
         );
-        $stmt->execute(['id' => $id]);
+        $stmt->execute(['id' => $id, 'sid' => Society::currentId()]);
         return $stmt->fetch() ?: null;
     }
 
