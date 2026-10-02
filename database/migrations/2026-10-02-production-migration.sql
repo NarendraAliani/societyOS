@@ -129,7 +129,7 @@ SELECT table_name,index_name
 FROM information_schema.statistics
 WHERE table_schema=DATABASE()
 AND index_name IN (
-' uq_society_code','uq_user_role','uq_flat_role',
+'uq_society_code','uq_user_role','uq_flat_role',
 'idx_users_society_status','idx_members_society_status_flat',
 'idx_bills_society_due_status','idx_visitors_society_checkin',
 'idx_complaints_society_status_created','idx_activity_society_created',
