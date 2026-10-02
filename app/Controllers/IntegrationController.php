@@ -92,14 +92,6 @@ final class IntegrationController
         http_response_code(403);exit('Verification failed.');
     }
 
-    public function telegramWebhookSetup(): void
-    {
-        $this->csrf();
-        try{IntegrationService::setTelegramWebhook(Society::currentId());Flash::set('success','Telegram webhook configured.');}
-        catch(\Throwable $e){Flash::set('error',$e->getMessage());}
-        header('Location:/admin/integrations');exit;
-    }
-
     public function upiQr(string $billId): void
     {
         $cfg=IntegrationService::config(Society::currentId());
