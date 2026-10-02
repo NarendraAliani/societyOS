@@ -183,6 +183,15 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
         });
     });
 
+    // Keep wide data tables usable on phones without requiring every view to hand-wrap them.
+    document.querySelectorAll('#app-content table').forEach(function (table) {
+        if (table.closest('.table-responsive')) return;
+        var wrapper = document.createElement('div');
+        wrapper.className = 'table-responsive';
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+    });
+
     // Any table-row edit/management form that was historically embedded in a
     // Bootstrap collapse is presented as a modal instead. This keeps list pages
     // compact and makes the interaction consistent across the application.
