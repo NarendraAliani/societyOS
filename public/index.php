@@ -7,6 +7,7 @@ require_once dirname(__DIR__) . '/config/database.php';
 
 use App\Helpers\Router;
 use App\Helpers\Session;
+use App\Helpers\ErrorHandler;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\PermissionMiddleware;
 use App\Controllers\AuthController;
@@ -33,6 +34,7 @@ use App\Middleware\BackOfficeMiddleware;
 use App\Middleware\PlatformAdminMiddleware;
 
 Session::start();
+ErrorHandler::register();
 
 // Baseline browser security headers for every application response.
 header('X-Content-Type-Options: nosniff');
