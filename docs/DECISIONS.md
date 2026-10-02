@@ -266,3 +266,24 @@ One email/password identifies one login account; a user can have multiple role a
 ## User-to-home assignment rule
 
 Resident and tenant user accounts follow a global home-assignment rule: a flat may have at most one user account for each resident/tenant role. The linked-home selector is role-dependent and excludes every flat that is already linked to a user for the selected role. Resident accounts use active owner records; tenant accounts use active tenant records. The server enforces the same rule independently of the UI so a crafted request cannot bypass the dependent dropdown.
+
+
+## 2026-10-02 — Quality hardening: tenant boundaries and global security baseline
+**Decision**: Treat society ownership as a server-side invariant at both controller and model lookup boundaries. Authenticated state-changing requests are also recorded as route-level audit events, while high-signal module actions continue to write explicit activity entries.
+**Reason**: Multi-society support changes the threat model: an object ID is not sufficient authorization. Defense in depth reduces the chance that a future controller refactor accidentally exposes another society's record.
+**Impact**: High-risk society-owned lookups now include current-society constraints; controllers continue to verify ownership before mutation. Session cookies, browser security headers, safe exception handling, upload validation and destructive-action confirmations are standardized.
+
+## 2026-10-02 — Visitor passes: real QR representation
+**Decision**: Keep the existing random pass token as the canonical credential and render it as a server-side SVG QR code using BaconQrCode.
+**Reason**: SVG avoids an Imagick dependency and keeps QR generation local to the application. The underlying token and verification flow remain unchanged, so QR is a presentation upgrade rather than a new security credential.
+**Impact**: A pass can be opened through its authenticated QR action and scanned by gate staff; token expiry and single-use verification rules remain server-side.
+
+## 2026-10-02 — Performance indexes for multi-society growth
+**Decision**: Add composite indexes around society/date/status access patterns and prepare a separate migration for existing installations.
+**Reason**: The application's dominant list/report queries increasingly filter by society plus status/date. Composite indexes are more appropriate than indiscriminate single-column indexes for these repeated predicates.
+**Impact**: Fresh installs receive the indexes from schema.sql. Existing production installations receive a reviewable migration; it is not executed automatically because DDL requires backup and operational approval.
+
+## 2026-10-02 — Global production error handling
+**Decision**: Log unhandled exceptions to storage/logs/app.log and return a generic production response unless debug mode is explicitly enabled.
+**Reason**: Production users should not see stack traces, file paths or SQL details, while operators still need diagnostic information.
+**Impact**: The front controller registers the shared ErrorHandler before routing.
