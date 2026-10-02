@@ -169,6 +169,28 @@ final class IntegrationService
         return self::postJson($url, json_encode(['chat_id'=>$chatId,'text'=>$message,'protect_content'=>true], JSON_THROW_ON_ERROR), []);
     }
 
+    public static function processRazorpayWebhook(int $societyId, string $payload, string $signature): void
+    {
+        if (!self::verifyWebhook($societyId, $payload, $signature)) throw new \RuntimeException('Invalid webhook signature.');
+        $event=json_decode($payload,true);
+        if (!is_array($event) || ($event['event']??'') !== 'payment.captured') return;
+        $entity=$event['payload']['payment']['entity']??null;
+        if (!is_array($entity) || empty($entity['id']) || empty($entity['order_id'])) return;
+        if (Payment::findByReference((string)$entity['id'])) return;
+        $cfg=self::config($societyId);
+        $ch=curl_init('https://api.razorpay.com/v1/orders/'.rawurlencode((string)$entity['order_id']));
+        curl_setopt_array($ch,[CURLOPT_RETURNTRANSFER=>true,CURLOPT_TIMEOUT=>20,CURLOPT_HTTPAUTH=>CURLAUTH_BASIC,CURLOPT_USERPWD=>$cfg['razorpay_key_id'].':'.$cfg['razorpay_key_secret']]);
+        $body=curl_exec($ch);$status=(int)curl_getinfo($ch,CURLINFO_HTTP_CODE);curl_close($ch);
+        if($body===false||$status<200||$status>=300) throw new \RuntimeException('Unable to resolve Razorpay order.');
+        $order=json_decode((string)$body,true);$notes=$order['notes']??[];
+        $billId=(int)($notes['bill_id']??0);$memberId=(int)($notes['member_id']??0);$amount=((int)($entity['amount']??0))/100;
+        if($billId<=0||$memberId<=0||$amount<=0) return;
+        $bill=MaintenanceBill::find($billId);if(!$bill||((int)$bill['society_id']!==$societyId)) return;
+        $allowed=false;foreach(MaintenanceBill::forMember($memberId) as $row)if((int)$row['id']===$billId){$allowed=true;break;}if(!$allowed)return;
+        $mode=match((string)($entity['method']??'upi')){'card'=>'card','netbanking'=>'bank_transfer','upi'=>'upi',default=>'upi'};
+        BillingService::recordPayment($billId,$amount,$mode,(string)$entity['id'],null,$societyId);
+    }
+
     private static function postJson(string $url, string $payload, array $headers): array
     {
         $ch = curl_init($url);
