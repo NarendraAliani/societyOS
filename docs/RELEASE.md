@@ -85,3 +85,18 @@ Before using the platform console in production:
 5. Use Platform → Create Society to provision additional societies. Do not manually insert additional society rows.
 
 Provisioning creates the society boundary, current financial year, default settings, cash account, complaint/asset categories, maintenance heads/rates, and the society's first Super Admin atomically. The new Super Admin then signs in through the normal /login flow using the provisioned Society Code.
+
+
+## 2026-10 quality hardening release
+
+- Added tenant-scoped lookup hardening for society-owned records.
+- Hardened session cookies and timeout handling.
+- Added production-safe exception logging and response handling.
+- Added CSP and browser security headers.
+- Added global destructive-action confirmations.
+- Added responsive table wrapping and long-table search.
+- Added server-side SVG QR generation for visitor passes.
+- Added targeted performance indexes to the fresh schema.
+- Added migration database/migrations/2026-10-02-performance-indexes.sql for existing installations.
+
+Operational note: the performance-index migration is not executed by the deployment workflow. Take a production backup and review/execute it separately when approved.
