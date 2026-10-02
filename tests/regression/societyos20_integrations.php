@@ -9,7 +9,7 @@ $files=[
 ];
 foreach($files as $file){if(!is_file($root.'/'.$file))throw new RuntimeException("Missing {$file}");}
 $routes=file_get_contents($root.'/public/index.php');
-foreach(['/admin/integrations','/payments/razorpay/order','/payments/razorpay/verify','/payments/razorpay/webhook','/integrations/whatsapp/webhook','/resident/upi-qr/{billId}'] as $route){
+foreach(['/admin/integrations','/admin/integrations/toggle','/payments/razorpay/order','/payments/razorpay/verify','/payments/razorpay/webhook','/integrations/whatsapp/webhook','/resident/upi-qr/{billId}'] as $route){
  if(strpos($routes,$route)===false)throw new RuntimeException("Missing route {$route}");
 }
 $service=file_get_contents($root.'/app/Services/IntegrationService.php');
