@@ -5,6 +5,11 @@ Status legend: ✅ built this phase · ⬜ planned (routes not yet wired)
 ```
 /login                          ✅ GET/POST  — auth
 /logout                         ✅ POST
+/forgot-password                ✅ GET/POST — CAPTCHA-protected email password reset
+/reset-password                 ✅ GET/POST — Single-use email reset token
+/platform/login                 ✅ GET/POST — Platform administration login
+/platform/forgot-password       ✅ GET/POST — Platform admin email password reset
+/platform/reset-password        ✅ GET/POST — Platform admin reset token
 /                                ✅ GET redirect → /dashboard
 /dashboard                      ✅ GET  — stat cards (flats, residents, visitors, complaints, dues, income, expenses)
 
@@ -16,7 +21,7 @@ Status legend: ✅ built this phase · ⬜ planned (routes not yet wired)
 /society/floors/{id}/delete     ✅ POST
 /society/flats                  ✅ POST — create flat
 /society/flats/{id}/delete      ✅ POST
-/society/parking                ⬜ Parking slots
+/society/parking                ⬜ Legacy placeholder — parking is under /vehicles/parking
 /society/maintenance-heads      ✅ GET/POST — Maintenance heads (create/toggle/delete/edit name+type)
 /society/maintenance-heads/{id} ✅ GET — Rate history + schedule a future/immediate rate change
 /society/maintenance-heads/{id}/rates ✅ POST — Schedule a new effective-dated rate
@@ -71,6 +76,7 @@ Status legend: ✅ built this phase · ⬜ planned (routes not yet wired)
 /visitors/{id}/checkout         ✅ POST
 /visitors/passes                ✅ GET/POST — Pre-authorized passes (text token, not a scannable QR image — see DECISIONS.md)
 /visitors/passes/verify         ✅ POST — Verify token + auto check-in, single-use, time-window enforced
+/visitors/passes?show_qr={id}   ✅ GET — Authenticated SVG QR representation of a visitor pass
 /visitors/deliveries            ✅ GET/POST — Delivery register, mark collected
 
 /complaints                     ✅ GET — List, filter by status
