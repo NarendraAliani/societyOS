@@ -24,8 +24,8 @@ final class Account
 
     public static function find(int $id): ?array
     {
-        $stmt = db()->prepare('SELECT * FROM accounts WHERE id = :id');
-        $stmt->execute(['id' => $id]);
+        $stmt = db()->prepare('SELECT * FROM accounts WHERE id = :id AND society_id = :sid');
+        $stmt->execute(['id' => $id, 'sid' => Society::currentId()]);
         return $stmt->fetch() ?: null;
     }
 
