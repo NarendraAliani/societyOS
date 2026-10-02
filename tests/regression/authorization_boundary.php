@@ -13,6 +13,7 @@ $publicPost = [
     "'/platform/forgot-password'",
     "'/platform/reset-password'",
     "'/logout'",
+    "'/payments/razorpay/webhook'",
 ];
 
 $failures = [];
