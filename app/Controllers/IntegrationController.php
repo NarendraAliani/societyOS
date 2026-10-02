@@ -40,7 +40,13 @@ final class IntegrationController
     {
         $this->csrf();
         $sid=Society::currentId();
-        foreach(['razorpay','upi','whatsapp','telegram'] as $name) Settings::set($sid,'integration.'.$name.'.enabled',isset($_POST[$name.'_enabled'])?'1':'0');
+        // Each integration card is its own form. Update only the card that was submitted;
+        // otherwise an unchecked checkbox from another card is indistinguishable from a
+        // missing field and would accidentally disable that other integration.
+        $section = (string)($_POST['integration_section'] ?? '');
+        if (in_array($section, ['razorpay','upi','whatsapp','telegram'], true)) {
+            Settings::set($sid, 'integration.'.$section.'.enabled', isset($_POST[$section.'_enabled']) ? '1' : '0');
+        }
         $fields=[
             'integration.razorpay.key_id'=>['razorpay_key_id',true],
             'integration.razorpay.key_secret'=>['razorpay_key_secret',true],

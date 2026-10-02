@@ -8,7 +8,7 @@ $cfg=$cfg??[];
 <div class="col-xl-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
 <h5>Razorpay Payment Gateway</h5>
 <p class="text-muted small">Each society can connect its own Razorpay merchant account. Key secrets remain encrypted in the SocietyOS database and are never rendered back in full.</p>
-<form method="post" action="/admin/integrations"><?= \App\Helpers\Csrf::field() ?>
+<form method="post" action="/admin/integrations"><?= \App\Helpers\Csrf::field() ?><input type="hidden" name="integration_section" value="razorpay">
 <div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" name="razorpay_enabled" <?= $cfg['razorpay_enabled']?'checked':'' ?>><label class="form-check-label">Enable Razorpay online payments</label></div>
 <label class="form-label">Key ID</label><input class="form-control mb-2" name="razorpay_key_id" placeholder="<?= htmlspecialchars($masked['razorpay_key_id']) ?>">
 <label class="form-label">Key Secret</label><input class="form-control mb-2" type="password" name="razorpay_key_secret" autocomplete="new-password" placeholder="<?= htmlspecialchars($masked['razorpay_key_secret']) ?>">
@@ -20,7 +20,7 @@ $cfg=$cfg??[];
 
 <div class="col-xl-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
 <h5>UPI Collection</h5><p class="text-muted small">Configure the society's UPI ID for direct UPI instructions/QR display. Razorpay remains the verified online gateway when enabled.</p>
-<form method="post" action="/admin/integrations"><?= \App\Helpers\Csrf::field() ?>
+<form method="post" action="/admin/integrations"><?= \App\Helpers\Csrf::field() ?><input type="hidden" name="integration_section" value="upi">
 <div class="form-check form-switch mb-3"><input class="form-check-input js-integration-toggle" type="checkbox" name="upi_enabled" data-integration="upi" <?= $cfg['upi_enabled']?'checked':'' ?>><label class="form-check-label">Enable UPI display</label></div>
 <label class="form-label">UPI ID / VPA</label><input class="form-control mb-2" name="upi_id" value="<?= htmlspecialchars($cfg['upi_id']) ?>" placeholder="society@bank">
 <label class="form-label">UPI Account Name</label><input class="form-control mb-3" name="upi_name" value="<?= htmlspecialchars($cfg['upi_name']) ?>" placeholder="Society Name">
@@ -30,7 +30,7 @@ $cfg=$cfg??[];
 
 <div class="col-xl-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
 <h5>WhatsApp Cloud API</h5><p class="text-muted small">Use Meta WhatsApp Business Platform credentials. Message templates and recipient opt-in remain governed by WhatsApp's policies.</p>
-<form method="post" action="/admin/integrations"><?= \App\Helpers\Csrf::field() ?>
+<form method="post" action="/admin/integrations"><?= \App\Helpers\Csrf::field() ?><input type="hidden" name="integration_section" value="whatsapp">
 <div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" name="whatsapp_enabled" <?= $cfg['whatsapp_enabled']?'checked':'' ?>><label class="form-check-label">Enable WhatsApp</label></div>
 <label class="form-label">Phone Number ID</label><input class="form-control mb-2" name="whatsapp_phone_number_id" value="<?= htmlspecialchars($cfg['whatsapp_phone_number_id']) ?>">
 <label class="form-label">Business Account ID</label><input class="form-control mb-2" name="whatsapp_business_account_id" value="<?= htmlspecialchars($cfg['whatsapp_business_account_id']) ?>">
@@ -44,7 +44,7 @@ $cfg=$cfg??[];
 
 <div class="col-xl-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
 <h5>Telegram Bot</h5><p class="text-muted small">Configure one bot per society. The bot can be used for society alerts and operational notifications.</p>
-<form method="post" action="/admin/integrations"><?= \App\Helpers\Csrf::field() ?>
+<form method="post" action="/admin/integrations"><?= \App\Helpers\Csrf::field() ?><input type="hidden" name="integration_section" value="telegram">
 <div class="form-check form-switch mb-3"><input class="form-check-input js-integration-toggle" type="checkbox" name="telegram_enabled" data-integration="telegram" <?= $cfg['telegram_enabled']?'checked':'' ?>><label class="form-check-label">Enable Telegram</label></div>
 <label class="form-label">Bot Token</label><input class="form-control mb-2" type="password" name="telegram_bot_token" autocomplete="new-password" placeholder="<?= htmlspecialchars($masked['telegram_bot_token']) ?>">
 <label class="form-label">Default Chat ID</label><input class="form-control mb-3" name="telegram_default_chat_id" value="<?= htmlspecialchars($cfg['telegram_default_chat_id']) ?>" placeholder="-1001234567890">
