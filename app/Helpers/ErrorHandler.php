@@ -17,9 +17,7 @@ final class ErrorHandler
                 return;
             }
 
-            $pageTitle = 'Something went wrong';
-            $message = 'Something went wrong while processing your request. Please try again.';
-            require __DIR__ . '/../Views/errors/500.php';
+            echo '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SocietyOS</title></head><body style="font-family:system-ui,sans-serif;padding:3rem;text-align:center"><h1>Something went wrong</h1><p>Please try again.</p><a href="/dashboard">Back to Dashboard</a></body></html>';
         });
     }
 
