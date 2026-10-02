@@ -89,6 +89,9 @@ jobs:
       - name: Quality hardening regression contract
         run: php tests/regression/quality_hardening.php
 
+      - name: Authorization boundary regression contract
+        run: php tests/regression/authorization_boundary.php
+
       - name: Prepare deployment branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
