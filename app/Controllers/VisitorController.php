@@ -93,6 +93,17 @@ final class VisitorController
 
     public function passes(): void
     {
+        if (isset($_GET['show_qr'])) {
+            $pass = VisitorPass::find((int) $_GET['show_qr']);
+            if (!$pass || (int) ($pass['society_id'] ?? 0) !== Society::currentId()) {
+                http_response_code(404);
+                exit;
+            }
+            header('Content-Type: image/svg+xml; charset=UTF-8');
+            echo \App\Helpers\QrCode::svg((string) $pass['qr_token'], 300);
+            exit;
+        }
+
         $pageTitle = 'Visitor Passes';
         $passes = VisitorPass::allForSociety(Society::currentId());
         $flats = Flat::allForSociety(Society::currentId());
