@@ -92,6 +92,9 @@ jobs:
       - name: Authorization boundary regression contract
         run: php tests/regression/authorization_boundary.php
 
+      - name: SocietyOS 2.0 integration regression contract
+        run: php tests/regression/societyos20_integrations.php
+
       - name: Prepare deployment branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
