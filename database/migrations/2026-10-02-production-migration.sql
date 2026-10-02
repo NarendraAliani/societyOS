@@ -125,14 +125,16 @@ SELECT COUNT(*) AS platform_admin_rows FROM platform_admins;
 SELECT COUNT(*) AS platform_login_history_rows FROM platform_login_history;
 SELECT COUNT(*) AS platform_password_reset_rows FROM platform_password_resets;
 
-SELECT table_name,index_name
-FROM information_schema.statistics
-WHERE table_schema=DATABASE()
-AND index_name IN (
-'uq_society_code','uq_user_role','uq_flat_role',
-'idx_users_society_status','idx_members_society_status_flat',
-'idx_bills_society_due_status','idx_visitors_society_checkin',
-'idx_complaints_society_status_created','idx_activity_society_created',
-'idx_parking_alloc_slot_active','idx_documents_member_created',
-'idx_password_resets_token_used_expiry'
-);
+-- Shared-hosting compatibility: verification uses SHOW INDEX rather than
+-- information_schema, because some BigRock/cPanel accounts deny access to
+-- information_schema despite having full privileges on the application DB.
+SHOW INDEX FROM society;
+SHOW INDEX FROM users;
+SHOW INDEX FROM members;
+SHOW INDEX FROM maintenance_bills;
+SHOW INDEX FROM visitors;
+SHOW INDEX FROM complaints;
+SHOW INDEX FROM activity_logs;
+SHOW INDEX FROM parking_allocations;
+SHOW INDEX FROM documents;
+SHOW INDEX FROM password_resets;
