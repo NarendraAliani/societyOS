@@ -39,6 +39,14 @@ $modalViews = [
 ];
 
 $staffShow = file_get_contents(__DIR__ . '/../../app/Views/staff/show.php');
+if (strpos($staffShow, 'AppHelpersCsrf::') !== false) {
+    fwrite(STDERR, "Staff detail contains an invalid CSRF helper reference.\n");
+    exit(1);
+}
+if (strpos($staffShow, '\\App\\Helpers\\Csrf::field()') === false) {
+    fwrite(STDERR, "Staff detail is missing the namespaced CSRF helper.\n");
+    exit(1);
+}
 foreach (['editStaffModal', 'policeVerificationModal', 'payrollEntryModal'] as $modalId) {
     if (strpos($staffShow, 'id="' . $modalId . '"') === false) {
         fwrite(STDERR, "Staff detail modal missing: {$modalId}\n");
