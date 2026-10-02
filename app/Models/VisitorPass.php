@@ -48,7 +48,7 @@ final class VisitorPass
 
     public static function find(int $id): ?array
     {
-        $stmt = db()->prepare('SELECT vp.* FROM visitor_passes vp JOIN flats f ON f.id = vp.flat_id JOIN floors fl ON fl.id = f.floor_id JOIN wings w ON w.id = fl.wing_id WHERE vp.id = :id AND w.society_id = :sid');
+        $stmt = db()->prepare('SELECT vp.*, w.society_id FROM visitor_passes vp JOIN flats f ON f.id = vp.flat_id JOIN floors fl ON fl.id = f.floor_id JOIN wings w ON w.id = fl.wing_id WHERE vp.id = :id AND w.society_id = :sid');
         $stmt->execute(['id' => $id, 'sid' => Society::currentId()]);
         return $stmt->fetch() ?: null;
     }
