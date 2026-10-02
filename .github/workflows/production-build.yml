@@ -71,6 +71,9 @@ jobs:
       - name: Account menu logout regression contract
         run: php tests/regression/account_menu_logout.php
 
+      - name: Security header regression contract
+        run: php tests/regression/security_headers.php
+
       - name: Authentication CAPTCHA regression contract
         run: php tests/regression/authentication_captcha.php
 
