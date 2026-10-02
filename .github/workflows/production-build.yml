@@ -83,6 +83,9 @@ jobs:
       - name: Password session invalidation regression contract
         run: php tests/regression/password_session_invalidation.php
 
+      - name: QR code regression contract
+        run: php tests/regression/visitor_qr.php
+
       - name: Prepare deployment branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
