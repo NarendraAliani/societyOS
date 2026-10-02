@@ -64,6 +64,7 @@ ob_start();
                     <tbody>
                     <?php foreach ($passes as $pass): ?>
                         <tr>
+                            <td><a class="btn btn-sm btn-outline-primary" href="?show_qr=<?= (int) $pass['id'] ?>">Show QR</a></td>
                             <td class="fw-bold"><?= htmlspecialchars($pass['qr_token']) ?></td>
                             <td><?= htmlspecialchars($pass['visitor_name']) ?></td>
                             <td><?= htmlspecialchars($pass['wing_name'] . '-' . $pass['flat_number']) ?></td>
