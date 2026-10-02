@@ -9,7 +9,7 @@ final class VisitorPass
     public static function allForSociety(int $societyId): array
     {
         $stmt = db()->prepare(
-            'SELECT vp.*, f.flat_number, w.name AS wing_name, w.society_id
+            'SELECT vp.*, f.flat_number, w.name AS wing_name, w.society_id, w.society_id
              FROM visitor_passes vp
              JOIN flats f ON f.id = vp.flat_id
              JOIN floors fl ON fl.id = f.floor_id
