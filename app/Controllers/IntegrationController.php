@@ -20,6 +20,22 @@ final class IntegrationController
         foreach(self::SECRET_FIELDS as $key) $masked[$key]=SecretCipher::masked((string)($cfg[$key]??''));
         require __DIR__.'/../Views/admin/integrations.php';
     }
+    public function toggle(): void
+    {
+        $this->csrf();
+        $sid = Society::currentId();
+        $name = (string)($_POST['integration'] ?? '');
+        $allowed = ['razorpay','upi','whatsapp','telegram'];
+        if (!in_array($name, $allowed, true)) {
+            http_response_code(422);
+            $this->json(['ok'=>false,'message'=>'Invalid integration.']);
+        }
+        $enabled = (string)($_POST['enabled'] ?? '0') === '1' ? '1' : '0';
+        Settings::set($sid, 'integration.'.$name.'.enabled', $enabled);
+        ActivityLog::log('settings','integration_toggle',sprintf('Set %s integration %s', $name, $enabled === '1' ? 'enabled' : 'disabled'));
+        $this->json(['ok'=>true,'integration'=>$name,'enabled'=>$enabled === '1']);
+    }
+
     public function update(): void
     {
         $this->csrf();
