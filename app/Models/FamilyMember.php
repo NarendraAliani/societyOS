@@ -8,8 +8,8 @@ final class FamilyMember
 {
     public static function forMember(int $memberId): array
     {
-        $stmt = db()->prepare('SELECT * FROM family_members WHERE member_id = :member_id ORDER BY name');
-        $stmt->execute(['member_id' => $memberId]);
+        $stmt = db()->prepare('SELECT fm.* FROM family_members fm JOIN members m ON m.id = fm.member_id WHERE fm.member_id = :member_id AND m.society_id = :sid ORDER BY name');
+        $stmt->execute(['member_id' => $memberId, 'sid' => Society::currentId()]);
         return array_map([self::class, 'withDisplayAge'], $stmt->fetchAll());
     }
 
@@ -35,7 +35,7 @@ final class FamilyMember
         $stmt = db()->prepare(
             'UPDATE family_members
              SET name = :name, relation = :relation, date_of_birth = :dob, age = :age, phone = :phone
-             WHERE id = :id'
+             WHERE id = :id AND member_id IN (SELECT id FROM members WHERE society_id = :sid)'
         );
         $stmt->execute([
             'id' => $id,
@@ -50,7 +50,7 @@ final class FamilyMember
     public static function delete(int $id): void
     {
         $stmt = db()->prepare('DELETE FROM family_members WHERE id = :id');
-        $stmt->execute(['id' => $id]);
+        $stmt->execute(['id' => $id, 'sid' => Society::currentId()]);
     }
 
     public static function find(int $id): ?array
