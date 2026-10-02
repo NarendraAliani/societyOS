@@ -245,13 +245,35 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
             modal.tabIndex = -1;
             modal.setAttribute('aria-hidden', 'true');
             modal.innerHTML = '<div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Edit / Manage</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"></div></div></div>';
-            modal.querySelector('.modal-body').appendChild(target.cloneNode(true));
+            var modalBody = modal.querySelector('.modal-body');
+
+            // Move the live form nodes instead of cloning them. Cloning would drop event
+            // listeners installed by a page (for example dependent role/home dropdowns).
+            // Also unwrap table rows: a <tr> directly inside a modal body is invalid markup
+            // and can make the management panel appear empty/non-interactive.
+            var source = target;
+            if (target.tagName === 'TR') {
+                source = target.querySelector('td') || target;
+            }
+            while (source.firstChild) {
+                modalBody.appendChild(source.firstChild);
+            }
+
             document.body.appendChild(modal);
             target.remove();
-            trigger.setAttribute('data-bs-toggle', 'modal');
-            trigger.setAttribute('data-bs-target', '#' + modalId);
+
+            // Bootstrap's delegated data API is not used here because the trigger originally
+            // targeted a collapse that has now been removed. Explicitly bind the modal instance
+            // so every converted Edit/Manage button remains reliably clickable.
+            var modalInstance = new bootstrap.Modal(modal);
+            trigger.removeAttribute('data-bs-toggle');
+            trigger.removeAttribute('data-bs-target');
             trigger.removeAttribute('aria-expanded');
             trigger.removeAttribute('aria-controls');
+            trigger.addEventListener('click', function (event) {
+                event.preventDefault();
+                modalInstance.show();
+            });
         });
     })();
 })();

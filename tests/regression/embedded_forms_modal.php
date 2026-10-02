@@ -28,13 +28,26 @@ $modalViews = [
     'app/Views/vehicles/parking.php',
     'app/Views/vehicles/parking_rates.php',
     'app/Views/complaints/categories.php',
+    // Views that still declare row-level collapse controls are covered by the
+    // global converter; keep these pages in the regression contract.
+    'app/Views/admin/users.php',
+    'app/Views/staff/index.php',
+    'app/Views/society/wings.php',
+    'app/Views/society/maintenance_heads.php',
+    'app/Views/accounting/vendors.php',
 ];
 
 foreach ($modalViews as $view) {
     $path = __DIR__ . '/../../' . $view;
     $source = file_get_contents($path);
-    if (strpos($source, 'data-bs-toggle="modal"') === false) {
-        fwrite(STDERR, "Expected modal trigger missing: {$view}\n");
+    if (strpos($source, 'data-bs-toggle="modal"') === false &&
+        strpos($source, 'data-bs-toggle="collapse"') === false) {
+        fwrite(STDERR, "Expected modal/collapse management trigger missing: {$view}\n");
+        exit(1);
+    }
+    if (strpos($source, 'data-bs-toggle="collapse"') !== false &&
+        strpos($source, '<form') === false) {
+        fwrite(STDERR, "Collapse management trigger has no form target: {$view}\n");
         exit(1);
     }
 }
