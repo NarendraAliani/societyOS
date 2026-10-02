@@ -33,6 +33,9 @@ jobs:
           extensions: mbstring, intl, gd, zip, xml, curl, pdo_mysql
           coverage: none
 
+      - name: Refresh QR dependency lock
+        run: composer update bacon/bacon-qr-code --with-dependencies --no-interaction --no-progress --prefer-dist
+
       - name: Validate Composer configuration
         run: composer validate --strict
 
