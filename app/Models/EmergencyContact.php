@@ -33,12 +33,12 @@ final class EmergencyContact
     public static function delete(int $id): void
     {
         $stmt = db()->prepare('DELETE FROM emergency_contacts WHERE id = :id');
-        $stmt->execute(['id' => $id]);
+        $stmt->execute(['id' => $id, 'sid' => Society::currentId()]);
     }
 
     public static function find(int $id): ?array
     {
-        $stmt = db()->prepare('SELECT * FROM emergency_contacts WHERE id = :id');
+        $stmt = db()->prepare('SELECT ec.* FROM emergency_contacts ec JOIN members m ON m.id = ec.member_id WHERE ec.id = :id AND m.society_id = :sid');
         $stmt->execute(['id' => $id]);
         return $stmt->fetch() ?: null;
     }
