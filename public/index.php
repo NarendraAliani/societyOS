@@ -331,6 +331,7 @@ $router->post('/admin/integrations/telegram/test', [IntegrationController::class
 $router->post('/payments/razorpay/order', [IntegrationController::class, 'razorpayOrder'], [$auth, $can('billing.view')]);
 $router->post('/payments/razorpay/verify', [IntegrationController::class, 'razorpayVerify'], [$auth, $can('billing.view')]);
 $router->post('/payments/razorpay/webhook', [IntegrationController::class, 'razorpayWebhook']);
+$router->get('/resident/upi-qr/{billId}', [IntegrationController::class, 'upiQr'], [$auth, $can('billing.view')]);
 
 
 // Profile — any authenticated user, no specific permission required
