@@ -184,12 +184,14 @@ final class User
     {
         $stmt=db()->prepare('UPDATE users SET password_hash=:hash,must_change_password=1 WHERE id=:id');
         $stmt->execute(['hash'=>password_hash($newPassword,PASSWORD_BCRYPT),'id'=>$id]);
+        db()->prepare('DELETE FROM user_sessions WHERE user_id=:id')->execute(['id'=>$id]);
     }
 
     public static function changeOwnPassword(int $id,string $newPassword): void
     {
         $stmt=db()->prepare('UPDATE users SET password_hash=:hash,must_change_password=0 WHERE id=:id');
         $stmt->execute(['hash'=>password_hash($newPassword,PASSWORD_BCRYPT),'id'=>$id]);
+        db()->prepare('DELETE FROM user_sessions WHERE user_id=:id')->execute(['id'=>$id]);
     }
 
     public static function recordLogin(int $userId): void
