@@ -12,6 +12,7 @@ $publicPost = [
     "'/platform/login'",
     "'/platform/forgot-password'",
     "'/platform/reset-password'",
+    "'/logout'",
 ];
 
 $failures = [];
