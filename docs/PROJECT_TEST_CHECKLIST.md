@@ -111,3 +111,19 @@ With a second society available:
 - [ ] Logout
 
 Record deployment date, commit SHA, tester, environment, and failed test IDs for sign-off.
+
+
+## Quality hardening verification
+
+| Area | Automated gate | Manual verification |
+|---|---|---|
+| Multi-society isolation | Tenant-scoped lookup regression | Create two societies and attempt cross-society URLs |
+| RBAC | Route/middleware regression | Log in as each role and verify permitted/forbidden modules |
+| CSRF | Controller security contracts | Submit a state-changing form without a valid token |
+| Authentication | CAPTCHA + reset regressions | Login, logout, password reset and session expiry |
+| Visitor QR | QR regression | Open a pass's QR action and scan it with a phone |
+| File uploads | Upload helper contract | Test valid files, wrong MIME, oversize and unauthorized access |
+| Audit logs | Activity-log contract | Perform a state-changing action and inspect Activity Logs |
+| Responsive UI | Layout regression | Check phone/tablet widths and wide data tables |
+| Destructive actions | Confirmation contract | Verify delete/restore prompts and server-side authorization |
+| Production smoke | Deployment workflow | Open login and platform login after deployment |
