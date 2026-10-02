@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Helpers;
 
+use App\Models\ActivityLog;
+
 final class Router
 {
     private array $routes = [];
@@ -41,6 +43,9 @@ final class Router
             }
             foreach ($route['middleware'] as $middleware) {
                 $middleware();
+            }
+            if ($method === 'POST' && Auth::check() && (int) (Auth::societyId() ?? 0) > 0) {
+                ActivityLog::log('route', 'POST', substr($path, 0, 220));
             }
             $handler = $route['handler'];
             if (is_array($handler)) {
