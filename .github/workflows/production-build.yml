@@ -114,6 +114,26 @@ jobs:
           git commit -m "Build production deployment from ${GITHUB_SHA::7}"
           git push --force origin deploy
 
+
+      - name: Production smoke test
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for url in "https://society.dairy-dealer.net/login" "https://society.dairy-dealer.net/platform/login"; do
+            echo "Checking ${url}"
+            status="$(curl -sS -L -o /dev/null -w '%{http_code}' --max-time 30 "$url")"
+            test "$status" = "200"
+          done
+
+          headers="$(curl -sS -I --max-time 30 https://society.dairy-dealer.net/login)"
+          echo "$headers" | grep -iq '^x-content-type-options: nosniff'
+          echo "$headers" | grep -iq '^x-frame-options: sameorigin'
+          echo "$headers" | grep -iq '^referrer-policy: strict-origin-when-cross-origin'
+          echo "$headers" | grep -iq '^permissions-policy:'
+          echo "$headers" | grep -iq '^strict-transport-security:'
+
       - name: Deploy production build to BigRock via FTPS
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
