@@ -36,9 +36,9 @@ final class ParkingSlot
                      WHERE pr.society_id = ps.society_id AND pr.slot_type = ps.slot_type AND pr.effective_from <= CURDATE()
                      ORDER BY pr.effective_from DESC LIMIT 1) AS current_rate
              FROM parking_slots ps
-             WHERE ps.id = :id'
+             WHERE ps.id = :id AND ps.society_id = :sid'
         );
-        $stmt->execute(['id' => $id]);
+        $stmt->execute(['id' => $id, 'sid' => Society::currentId()]);
         return $stmt->fetch() ?: null;
     }
 
@@ -53,19 +53,19 @@ final class ParkingSlot
 
     public static function update(int $id, string $slotNumber, string $slotType): void
     {
-        $stmt = db()->prepare('UPDATE parking_slots SET slot_number = :slot_number, slot_type = :slot_type WHERE id = :id');
-        $stmt->execute(['slot_number' => $slotNumber, 'slot_type' => $slotType, 'id' => $id]);
+        $stmt = db()->prepare('UPDATE parking_slots SET slot_number = :slot_number, slot_type = :slot_type WHERE id = :id AND society_id = :sid');
+        $stmt->execute(['slot_number' => $slotNumber, 'slot_type' => $slotType, 'id' => $id, 'sid' => Society::currentId()]);
     }
 
     public static function setAllocated(int $id, bool $allocated): void
     {
         $stmt = db()->prepare('UPDATE parking_slots SET is_allocated = :allocated WHERE id = :id');
-        $stmt->execute(['allocated' => $allocated ? 1 : 0, 'id' => $id]);
+        $stmt->execute(['allocated' => $allocated ? 1 : 0, 'id' => $id, 'sid' => Society::currentId()]);
     }
 
     public static function delete(int $id): void
     {
         $stmt = db()->prepare('DELETE FROM parking_slots WHERE id = :id');
-        $stmt->execute(['id' => $id]);
+        $stmt->execute(['id' => $id, 'sid' => Society::currentId()]);
     }
 }
