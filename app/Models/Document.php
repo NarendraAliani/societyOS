@@ -12,17 +12,17 @@ final class Document
             'SELECT d.*, u.name AS uploaded_by_name
              FROM documents d
              LEFT JOIN users u ON u.id = d.uploaded_by
-             WHERE d.member_id = :member_id
+             WHERE d.member_id = :member_id AND m.society_id = :sid
              ORDER BY d.created_at DESC'
         );
-        $stmt->execute(['member_id' => $memberId]);
+        $stmt->execute(['member_id' => $memberId, 'sid' => Society::currentId()]);
         return $stmt->fetchAll();
     }
 
     public static function find(int $id): ?array
     {
-        $stmt = db()->prepare('SELECT d.*, m.society_id AS member_society_id FROM documents d JOIN members m ON m.id = d.member_id WHERE d.id = :id');
-        $stmt->execute(['id' => $id]);
+        $stmt = db()->prepare('SELECT d.*, m.society_id AS member_society_id FROM documents d JOIN members m ON m.id = d.member_id WHERE d.id = :id AND m.society_id = :sid');
+        $stmt->execute(['id' => $id, 'sid' => Society::currentId()]);
         return $stmt->fetch() ?: null;
     }
 
@@ -45,7 +45,7 @@ final class Document
 
     public static function delete(int $id): void
     {
-        $stmt = db()->prepare('DELETE FROM documents WHERE id = :id');
-        $stmt->execute(['id' => $id]);
+        $stmt = db()->prepare('DELETE FROM documents d WHERE d.id = :id AND d.member_id IN (SELECT id FROM members WHERE society_id = :sid)');
+        $stmt->execute(['id' => $id, 'sid' => Society::currentId()]);
     }
 }
