@@ -24,8 +24,8 @@ final class Vehicle
 
     public static function forMember(int $memberId): array
     {
-        $stmt = db()->prepare('SELECT * FROM vehicles WHERE member_id = :member_id ORDER BY registration_number');
-        $stmt->execute(['member_id' => $memberId]);
+        $stmt = db()->prepare('SELECT * FROM vehicles WHERE member_id = :member_id AND member_id IN (SELECT id FROM members WHERE society_id = :sid) ORDER BY registration_number');
+        $stmt->execute(['member_id' => $memberId, 'sid' => Society::currentId()]);
         return $stmt->fetchAll();
     }
 
@@ -38,9 +38,9 @@ final class Vehicle
              JOIN flats f ON f.id = m.flat_id
              JOIN floors fl ON fl.id = f.floor_id
              JOIN wings w ON w.id = fl.wing_id
-             WHERE v.id = :id'
+             WHERE v.id = :id AND m.society_id = :sid'
         );
-        $stmt->execute(['id' => $id]);
+        $stmt->execute(['id' => $id, 'sid' => Society::currentId(), 'sid' => Society::currentId()]);
         return $stmt->fetch() ?: null;
     }
 
@@ -66,7 +66,7 @@ final class Vehicle
         $stmt = db()->prepare(
             'UPDATE vehicles SET vehicle_type = :vehicle_type, registration_number = :registration_number,
                 make = :make, model = :model, color = :color
-             WHERE id = :id'
+             WHERE id = :id AND member_id IN (SELECT id FROM members WHERE society_id = :sid)'
         );
         $stmt->execute([
             'vehicle_type' => $fields['vehicle_type'],
@@ -86,8 +86,8 @@ final class Vehicle
 
     public static function registrationExists(string $registrationNumber, ?int $excludingId = null): bool
     {
-        $sql = 'SELECT COUNT(*) FROM vehicles WHERE registration_number = :reg';
-        $params = ['reg' => $registrationNumber];
+        $sql = 'SELECT COUNT(*) FROM vehicles WHERE registration_number = :reg AND member_id IN (SELECT id FROM members WHERE society_id = :sid)';
+        $params = ['reg' => $registrationNumber, 'sid' => Society::currentId()];
 
         if ($excludingId !== null) {
             $sql .= ' AND id != :excluding_id';
