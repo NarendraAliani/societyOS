@@ -227,7 +227,7 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
             counter += 1;
             var modalId = 'societyos-edit-modal-' + counter;
             var modal = document.createElement('div');
-            modal.className = 'modal fade';
+            modal.className = 'modal fade app-form-modal';
             modal.id = modalId;
             modal.tabIndex = -1;
             modal.setAttribute('aria-hidden', 'true');
