@@ -59,7 +59,7 @@ ob_start();
     <div class="col-md-8">
         <div class="card border-0 shadow-sm">
             <div class="card-body">
-                <table class="table table-hover align-middle">
+                <div class="table-responsive"><table class="table table-hover align-middle">
                     <thead><tr><th>Token</th><th>Visitor</th><th>Flat</th><th>Valid Window</th><th>Status</th></tr></thead>
                     <tbody>
                     <?php foreach ($passes as $pass): ?>
@@ -83,7 +83,7 @@ ob_start();
                         <tr><td colspan="5" class="text-center text-muted py-4">No passes issued yet.</td></tr>
                     <?php endif; ?>
                     </tbody>
-                </table>
+                </table></div>
             </div>
         </div>
     </div>
