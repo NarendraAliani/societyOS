@@ -107,6 +107,10 @@ jobs:
           mkdir -p /tmp/societyos-deploy
           rsync -a --exclude='.git/' ./ /tmp/societyos-deploy/
 
+          # Composer may refresh composer.lock during the build; the deployment copy above
+          # intentionally captures that generated lock file before switching branches.
+          git reset --hard HEAD
+
           git branch -D deploy 2>/dev/null || true
           git switch --orphan deploy
           git rm -rf . || true
