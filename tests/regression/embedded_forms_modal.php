@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 $layout = file_get_contents(__DIR__ . '/../../app/Views/layouts/app.php');
 if (strpos($layout, 'promoteEmbeddedCollapseFormsToModals') === false ||
-    strpos($layout, 'data-bs-toggle\', \'modal\'') === false) {
+    strpos($layout, 'new bootstrap.Modal') === false ||
+    strpos($layout, 'modalInstance.show()') === false) {
     fwrite(STDERR, "Global embedded-form modal behavior is missing.\n");
     exit(1);
 }
