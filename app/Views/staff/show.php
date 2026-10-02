@@ -107,7 +107,7 @@ $verificationLabel = match ($staff['police_verification_status']) {
                                                     </div>
                                                     <form method="post" action="/staff/payroll/<?= (int) $entry['id'] ?>/mark-paid">
                                                         <div class="modal-body">
-                                                            <?= AppHelpersCsrf::field() ?>
+                                                            <?= \App\Helpers\Csrf::field() ?>
                                                             <input type="hidden" name="staff_id" value="<?= (int) $staff['id'] ?>">
                                                             <p class="mb-0">Mark the <strong><?= htmlspecialchars($entry['pay_period']) ?></strong> payroll entry for <strong><?= htmlspecialchars($staff['name']) ?></strong> as paid?</p>
                                                         </div>
@@ -144,7 +144,7 @@ $verificationLabel = match ($staff['police_verification_status']) {
             </div>
             <form method="post" action="/staff/<?= (int) $staff['id'] ?>" enctype="multipart/form-data">
                 <div class="modal-body">
-                    <?= AppHelpersCsrf::field() ?>
+                    <?= \App\Helpers\Csrf::field() ?>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Name <span class="text-danger">*</span></label>
@@ -201,7 +201,7 @@ $verificationLabel = match ($staff['police_verification_status']) {
             </div>
             <form method="post" action="/staff/<?= (int) $staff['id'] ?>/police-verification" enctype="multipart/form-data">
                 <div class="modal-body">
-                    <?= AppHelpersCsrf::field() ?>
+                    <?= \App\Helpers\Csrf::field() ?>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Verification Status</label>
@@ -240,7 +240,7 @@ $verificationLabel = match ($staff['police_verification_status']) {
             </div>
             <form method="post" action="/staff/<?= (int) $staff['id'] ?>/payroll">
                 <div class="modal-body">
-                    <?= AppHelpersCsrf::field() ?>
+                    <?= \App\Helpers\Csrf::field() ?>
                     <div class="row g-3">
                         <div class="col-12">
                             <label class="form-label">Pay Period <span class="text-danger">*</span></label>
