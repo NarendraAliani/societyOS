@@ -183,6 +183,18 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
         });
     });
 
+    document.addEventListener('submit', function (event) {
+        var form = event.target;
+        if (!form || form.dataset.skipConfirm === 'true') return;
+        var action = (form.getAttribute('action') || '').toLowerCase();
+        if (/\/(delete|restore)(?:\/|$)/.test(action)) {
+            var message = action.indexOf('/restore') !== -1
+                ? 'Restore this backup? The current database will be replaced after a safety backup.'
+                : 'Delete this item? This action cannot be undone.';
+            if (!window.confirm(message)) event.preventDefault();
+        }
+    });
+
     // Add lightweight client-side search to long tables. It is deliberately opt-in by row count
     // so small action tables and forms remain visually unchanged.
     document.querySelectorAll('#app-content table').forEach(function (table) {
