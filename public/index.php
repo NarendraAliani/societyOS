@@ -326,6 +326,7 @@ $router->get('/admin/settings', [SettingsController::class, 'index'], [$auth, $b
 $router->post('/admin/settings', [SettingsController::class, 'update'], [$auth, $backOffice, $can('settings.manage')]);
 $router->get('/admin/integrations', [IntegrationController::class, 'index'], [$auth, $backOffice, $can('settings.manage')]);
 $router->post('/admin/integrations', [IntegrationController::class, 'update'], [$auth, $backOffice, $can('settings.manage')]);
+$router->post('/admin/integrations/toggle', [IntegrationController::class, 'toggle'], [$auth, $backOffice, $can('settings.manage')]);
 $router->post('/admin/integrations/whatsapp/test', [IntegrationController::class, 'testWhatsApp'], [$auth, $backOffice, $can('settings.manage')]);
 $router->post('/admin/integrations/telegram/test', [IntegrationController::class, 'testTelegram'], [$auth, $backOffice, $can('settings.manage')]);
 $router->post('/payments/razorpay/order', [IntegrationController::class, 'razorpayOrder'], [$auth, $can('billing.view')]);
