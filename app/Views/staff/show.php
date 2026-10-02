@@ -26,7 +26,11 @@ $verificationLabel = match ($staff['police_verification_status']) {
                         <?php endif; ?>
                         <h6 class="mb-0"><?= htmlspecialchars($staff['name']) ?></h6>
                     </div>
-                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#edit-staff"><i class="fa-solid fa-pen"></i></button>
+                    <div class="d-flex gap-1">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#editStaffModal" title="Edit Staff"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-sm btn-outline-warning" type="button" data-bs-toggle="modal" data-bs-target="#policeVerificationModal" title="Police Verification"><i class="fa-solid fa-shield-halved"></i></button>
+                        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#payrollEntryModal" title="Add Payroll Entry"><i class="fa-solid fa-money-check-dollar"></i></button>
+                    </div>
                 </div>
                 <p class="mb-1 mt-3"><strong>Designation:</strong> <?= htmlspecialchars($staff['designation'] ?? '-') ?></p>
                 <p class="mb-1"><strong>Phone:</strong> <?= htmlspecialchars($staff['phone'] ?? '-') ?></p>
@@ -41,7 +45,7 @@ $verificationLabel = match ($staff['police_verification_status']) {
                     <?php endif; ?>
                 </p>
 
-                <div class="collapse mt-3" id="edit-staff">
+                <div class="modal fade" id="editStaffModal" tabindex="-1" aria-labelledby="editStaffModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="editStaffModalLabel">Edit Staff</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body">
                     <form method="post" action="/staff/<?= (int) $staff['id'] ?>" enctype="multipart/form-data">
                         <?= \App\Helpers\Csrf::field() ?>
                         <div class="mb-2">
@@ -78,11 +82,13 @@ $verificationLabel = match ($staff['police_verification_status']) {
                         </div>
                         <button type="submit" class="btn btn-sm btn-primary w-100">Save</button>
                     </form>
-                </div>
+ 
+                            </div></div></div></div>
             </div>
         </div>
 
         <div class="card border-0 shadow-sm mt-3">
+            <div class="card-body">        <div class="card border-0 shadow-sm mt-3">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">Police Verification</h6>
@@ -94,6 +100,10 @@ $verificationLabel = match ($staff['police_verification_status']) {
                 <?php if ($staff['police_verification_doc_path']): ?>
                     <p class="mb-2"><a href="/staff/<?= (int) $staff['id'] ?>/file/police_doc" target="_blank">View Certificate <i class="fa-solid fa-arrow-up-right-from-square fa-xs"></i></a></p>
                 <?php endif; ?>
+                <div class="mt-3"><button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#policeVerificationModal"><i class="fa-solid fa-shield-halved me-1"></i>Update Verification</button></div>
+            </div>
+        </div>
+        <div class="modal fade" id="policeVerificationModal" tabindex="-1" aria-labelledby="policeVerificationModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="policeVerificationModalLabel">Police Verification</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body">
                 <form method="post" action="/staff/<?= (int) $staff['id'] ?>/police-verification" enctype="multipart/form-data" class="mt-2">
                     <?= \App\Helpers\Csrf::field() ?>
                     <div class="row g-2">
@@ -118,12 +128,10 @@ $verificationLabel = match ($staff['police_verification_status']) {
                         </div>
                     </div>
                 </form>
-            </div>
-        </div>
-
-        <div class="card border-0 shadow-sm mt-3">
-            <div class="card-body">
-                <h6>Add Payroll Entry</h6>
+     
+                    </div></div></div></div>
+        <div class="card border-0 shadow-sm mt-3"><div class="card-body"><h6>Add Payroll Entry</h6><p class="text-muted small mb-3">Record a salary/payroll entry for this staff member.</p><button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#payrollEntryModal"><i class="fa-solid fa-money-check-dollar me-1"></i>Add Payroll Entry</button></div></div>
+        <div class="modal fade" id="payrollEntryModal" tabindex="-1" aria-labelledby="payrollEntryModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="payrollEntryModalLabel">Add Payroll Entry</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body">
                 <form method="post" action="/staff/<?= (int) $staff['id'] ?>/payroll">
                     <?= \App\Helpers\Csrf::field() ?>
                     <div class="mb-3">
@@ -140,8 +148,8 @@ $verificationLabel = match ($staff['police_verification_status']) {
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Add Entry</button>
                 </form>
-            </div>
-        </div>
+     
+                    </div></div></div></div>
     </div>
     <div class="col-md-7">
         <div class="card border-0 shadow-sm">
