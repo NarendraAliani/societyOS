@@ -5,7 +5,7 @@ ob_start();
 <p><a href="/visitors">&laquo; Back to Visitor Register</a></p>
 
 <div class="row">
-    <div class="col-md-4 d-flex justify-content-md-end align-items-start">
+    <div class="col-md-4 d-flex justify-content-md-end align-items-start flex-wrap gap-2">
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-app-Views-visitors-passes-php"><i class="fa-solid fa-plus me-1"></i>Create Pass</button>
         <div class="modal fade" id="modal-app-Views-visitors-passes-php" tabindex="-1" aria-labelledby="modal-app-Views-visitors-passes-php-label" aria-hidden="true">
             <div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
