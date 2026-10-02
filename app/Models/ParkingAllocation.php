@@ -8,15 +8,15 @@ final class ParkingAllocation
 {
     public static function find(int $id): ?array
     {
-        $stmt = db()->prepare('SELECT * FROM parking_allocations WHERE id = :id');
-        $stmt->execute(['id' => $id]);
+        $stmt = db()->prepare('SELECT pa.* FROM parking_allocations pa JOIN parking_slots ps ON ps.id = pa.parking_slot_id WHERE pa.id = :id AND ps.society_id = :sid');
+        $stmt->execute(['id' => $id, 'sid' => Society::currentId()]);
         return $stmt->fetch() ?: null;
     }
 
     public static function activeForSlot(int $slotId): ?array
     {
-        $stmt = db()->prepare('SELECT * FROM parking_allocations WHERE parking_slot_id = :slot_id AND allocated_to IS NULL LIMIT 1');
-        $stmt->execute(['slot_id' => $slotId]);
+        $stmt = db()->prepare('SELECT * FROM parking_allocations WHERE parking_slot_id = :slot_id AND allocated_to IS NULL AND parking_slot_id IN (SELECT id FROM parking_slots WHERE society_id = :sid) LIMIT 1');
+        $stmt->execute(['slot_id' => $slotId, 'sid' => Society::currentId()]);
         return $stmt->fetch() ?: null;
     }
 
@@ -29,10 +29,10 @@ final class ParkingAllocation
              JOIN floors fl ON fl.id = f.floor_id
              JOIN wings w ON w.id = fl.wing_id
              LEFT JOIN vehicles v ON v.id = pa.vehicle_id
-             WHERE pa.parking_slot_id = :slot_id
+             WHERE pa.parking_slot_id = :slot_id AND ps.society_id = :sid
              ORDER BY pa.allocated_from DESC'
         );
-        $stmt->execute(['slot_id' => $slotId]);
+        $stmt->execute(['slot_id' => $slotId, 'sid' => Society::currentId()]);
         return $stmt->fetchAll();
     }
 
@@ -48,11 +48,11 @@ final class ParkingAllocation
             'SELECT pa.*, ps.slot_number, ps.slot_type
              FROM parking_allocations pa
              JOIN parking_slots ps ON ps.id = pa.parking_slot_id
-             WHERE pa.flat_id = :flat_id
+             WHERE pa.flat_id = :flat_id AND ps.society_id = :sid
                AND pa.allocated_from <= :period_end
                AND (pa.allocated_to IS NULL OR pa.allocated_to >= :period_start)'
         );
-        $stmt->execute(['flat_id' => $flatId, 'period_end' => $periodEnd, 'period_start' => $periodStart]);
+        $stmt->execute(['flat_id' => $flatId, 'period_end' => $periodEnd, 'period_start' => $periodStart, 'sid' => Society::currentId()]);
         return $stmt->fetchAll();
     }
 
@@ -69,8 +69,8 @@ final class ParkingAllocation
         try {
             $existing = self::activeForSlot($slotId);
             if ($existing) {
-                $pdo->prepare('UPDATE parking_allocations SET allocated_to = :to WHERE id = :id')
-                    ->execute(['to' => $fromDate, 'id' => $existing['id']]);
+                $pdo->prepare('UPDATE parking_allocations SET allocated_to = :to WHERE id = :id AND parking_slot_id IN (SELECT id FROM parking_slots WHERE society_id = :sid)')
+                    ->execute(['to' => $fromDate, 'id' => $existing['id'], 'sid' => Society::currentId()]);
             }
 
             $insert = $pdo->prepare(
@@ -101,15 +101,15 @@ final class ParkingAllocation
     {
         $pdo = db();
 
-        $stmt = $pdo->prepare('SELECT parking_slot_id FROM parking_allocations WHERE id = :id');
-        $stmt->execute(['id' => $allocationId]);
+        $stmt = $pdo->prepare('SELECT pa.parking_slot_id FROM parking_allocations pa JOIN parking_slots ps ON ps.id = pa.parking_slot_id WHERE pa.id = :id AND ps.society_id = :sid');
+        $stmt->execute(['id' => $allocationId, 'sid' => Society::currentId()]);
         $row = $stmt->fetch();
         if (!$row) {
             return;
         }
 
-        $pdo->prepare('UPDATE parking_allocations SET allocated_to = CURDATE() WHERE id = :id')
-            ->execute(['id' => $allocationId]);
+        $pdo->prepare('UPDATE parking_allocations SET allocated_to = CURDATE() WHERE id = :id AND parking_slot_id IN (SELECT id FROM parking_slots WHERE society_id = :sid)')
+            ->execute(['id' => $allocationId, 'sid' => Society::currentId()]);
 
         ParkingSlot::setAllocated((int) $row['parking_slot_id'], false);
     }
