@@ -15,8 +15,8 @@ final class Staff
 
     public static function find(int $id): ?array
     {
-        $stmt = db()->prepare('SELECT * FROM staff WHERE id = :id');
-        $stmt->execute(['id' => $id]);
+        $stmt = db()->prepare('SELECT * FROM staff WHERE id = :id AND society_id = :sid');
+        $stmt->execute(['id' => $id, 'sid' => Society::currentId()]);
         $row = $stmt->fetch();
         return $row ? self::withDisplayAge($row) : null;
     }
