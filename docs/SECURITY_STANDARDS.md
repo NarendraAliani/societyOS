@@ -45,3 +45,19 @@ Required controls:
 12. Production deployments must document any required password-reset database migration; live database migrations require backup and explicit operational approval.
 
 The reusable implementation is app/Services/PasswordResetService.php + app/Helpers/Mailer.php, with user and platform reset screens under app/Views/auth/ and app/Views/platform/.
+
+
+## 2026-10 quality hardening baseline
+
+Every authenticated product surface should also enforce:
+
+- tenant-scoped object lookups for society-owned records;
+- permission middleware on protected routes, with server-side authorization remaining authoritative;
+- CSRF protection on every state-changing request;
+- strict session mode, cookie-only sessions, HttpOnly and SameSite cookies, session regeneration at authentication boundaries, and inactivity timeout;
+- production-safe exception handling with server-side logging and no technical stack traces when debug mode is disabled;
+- browser security headers including CSP, clickjacking protection, MIME sniffing protection, Referrer-Policy and Permissions-Policy;
+- centralized destructive-action confirmation for delete/restore operations;
+- shared upload validation using actual MIME content, size limits, randomized filenames and storage outside the public web root;
+- audit records for authenticated state-changing requests in addition to high-signal module actions;
+- regression contracts for security-sensitive behavior so future refactors cannot silently remove protections.
