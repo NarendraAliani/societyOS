@@ -21,7 +21,7 @@ $cfg=$cfg??[];
 <div class="col-xl-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
 <h5>UPI Collection</h5><p class="text-muted small">Configure the society's UPI ID for direct UPI instructions/QR display. Razorpay remains the verified online gateway when enabled.</p>
 <form method="post" action="/admin/integrations"><?= \App\Helpers\Csrf::field() ?>
-<div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" name="upi_enabled" <?= $cfg['upi_enabled']?'checked':'' ?>><label class="form-check-label">Enable UPI display</label></div>
+<div class="form-check form-switch mb-3"><input class="form-check-input js-integration-toggle" type="checkbox" name="upi_enabled" data-integration="upi" <?= $cfg['upi_enabled']?'checked':'' ?>><label class="form-check-label">Enable UPI display</label></div>
 <label class="form-label">UPI ID / VPA</label><input class="form-control mb-2" name="upi_id" value="<?= htmlspecialchars($cfg['upi_id']) ?>" placeholder="society@bank">
 <label class="form-label">UPI Account Name</label><input class="form-control mb-3" name="upi_name" value="<?= htmlspecialchars($cfg['upi_name']) ?>" placeholder="Society Name">
 <button class="btn btn-primary">Save UPI</button>
@@ -45,7 +45,7 @@ $cfg=$cfg??[];
 <div class="col-xl-6"><div class="card border-0 shadow-sm h-100"><div class="card-body">
 <h5>Telegram Bot</h5><p class="text-muted small">Configure one bot per society. The bot can be used for society alerts and operational notifications.</p>
 <form method="post" action="/admin/integrations"><?= \App\Helpers\Csrf::field() ?>
-<div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" name="telegram_enabled" <?= $cfg['telegram_enabled']?'checked':'' ?>><label class="form-check-label">Enable Telegram</label></div>
+<div class="form-check form-switch mb-3"><input class="form-check-input js-integration-toggle" type="checkbox" name="telegram_enabled" data-integration="telegram" <?= $cfg['telegram_enabled']?'checked':'' ?>><label class="form-check-label">Enable Telegram</label></div>
 <label class="form-label">Bot Token</label><input class="form-control mb-2" type="password" name="telegram_bot_token" autocomplete="new-password" placeholder="<?= htmlspecialchars($masked['telegram_bot_token']) ?>">
 <label class="form-label">Default Chat ID</label><input class="form-control mb-3" name="telegram_default_chat_id" value="<?= htmlspecialchars($cfg['telegram_default_chat_id']) ?>" placeholder="-1001234567890">
 <button class="btn btn-primary">Save Telegram</button>
@@ -54,5 +54,29 @@ $cfg=$cfg??[];
 <form method="post" action="/admin/integrations/telegram/test" class="row g-2"><?= \App\Helpers\Csrf::field() ?><div class="col"><input class="form-control" name="chat_id" value="<?= htmlspecialchars($cfg['telegram_default_chat_id']) ?>" placeholder="Chat ID"></div><div class="col-auto"><button class="btn btn-outline-primary">Send Test</button></div></form>
 </div></div></div>
 </div>
+<script>
+document.querySelectorAll('.js-integration-toggle').forEach(function(toggle){
+    toggle.addEventListener('change', async function(){
+        const previous = !toggle.checked;
+        const form = toggle.closest('form');
+        const csrf = form ? form.querySelector('input[name="_csrf"]') : null;
+        toggle.disabled = true;
+        try {
+            const body = new URLSearchParams();
+            body.set('_csrf', csrf ? csrf.value : '');
+            body.set('integration', toggle.dataset.integration || '');
+            body.set('enabled', toggle.checked ? '1' : '0');
+            const response = await fetch('/admin/integrations/toggle', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest'}, body:body.toString()});
+            const data = await response.json();
+            if (!response.ok || !data.ok) throw new Error(data.message || 'Could not save integration status.');
+        } catch (error) {
+            toggle.checked = previous;
+            alert(error.message || 'Could not save integration status.');
+        } finally {
+            toggle.disabled = false;
+        }
+    });
+});
+</script>
 <div class="alert alert-warning mt-3"><strong>Credential safety:</strong> enter live secrets only in SocietyOS settings. Never commit them to GitHub or put them in frontend JavaScript. Razorpay likewise recommends keeping API secrets out of source control and validating webhook HMAC signatures. </div>
 <?php $content=ob_get_clean(); require __DIR__.'/../layouts/app.php';
