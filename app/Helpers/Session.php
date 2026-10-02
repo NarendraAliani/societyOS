@@ -24,6 +24,10 @@ final class Session
         ]);
 
         session_name('societyos_session');
+        ini_set('session.use_strict_mode', '1');
+        ini_set('session.use_only_cookies', '1');
+        ini_set('session.cookie_httponly', '1');
+        ini_set('session.cookie_samesite', 'Lax');
         session_start();
 
         if (!isset($_SESSION['_last_activity'])) {
@@ -31,7 +35,7 @@ final class Session
         } elseif (time() - $_SESSION['_last_activity'] > $lifetime) {
             $_SESSION = [];
             session_destroy();
-            session_start();
+            self::startFreshSession();
         }
         $_SESSION['_last_activity'] = time();
     }
@@ -39,5 +43,18 @@ final class Session
     public static function regenerate(): void
     {
         session_regenerate_id(true);
+    }
+
+    private static function startFreshSession(): void
+    {
+        session_name('societyos_session');
+        session_set_cookie_params([
+            'lifetime' => (int) config()['session_lifetime'] * 60,
+            'path' => '/',
+            'secure' => (($_SERVER['HTTPS'] ?? '') === 'on'),
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+        session_start();
     }
 }
