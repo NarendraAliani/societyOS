@@ -58,6 +58,7 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
                 <li class="nav-item"><a class="nav-link text-white" href="/assets"><i class="fa-solid fa-toolbox me-2"></i>Assets</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/reports"><i class="fa-solid fa-chart-column me-2"></i>Reports</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/admin/users"><i class="fa-solid fa-user-shield me-2"></i>Administration</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/admin/integrations"><i class="fa-solid fa-plug me-2"></i>Integrations</a></li>
             <?php endif; ?>
         </ul>
     </nav>
