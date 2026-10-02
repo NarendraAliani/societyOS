@@ -28,6 +28,7 @@ use App\Controllers\AdminController;
 use App\Controllers\BackupController;
 use App\Controllers\ProfileController;
 use App\Controllers\SettingsController;
+use App\Controllers\IntegrationController;
 use App\Controllers\ResidentController;
 use App\Controllers\PlatformController;
 use App\Middleware\BackOfficeMiddleware;
@@ -41,7 +42,7 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
-header("Content-Security-Policy: default-src 'self'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net data:; img-src 'self' data: blob:; connect-src 'self'");
+header("Content-Security-Policy: default-src 'self'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://checkout.razorpay.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net data:; img-src 'self' data: blob:; connect-src 'self' https://api.razorpay.com https://graph.facebook.com https://api.telegram.org");
 if (($_SERVER['HTTPS'] ?? '') === 'on') {
     header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
 }
@@ -323,6 +324,14 @@ $router->post('/admin/backup/restore-upload', [BackupController::class, 'restore
 
 $router->get('/admin/settings', [SettingsController::class, 'index'], [$auth, $backOffice, $can('settings.manage')]);
 $router->post('/admin/settings', [SettingsController::class, 'update'], [$auth, $backOffice, $can('settings.manage')]);
+$router->get('/admin/integrations', [IntegrationController::class, 'index'], [$auth, $backOffice, $can('settings.manage')]);
+$router->post('/admin/integrations', [IntegrationController::class, 'update'], [$auth, $backOffice, $can('settings.manage')]);
+$router->post('/admin/integrations/whatsapp/test', [IntegrationController::class, 'testWhatsApp'], [$auth, $backOffice, $can('settings.manage')]);
+$router->post('/admin/integrations/telegram/test', [IntegrationController::class, 'testTelegram'], [$auth, $backOffice, $can('settings.manage')]);
+$router->post('/payments/razorpay/order', [IntegrationController::class, 'razorpayOrder'], [$auth, $can('billing.view')]);
+$router->post('/payments/razorpay/verify', [IntegrationController::class, 'razorpayVerify'], [$auth, $can('billing.view')]);
+$router->post('/payments/razorpay/webhook', [IntegrationController::class, 'razorpayWebhook']);
+
 
 // Profile — any authenticated user, no specific permission required
 $router->get('/profile', [ProfileController::class, 'show'], [$auth]);
