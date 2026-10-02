@@ -332,6 +332,7 @@ $router->post('/payments/razorpay/order', [IntegrationController::class, 'razorp
 $router->post('/payments/razorpay/verify', [IntegrationController::class, 'razorpayVerify'], [$auth, $can('billing.view')]);
 $router->post('/payments/razorpay/webhook', [IntegrationController::class, 'razorpayWebhook']);
 $router->get('/resident/upi-qr/{billId}', [IntegrationController::class, 'upiQr'], [$auth, $can('billing.view')]);
+$router->get('/integrations/whatsapp/webhook', [IntegrationController::class, 'whatsappWebhook']);
 
 
 // Profile — any authenticated user, no specific permission required
