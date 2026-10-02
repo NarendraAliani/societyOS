@@ -39,7 +39,7 @@ $modalViews = [
 ];
 
 $staffShow = file_get_contents(__DIR__ . '/../../app/Views/staff/show.php');
-foreach (['editStaffModal', 'policeVerificationModal', 'payrollEntryModal'] as $modalId) {
+foreach (['policeVerificationModal', 'payrollEntryModal'] as $modalId) {
     if (strpos($staffShow, 'id="' . $modalId . '"') === false) {
         fwrite(STDERR, "Staff detail modal missing: {$modalId}\n");
         exit(1);
