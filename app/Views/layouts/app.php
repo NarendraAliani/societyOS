@@ -183,6 +183,26 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
         });
     });
 
+    // Add lightweight client-side search to long tables. It is deliberately opt-in by row count
+    // so small action tables and forms remain visually unchanged.
+    document.querySelectorAll('#app-content table').forEach(function (table) {
+        var body = table.tBodies && table.tBodies[0];
+        if (!body || body.rows.length < 10 || table.dataset.noSearch === 'true') return;
+        var wrapper = table.parentElement;
+        if (wrapper && wrapper.previousElementSibling && wrapper.previousElementSibling.classList.contains('societyos-table-search')) return;
+        var box = document.createElement('div');
+        box.className = 'societyos-table-search mb-2';
+        box.innerHTML = '<label class="visually-hidden">Search table</label><input type="search" class="form-control form-control-sm" placeholder="Search this table...">';
+        var input = box.querySelector('input');
+        input.addEventListener('input', function () {
+            var term = input.value.toLowerCase().trim();
+            Array.prototype.forEach.call(body.rows, function (row) {
+                row.hidden = term !== '' && row.textContent.toLowerCase().indexOf(term) === -1;
+            });
+        });
+        if (wrapper) wrapper.parentNode.insertBefore(box, wrapper);
+    });
+
     // Keep wide data tables usable on phones without requiring every view to hand-wrap them.
     document.querySelectorAll('#app-content table').forEach(function (table) {
         if (table.closest('.table-responsive')) return;
