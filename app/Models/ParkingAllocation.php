@@ -65,6 +65,11 @@ final class ParkingAllocation
     public static function allocate(int $slotId, int $flatId, ?int $vehicleId, string $fromDate, bool $isChargeable = true): int
     {
         $pdo = db();
+        $scope = $pdo->prepare('SELECT COUNT(*) FROM parking_slots ps JOIN flats f ON f.id = :flat_id JOIN floors fl ON fl.id = f.floor_id JOIN wings w ON w.id = fl.wing_id WHERE ps.id = :slot_id AND ps.society_id = :sid AND w.society_id = :sid');
+        $scope->execute(['flat_id' => $flatId, 'slot_id' => $slotId, 'sid' => Society::currentId()]);
+        if ((int) $scope->fetchColumn() !== 1) {
+            throw new \InvalidArgumentException('Parking slot and flat must belong to the current society.');
+        }
         $pdo->beginTransaction();
         try {
             $existing = self::activeForSlot($slotId);
