@@ -38,6 +38,19 @@ $modalViews = [
     'app/Views/accounting/vendors.php',
 ];
 
+$staffShow = file_get_contents(__DIR__ . '/../../app/Views/staff/show.php');
+foreach (['editStaffModal', 'policeVerificationModal', 'payrollEntryModal'] as $modalId) {
+    if (strpos($staffShow, 'id="' . $modalId . '"') === false) {
+        fwrite(STDERR, "Staff detail modal missing: {$modalId}\n");
+        exit(1);
+    }
+}
+if (substr_count($staffShow, '<form ') !== 3) {
+    fwrite(STDERR, "Staff detail should contain exactly three action forms, all inside modals.\n");
+    exit(1);
+}
+
+
 foreach ($modalViews as $view) {
     $path = __DIR__ . '/../../' . $view;
     $source = file_get_contents($path);
