@@ -80,6 +80,9 @@ jobs:
       - name: Email password reset regression contract
         run: php tests/regression/password_reset_email.php
 
+      - name: Password session invalidation regression contract
+        run: php tests/regression/password_session_invalidation.php
+
       - name: Prepare deployment branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
