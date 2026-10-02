@@ -90,18 +90,37 @@ final class PasswordResetService
 
     public static function completeReset(string $token, string $type, string $newPassword): bool
     {
-        $validated = self::validateToken($token, $type);
-        if (!$validated) {
+        if ($token === '' || !in_array($type, ['user', 'platform'], true)) {
             return false;
         }
 
         $table = $type === 'platform' ? 'platform_password_resets' : 'password_resets';
         $ownerColumn = $type === 'platform' ? 'platform_admin_id' : 'user_id';
-        $ownerId = (int) $validated['owner']['id'];
         $pdo = db();
 
         $pdo->beginTransaction();
         try {
+            // Lock the reset row inside the same transaction that consumes it. This prevents
+            // two concurrent requests from both validating the same single-use token.
+            $stmt = $pdo->prepare(
+                "SELECT * FROM {$table}
+                 WHERE token_hash=:hash AND used_at IS NULL AND expires_at>NOW()
+                 ORDER BY id DESC LIMIT 1 FOR UPDATE"
+            );
+            $stmt->execute(['hash' => hash('sha256', $token)]);
+            $reset = $stmt->fetch();
+            if (!$reset) {
+                $pdo->rollBack();
+                return false;
+            }
+
+            $ownerId = (int) $reset[$ownerColumn];
+            $owner = $type === 'platform' ? PlatformAdmin::findById($ownerId) : User::find($ownerId);
+            if (!$owner || ($owner['status'] ?? '') !== 'active') {
+                $pdo->rollBack();
+                return false;
+            }
+
             $hash = password_hash($newPassword, PASSWORD_BCRYPT);
 
             if ($type === 'platform') {
@@ -114,10 +133,10 @@ final class PasswordResetService
             }
 
             $pdo->prepare("UPDATE {$table} SET used_at=NOW() WHERE id=:id AND {$ownerColumn}=:owner_id AND used_at IS NULL")
-                ->execute(['id' => (int) $validated['reset']['id'], 'owner_id' => $ownerId]);
+                ->execute(['id' => (int) $reset['id'], 'owner_id' => $ownerId]);
 
             $pdo->prepare("DELETE FROM {$table} WHERE {$ownerColumn}=:owner_id AND used_at IS NULL AND id!=:id")
-                ->execute(['owner_id' => $ownerId, 'id' => (int) $validated['reset']['id']]);
+                ->execute(['owner_id' => $ownerId, 'id' => (int) $reset['id']]);
 
             $pdo->commit();
             return true;
