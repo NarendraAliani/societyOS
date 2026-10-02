@@ -36,9 +36,9 @@ final class MaintenanceBill
              JOIN flats f ON f.id = b.flat_id
              JOIN floors fl ON fl.id = f.floor_id
              JOIN wings w ON w.id = fl.wing_id
-             WHERE b.id = :id'
+             WHERE b.id = :id AND b.society_id = :sid'
         );
-        $stmt->execute(['id' => $id]);
+        $stmt->execute(['id' => $id, 'sid' => Society::currentId()]);
         return $stmt->fetch() ?: null;
     }
 
