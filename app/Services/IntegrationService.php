@@ -78,12 +78,32 @@ final class IntegrationService
         }
         $order = json_decode((string)$body, true);
         if (!is_array($order) || empty($order['id'])) throw new \RuntimeException('Invalid Razorpay order response.');
+        $_SESSION['societyos_razorpay_orders'][$order['id']] = ['bill_id'=>$billId,'member_id'=>$memberId,'amount'=>$amount,'created_at'=>time()];
         return ['order_id' => $order['id'], 'amount' => $order['amount'], 'currency' => $order['currency'], 'key_id' => $cfg['razorpay_key_id']];
     }
 
-    public static function verifyRazorpayPayment(int $societyId, int $billId, float $amount, string $orderId, string $paymentId, string $signature, int $memberId, ?int $userId): int
+    public static function verifyRazorpayPayment(int $societyId, string $paymentId, string $signature, ?int $userId): int
     {
         $cfg = self::config($societyId);
+        $orderId = '';
+        $pending = [];
+        foreach (($_SESSION['societyos_razorpay_orders'] ?? []) as $candidateOrderId => $record) {
+            if (!empty($record['created_at']) && (time() - (int)$record['created_at']) <= 1800) {
+                $pending[$candidateOrderId] = $record;
+            }
+        }
+        $_SESSION['societyos_razorpay_orders'] = $pending;
+        foreach ($pending as $candidateOrderId => $record) {
+            if (!empty($record['payment_id']) && $record['payment_id'] === $paymentId) { $orderId = $candidateOrderId; break; }
+        }
+        if ($orderId === '' && !empty($_POST['razorpay_order_id']) && isset($pending[(string)$_POST['razorpay_order_id']])) {
+            $orderId = (string)$_POST['razorpay_order_id'];
+        }
+        if ($orderId === '' || !isset($pending[$orderId])) throw new \RuntimeException('Razorpay order session expired. Please start payment again.');
+        $record = $pending[$orderId];
+        $billId = (int)$record['bill_id'];
+        $memberId = (int)$record['member_id'];
+        $amount = (float)$record['amount'];
         if ($cfg['razorpay_key_secret'] === '') throw new \RuntimeException('Razorpay secret is not configured.');
         $expected = hash_hmac('sha256', $orderId . '|' . $paymentId, $cfg['razorpay_key_secret']);
         if (!hash_equals($expected, $signature)) throw new \RuntimeException('Invalid Razorpay payment signature.');
@@ -109,13 +129,16 @@ final class IntegrationService
         curl_close($ch);
         if ($body === false || $status < 200 || $status >= 300) throw new \RuntimeException('Unable to confirm Razorpay payment status.');
         $payment = json_decode((string)$body, true);
-        if (!is_array($payment) || !in_array(($payment['status'] ?? ''), ['captured', 'authorized'], true)) {
+        if (!is_array($payment) || ($payment['status'] ?? '') !== 'captured') {
             throw new \RuntimeException('Razorpay payment is not captured/authorized.');
         }
         $paidAmount = ((int)($payment['amount'] ?? 0)) / 100;
         if (abs($paidAmount - $amount) > 0.01) throw new \RuntimeException('Razorpay payment amount does not match the bill payment.');
 
-        return BillingService::recordPayment($billId, $amount, 'upi', $paymentId, $userId, $societyId)['payment_id'];
+        $mode = match((string)($payment['method'] ?? 'upi')) { 'card' => 'card', 'netbanking' => 'bank_transfer', 'upi' => 'upi', default => 'upi' };
+        $result = BillingService::recordPayment($billId, $amount, $mode, $paymentId, $userId, $societyId);
+        unset($_SESSION['societyos_razorpay_orders'][$orderId]);
+        return $result['payment_id'];
     }
 
     public static function verifyWebhook(int $societyId, string $payload, string $signature): bool
