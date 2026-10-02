@@ -105,7 +105,8 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (society_id) REFERENCES society(id) ON DELETE CASCADE,
     FOREIGN KEY (role_id) REFERENCES roles(id),
-    UNIQUE KEY uq_user_email (society_id, email)
+    UNIQUE KEY uq_user_email (society_id, email),
+    INDEX idx_users_society_status (society_id, status)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS password_resets (
@@ -115,7 +116,8 @@ CREATE TABLE IF NOT EXISTS password_resets (
     expires_at DATETIME NOT NULL,
     used_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_password_resets_token_used_expiry (token_hash, used_at, expires_at)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS user_sessions (
@@ -150,7 +152,8 @@ CREATE TABLE IF NOT EXISTS activity_logs (
     FOREIGN KEY (society_id) REFERENCES society(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_activity_module (module),
-    INDEX idx_activity_created (created_at)
+    INDEX idx_activity_created (created_at),
+    INDEX idx_activity_society_created (society_id, created_at)
 ) ENGINE=InnoDB;
 
 -- Platform administrators are separate from society-scoped users.\nCREATE TABLE IF NOT EXISTS platform_admins (\n    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,\n    name VARCHAR(150) NOT NULL,\n    email VARCHAR(150) NOT NULL,\n    password_hash VARCHAR(255) NOT NULL,\n    status ENUM('active','inactive','locked') NOT NULL DEFAULT 'active',\n    must_change_password TINYINT(1) NOT NULL DEFAULT 1,\n    last_login_at TIMESTAMP NULL,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n    UNIQUE KEY uq_platform_admin_email (email)\n) ENGINE=InnoDB;\n\nCREATE TABLE IF NOT EXISTS platform_password_resets (
@@ -260,7 +263,8 @@ CREATE TABLE IF NOT EXISTS members (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (society_id) REFERENCES society(id) ON DELETE CASCADE,
     FOREIGN KEY (flat_id) REFERENCES flats(id) ON DELETE CASCADE,
-    INDEX idx_member_flat (flat_id)
+    INDEX idx_member_flat (flat_id),
+    INDEX idx_members_society_status_flat (society_id, status, flat_id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS user_roles (
@@ -330,7 +334,8 @@ CREATE TABLE IF NOT EXISTS documents (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (society_id) REFERENCES society(id) ON DELETE CASCADE,
     FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE,
-    FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
+    FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_documents_member_created (member_id, created_at)
 ) ENGINE=InnoDB;
 
 -- =====================================================================
@@ -364,7 +369,8 @@ CREATE TABLE IF NOT EXISTS parking_allocations (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (parking_slot_id) REFERENCES parking_slots(id) ON DELETE CASCADE,
     FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE SET NULL,
-    FOREIGN KEY (flat_id) REFERENCES flats(id) ON DELETE CASCADE
+    FOREIGN KEY (flat_id) REFERENCES flats(id) ON DELETE CASCADE,
+    INDEX idx_parking_alloc_slot_active (parking_slot_id, allocated_to)
 ) ENGINE=InnoDB;
 
 -- =====================================================================
@@ -417,7 +423,8 @@ CREATE TABLE IF NOT EXISTS maintenance_bills (
     FOREIGN KEY (flat_id) REFERENCES flats(id) ON DELETE CASCADE,
     FOREIGN KEY (financial_year_id) REFERENCES financial_years(id),
     UNIQUE KEY uq_bill_number (society_id, bill_number),
-    INDEX idx_bill_flat_status (flat_id, status)
+    INDEX idx_bill_flat_status (flat_id, status),
+    INDEX idx_bills_society_due_status (society_id, due_date, status)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS bill_items (
@@ -565,7 +572,8 @@ CREATE TABLE IF NOT EXISTS visitors (
     FOREIGN KEY (flat_id) REFERENCES flats(id) ON DELETE CASCADE,
     FOREIGN KEY (approved_by_member_id) REFERENCES members(id) ON DELETE SET NULL,
     FOREIGN KEY (logged_by) REFERENCES users(id) ON DELETE SET NULL,
-    INDEX idx_visitor_flat (flat_id)
+    INDEX idx_visitor_flat (flat_id),
+    INDEX idx_visitors_society_checkin (society_id, check_in_at)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS visitor_passes (
@@ -627,7 +635,8 @@ CREATE TABLE IF NOT EXISTS complaints (
     FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES complaint_categories(id),
     FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
-    INDEX idx_complaint_status (status)
+    INDEX idx_complaint_status (status),
+    INDEX idx_complaints_society_status_created (society_id, status, created_at)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS complaint_updates (
