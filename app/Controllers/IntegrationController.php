@@ -81,6 +81,25 @@ final class IntegrationController
         try{IntegrationService::processRazorpayWebhook($sid,$payload,$sig);}catch(\Throwable $e){http_response_code(401);exit('Invalid webhook.');}
         http_response_code(200);echo 'ok';
     }
+    public function whatsappWebhook(): void
+    {
+        $sid=(int)($_GET['society_id']??0);
+        $mode=(string)($_GET['hub_mode']??$_GET['hub.mode']??'');
+        $token=(string)($_GET['hub_verify_token']??$_GET['hub.verify_token']??'');
+        $challenge=(string)($_GET['hub_challenge']??$_GET['hub.challenge']??'');
+        $cfg=IntegrationService::config($sid);
+        if($sid>0 && $mode==='subscribe' && $cfg['whatsapp_verify_token']!=='' && hash_equals($cfg['whatsapp_verify_token'],$token)){header('Content-Type:text/plain');echo $challenge;exit;}
+        http_response_code(403);exit('Verification failed.');
+    }
+
+    public function telegramWebhookSetup(): void
+    {
+        $this->csrf();
+        try{IntegrationService::setTelegramWebhook(Society::currentId());Flash::set('success','Telegram webhook configured.');}
+        catch(\Throwable $e){Flash::set('error',$e->getMessage());}
+        header('Location:/admin/integrations');exit;
+    }
+
     public function upiQr(string $billId): void
     {
         $cfg=IntegrationService::config(Society::currentId());
