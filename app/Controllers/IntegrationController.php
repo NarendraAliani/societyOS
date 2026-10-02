@@ -80,6 +80,17 @@ final class IntegrationController
         if($sid<=0||!IntegrationService::verifyWebhook($sid,$payload,$sig)){http_response_code(401);exit('Invalid webhook.');}
         http_response_code(200);echo 'ok';
     }
+    public function upiQr(string $billId): void
+    {
+        $cfg=IntegrationService::config(Society::currentId());
+        $bill=\App\Models\MaintenanceBill::find((int)$billId);
+        if(!$cfg['upi_enabled'] || $cfg['upi_id']==='' || !$bill || (int)$bill['society_id']!==Society::currentId()){http_response_code(404);exit;}
+        $allowed=false; foreach(\App\Models\MaintenanceBill::forMember((int)(Auth::memberId()??0)) as $row) if((int)$row['id']===(int)$billId){$allowed=true;break;}
+        $amount=max(0,(float)$bill['total_amount']-(float)$bill['paid_amount']); if(!$allowed||$amount<=0){http_response_code(404);exit;}
+        $uri='upi://pay?'.http_build_query(['pa'=>$cfg['upi_id'],'pn'=>$cfg['upi_name']?:'SocietyOS Society','am'=>number_format($amount,2,'.',''),'cu'=>'INR','tn'=>'Maintenance '.$bill['bill_number']], '', '&', PHP_QUERY_RFC3986);
+        header('Content-Type:image/svg+xml; charset=UTF-8'); echo \App\Helpers\QrCode::svg($uri,320); exit;
+    }
+
     private function csrf(): void{if(!Csrf::verify($_POST['_csrf']??null)){http_response_code(419);exit('Session expired. Go back and try again.');}}
     private function json(array $data):void{header('Content-Type: application/json; charset=UTF-8');echo json_encode($data,JSON_UNESCAPED_SLASHES);exit;}
 }
