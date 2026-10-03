@@ -47,6 +47,10 @@ if (strpos($staffShow, '\\App\\Helpers\\Csrf::field()') === false) {
     fwrite(STDERR, "Staff detail is missing the namespaced CSRF helper.\n");
     exit(1);
 }
+if (strpos($staffShow, 'app-form-modal') === false) {
+    fwrite(STDERR, "Staff detail edit/management forms are not marked for modal presentation.\n");
+    exit(1);
+}
 foreach (['editStaffModal', 'policeVerificationModal', 'payrollEntryModal'] as $modalId) {
     if (strpos($staffShow, 'id="' . $modalId . '"') === false) {
         fwrite(STDERR, "Staff detail modal missing: {$modalId}\n");
