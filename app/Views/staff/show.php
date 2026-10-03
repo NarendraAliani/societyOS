@@ -98,7 +98,7 @@ $verificationLabel = match ($staff['police_verification_status']) {
                                         <span class="badge bg-success">Paid</span>
                                     <?php else: ?>
                                         <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#markPayrollPaidModal<?= (int) $entry['id'] ?>">Mark Paid</button>
-                                        <div class="modal fade" id="markPayrollPaidModal<?= (int) $entry['id'] ?>" tabindex="-1" aria-labelledby="markPayrollPaidLabel<?= (int) $entry['id'] ?>" aria-hidden="true">
+                                        <div class="modal fade app-form-modal" id="markPayrollPaidModal<?= (int) $entry['id'] ?>" tabindex="-1" aria-labelledby="markPayrollPaidLabel<?= (int) $entry['id'] ?>" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
@@ -135,7 +135,7 @@ $verificationLabel = match ($staff['police_verification_status']) {
 </div>
 
 <!-- Edit Staff -->
-<div class="modal fade" id="editStaffModal" tabindex="-1" aria-labelledby="editStaffModalLabel" aria-hidden="true">
+<div class="modal fade app-form-modal" id="editStaffModal" tabindex="-1" aria-labelledby="editStaffModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
@@ -192,7 +192,7 @@ $verificationLabel = match ($staff['police_verification_status']) {
 </div>
 
 <!-- Police Verification -->
-<div class="modal fade" id="policeVerificationModal" tabindex="-1" aria-labelledby="policeVerificationModalLabel" aria-hidden="true">
+<div class="modal fade app-form-modal" id="policeVerificationModal" tabindex="-1" aria-labelledby="policeVerificationModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
@@ -231,7 +231,7 @@ $verificationLabel = match ($staff['police_verification_status']) {
 </div>
 
 <!-- Payroll Entry -->
-<div class="modal fade" id="payrollEntryModal" tabindex="-1" aria-labelledby="payrollEntryModalLabel" aria-hidden="true">
+<div class="modal fade app-form-modal" id="payrollEntryModal" tabindex="-1" aria-labelledby="payrollEntryModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-md modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
