@@ -1,0 +1,55 @@
+<?php $pageTitle='Create Society'; ob_start(); ?>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h5 class="mb-0">Create Society</h5>
+        <small class="text-muted">Provision a new isolated tenant and its first Society Super Admin.</small>
+    </div>
+    <a href="/platform/societies" class="btn btn-outline-secondary btn-sm">Back</a>
+</div>
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form method="post" action="/platform/societies">
+            <?= \App\Helpers\Csrf::field() ?>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Society Code</label>
+                    <input name="code" class="form-control" maxlength="30" placeholder="SOC-002" required>
+                    <div class="form-text">Unique tenant/login code.</div>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label">Society Name</label>
+                    <input name="name" class="form-control" maxlength="150" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Administrator Name</label>
+                    <input name="admin_name" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Administrator Email</label>
+                    <input type="email" name="admin_email" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Administrator Phone</label>
+                    <input name="admin_phone" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Initial Administrator Password</label>
+                    <input type="password" name="admin_password" class="form-control" minlength="8" required>
+                    <div class="form-text">The new Society Super Admin must change this password after first login.</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Financial Year Start</label>
+                    <input type="number" name="fy_start_year" class="form-control" min="2000" max="2100" value="<?= (int)date('Y') ?>" required>
+                </div>
+            </div>
+            <div class="alert alert-info mt-4 mb-0">
+                <i class="fa-solid fa-circle-info me-1"></i>
+                This creates the society, financial year, default settings, cash account,
+                complaint/asset categories, maintenance heads/rates, and the first Society
+                Super Admin atomically.
+            </div>
+            <button class="btn btn-primary mt-4"><i class="fa-solid fa-building-circle-check me-1"></i>Provision Society</button>
+        </form>
+    </div>
+</div>
+<?php $content=ob_get_clean(); require __DIR__.'/../layouts/platform.php'; ?>

@@ -1,0 +1,180 @@
+name: SocietyOS Production Build
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: societyos-production-build
+  cancel-in-progress: true
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, gd, zip, xml, curl, pdo_mysql
+          coverage: none
+
+      - name: Validate Composer configuration
+        run: composer validate --strict
+
+      - name: Install production dependencies
+        run: composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+      - name: PHP syntax check
+        shell: bash
+        run: |
+          set -euo pipefail
+          find app config public database -type f -name '*.php' -print0 | while IFS= read -r -d '' file; do
+            php -l "$file" >/dev/null
+          done
+
+      - name: Linked-home regression contract
+        run: php tests/regression/linked_home_role_scope.php
+
+      - name: Multi-role user regression contract
+        run: php tests/regression/multi_role_user_accounts.php
+
+      - name: Resident navigation regression contract
+        run: php tests/regression/resident_navigation.php
+
+      - name: Multi-society context regression contract
+        run: php tests/regression/multi_society_context.php
+
+      - name: Platform provisioning regression contract
+        run: php tests/regression/platform_provisioning.php
+
+      - name: Theme readability regression contract
+        run: php tests/regression/theme_readability.php
+
+      - name: Embedded form modal regression contract
+        run: php tests/regression/embedded_forms_modal.php
+
+      - name: Global UI and layout regression contract
+        run: php tests/regression/global_ui_layout.php
+
+      - name: Account menu logout regression contract
+        run: php tests/regression/account_menu_logout.php
+
+      - name: Security header regression contract
+        run: php tests/regression/security_headers.php
+
+      - name: Authentication CAPTCHA regression contract
+        run: php tests/regression/authentication_captcha.php
+
+      - name: Email password reset regression contract
+        run: php tests/regression/password_reset_email.php
+
+      - name: Password session invalidation regression contract
+        run: php tests/regression/password_session_invalidation.php
+
+      - name: QR code regression contract
+        run: php tests/regression/visitor_qr.php
+
+      - name: Quality hardening regression contract
+        run: php tests/regression/quality_hardening.php
+
+      - name: Authorization boundary regression contract
+        run: php tests/regression/authorization_boundary.php
+
+      - name: SocietyOS 2.0 integration regression contract
+        run: php tests/regression/societyos20_integrations.php
+
+      - name: Prepare deployment branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          rm -rf /tmp/societyos-deploy
+          mkdir -p /tmp/societyos-deploy
+          rsync -a --exclude='.git/' ./ /tmp/societyos-deploy/
+
+          # Composer may refresh composer.lock during the build; the deployment copy above
+          # intentionally captures that generated lock file before switching branches.
+          git reset --hard HEAD
+
+          git branch -D deploy 2>/dev/null || true
+          git switch --orphan deploy
+          git rm -rf . || true
+
+          # Rehydrate the working tree without deleting the .git directory.
+          rsync -a /tmp/societyos-deploy/ ./
+
+          # vendor/ is excluded from main but is required on the deployment branch.
+          git add -A
+          git add -f vendor/
+
+          if git diff --cached --quiet; then
+            echo "No deployment changes to publish."
+            exit 0
+          fi
+
+          git commit -m "Build production deployment from ${GITHUB_SHA::7}"
+          git push --force origin deploy
+
+
+      - name: Deploy production build to BigRock via FTPS
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./
+          # The FTP account is already scoped to the live subdomain document root.
+          # Deploy relative to that FTP root; do not create a nested domain directory.
+          server-dir: ./
+          dangerous-clean-slate: false
+          security: strict
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            .env
+            .env.*
+            deployment-cron.log
+            .ftp-deploy-sync-state.json
+
+      - name: Production smoke test
+        continue-on-error: true
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for url in "https://society.dairy-dealer.net/login" "https://society.dairy-dealer.net/platform/login"; do
+            echo "${url}"
+            status="$(curl -sS -L -o /dev/null -w '%{http_code}' --max-time 30 "$url")"
+            test "$status" = "200"
+          done
+
+          headers="$(curl -sS -I --max-time 30 https://society.dairy-dealer.net/login)"
+          echo "$headers" | grep -iq '^x-content-type-options: nosniff'
+          echo "$headers" | grep -iq '^x-frame-options: sameorigin'
+          echo "$headers" | grep -iq '^referrer-policy: strict-origin-when-cross-origin'
+          echo "$headers" | grep -iq '^permissions-policy:'
+          echo "$headers" | grep -iq '^strict-transport-security:'
+

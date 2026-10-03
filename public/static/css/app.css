@@ -1,0 +1,683 @@
+/* ===== Base ===== */
+
+body {
+    background-color: #f5f6fa;
+}
+
+.sidebar .nav-link.active,
+.sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.card {
+    border-radius: 0.75rem;
+}
+
+/* ===== Theme-aware topbar =====
+   Bootstrap's own utilities (bg-white, navbar-light) aren't color-mode aware, so the
+   topbar uses this custom class instead of those, and gets restyled per theme below. */
+
+.app-topbar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* ===== Dark theme =====
+   Bootstrap 5.3's [data-bs-theme="dark"] already restyles cards/tables/forms/badges on
+   its own; only the pieces Bootstrap doesn't own (body bg, sidebar hover, our topbar
+   class) need an explicit override here. */
+
+[data-bs-theme="dark"] body {
+    background-color: #12141c;
+}
+
+[data-bs-theme="dark"] .app-topbar {
+    background-color: #1c1f2b;
+    border-bottom-color: #2c3040;
+}
+
+[data-bs-theme="dark"] .sidebar {
+    background-color: #0d0f17 !important;
+}
+
+/* ===== Mid theme =====
+   Not a Bootstrap-native mode — stays on light-mode Bootstrap components underneath,
+   with a muted/soft palette layered on top via this custom attribute. */
+
+[data-theme="mid"] body {
+    background-color: #e4e8ee;
+}
+
+[data-theme="mid"] .app-topbar {
+    background-color: #f4f6f9;
+    border-bottom-color: #d8dde5;
+}
+
+[data-theme="mid"] .card {
+    background-color: #f4f6f9;
+    border-color: #d8dde5;
+}
+
+[data-theme="mid"] .sidebar {
+    background-color: #232840 !important;
+}
+
+[data-theme="mid"] .table {
+    --bs-table-bg: transparent;
+}
+
+/* ===== Colorful KPI cards =====
+   Uses Bootstrap's own --bs-* color variables, so the accent colors stay correct across
+   both the native dark mode and the custom mid theme without needing per-theme overrides. */
+
+.kpi-card {
+    border-left: 4px solid transparent;
+}
+
+.kpi-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+.kpi-primary { border-left-color: var(--bs-primary); }
+.kpi-primary .kpi-icon { background: rgba(13, 110, 253, .15); color: var(--bs-primary); }
+
+.kpi-success { border-left-color: var(--bs-success); }
+.kpi-success .kpi-icon { background: rgba(25, 135, 84, .15); color: var(--bs-success); }
+
+.kpi-info { border-left-color: var(--bs-info); }
+.kpi-info .kpi-icon { background: rgba(13, 202, 240, .18); color: #0aa2c0; }
+
+.kpi-warning { border-left-color: var(--bs-warning); }
+.kpi-warning .kpi-icon { background: rgba(255, 193, 7, .18); color: #b8860b; }
+
+.kpi-danger { border-left-color: var(--bs-danger); }
+.kpi-danger .kpi-icon { background: rgba(220, 53, 69, .15); color: var(--bs-danger); }
+
+.kpi-secondary { border-left-color: var(--bs-secondary); }
+.kpi-secondary .kpi-icon { background: rgba(108, 117, 125, .15); color: var(--bs-secondary); }
+
+/* ===== Font size =====
+   Scales the root font-size; every rem-based Bootstrap component (buttons, tables, form
+   controls) follows proportionally without needing per-component overrides. */
+
+[data-font-size="small"] { font-size: 14px; }
+[data-font-size="large"] { font-size: 18px; }
+
+
+/* ===== Resident self-service pages ===== */
+.resident-page {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.resident-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.resident-page-header h4 {
+    margin-bottom: .35rem;
+    font-weight: 650;
+}
+
+.resident-page-header .resident-eyebrow {
+    color: var(--bs-primary);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.resident-page-header .resident-subtitle {
+    color: var(--bs-secondary-color);
+    margin-bottom: 0;
+}
+
+.resident-home-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .45rem .7rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 999px;
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-secondary-color);
+    font-size: .85rem;
+    white-space: nowrap;
+}
+
+.resident-section-card {
+    border: 0;
+    box-shadow: 0 .125rem .5rem rgba(0, 0, 0, .06);
+    overflow: hidden;
+}
+
+.resident-section-card .card-header {
+    background: var(--bs-body-bg);
+    border-bottom: 1px solid var(--bs-border-color);
+    padding: 1rem 1.25rem;
+}
+
+.resident-section-card .card-body {
+    padding: 1.25rem;
+}
+
+.resident-section-title {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 650;
+}
+
+.resident-section-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(13, 110, 253, .1);
+    color: var(--bs-primary);
+    flex-shrink: 0;
+}
+
+.resident-stat {
+    min-height: 92px;
+}
+
+.resident-stat .stat-label {
+    color: var(--bs-secondary-color);
+    font-size: .78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.resident-stat .stat-value {
+    margin-top: .2rem;
+    font-size: 1.55rem;
+    line-height: 1.15;
+    font-weight: 700;
+}
+
+.resident-table {
+    margin-bottom: 0;
+}
+
+.resident-table thead th {
+    color: var(--bs-secondary-color);
+    font-size: .76rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.resident-table tbody td {
+    padding-top: .85rem;
+    padding-bottom: .85rem;
+}
+
+.resident-empty {
+    padding: 2.5rem 1rem !important;
+    text-align: center;
+    color: var(--bs-secondary-color);
+}
+
+.resident-empty i {
+    display: block;
+    margin-bottom: .65rem;
+    font-size: 1.65rem;
+    opacity: .65;
+}
+
+.resident-form-note {
+    color: var(--bs-secondary-color);
+    font-size: .82rem;
+}
+
+.resident-list .list-group-item {
+    border-left: 0;
+    border-right: 0;
+    padding: .9rem 0;
+}
+
+.resident-list .list-group-item:first-child {
+    border-top: 0;
+}
+
+.resident-list .list-group-item:last-child {
+    border-bottom: 0;
+}
+
+.resident-item-title {
+    font-weight: 650;
+}
+
+.resident-item-meta {
+    color: var(--bs-secondary-color);
+    font-size: .82rem;
+}
+
+@media (max-width: 767.98px) {
+    .resident-page-header {
+        flex-direction: column;
+    }
+
+    .resident-home-pill {
+        white-space: normal;
+    }
+
+    .resident-section-card .card-body,
+    .resident-section-card .card-header {
+        padding: 1rem;
+    }
+}
+
+[data-bs-theme="dark"] .resident-section-card {
+    box-shadow: 0 .125rem .5rem rgba(0, 0, 0, .22);
+}
+
+
+/* ===== Standard modal forms =====
+   Project-wide convention: create/edit forms should open in Bootstrap modals instead of
+   occupying permanent page space. Keep the modal shell visually aligned with SocietyOS cards.
+*/
+.app-form-modal .modal-content {
+    border: 0;
+    border-radius: .85rem;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, .18);
+    overflow: hidden;
+}
+
+.app-form-modal .modal-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--bs-border-color);
+    background: var(--bs-tertiary-bg);
+}
+
+.app-form-modal .modal-body {
+    padding: 1.25rem;
+}
+
+.app-form-modal .modal-footer {
+    padding: .9rem 1.25rem;
+    border-top: 1px solid var(--bs-border-color);
+    background: var(--bs-tertiary-bg);
+}
+
+.app-form-modal .modal-title {
+    margin-top: .1rem;
+    font-weight: 650;
+}
+
+.app-form-modal .form-label {
+    font-weight: 600;
+}
+
+.app-form-modal form {
+    width: 100%;
+}
+
+.app-form-modal form > .row,
+.app-form-modal .row {
+    width: 100%;
+}
+
+.app-form-modal .form-control,
+.app-form-modal .form-select,
+.app-form-modal textarea {
+    min-width: 0;
+}
+
+.app-form-modal .form-text,
+.app-form-modal small {
+    line-height: 1.4;
+}
+
+@media (max-width: 767.98px) {
+    .app-form-modal .modal-dialog {
+        width: auto;
+        max-width: none;
+    }
+
+    .app-form-modal .row > [class*="col-"] {
+        width: 100%;
+    }
+}
+
+
+.app-form-modal .btn-close {
+    align-self: flex-start;
+}
+
+@media (max-width: 575.98px) {
+    .app-form-modal .modal-dialog {
+        margin: .75rem;
+    }
+
+    .app-form-modal .modal-body,
+    .app-form-modal .modal-header,
+    .app-form-modal .modal-footer {
+        padding: 1rem;
+    }
+}
+
+
+/* ===== Global responsive application shell ===== */
+#app-shell {
+    height: 100vh;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+#app-shell > main {
+    min-width: 0;
+    min-height: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 275px;
+    height: 100vh;
+    min-height: 100vh;
+    flex: 0 0 275px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
+.app-topbar {
+    min-height: 58px;
+    flex: 0 0 auto;
+}
+
+#app-content {
+    min-width: 0;
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
+.app-topbar-actions {
+    flex-wrap: nowrap;
+}
+
+.app-sidebar-toggle {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 991.98px) {
+    #app-shell {
+        display: block !important;
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
+    .sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        z-index: 1045;
+        width: min(82vw, 290px);
+        min-height: 100vh;
+        transform: translateX(-100%);
+        transition: transform .2s ease;
+        box-shadow: 0 0 1.5rem rgba(0, 0, 0, .18);
+        overflow-y: auto;
+    }
+
+    #app-shell.sidebar-open .sidebar {
+        transform: translateX(0);
+    }
+
+    #app-shell.sidebar-open::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 1040;
+        background: rgba(0, 0, 0, .45);
+    }
+
+    #app-shell > main {
+        width: 100%;
+        min-width: 0;
+        min-height: 100vh;
+        height: auto;
+        display: block;
+        overflow: visible;
+    }
+
+    .app-topbar {
+        position: sticky;
+        top: 0;
+        z-index: 1035;
+        padding-left: .75rem !important;
+        padding-right: .75rem !important;
+    }
+
+    .app-topbar-actions {
+        gap: .35rem !important;
+    }
+
+    .app-topbar-actions > .dropdown > .btn {
+        padding: .35rem .5rem;
+        white-space: nowrap;
+    }
+
+    #app-content {
+        min-height: 0;
+        overflow-y: visible;
+        padding: 1rem !important;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .app-topbar .navbar-text {
+        max-width: 32vw;
+        font-size: .9rem;
+    }
+
+    .app-topbar-actions > .dropdown > .btn {
+        font-size: .8rem;
+    }
+
+    .app-topbar-actions > .dropdown:nth-child(1) .btn,
+    .app-topbar-actions > .dropdown:nth-child(2) .btn {
+        width: 42px;
+        overflow: hidden;
+        font-size: 0;
+    }
+
+    .app-topbar-actions > .dropdown:nth-child(1) .btn i,
+    .app-topbar-actions > .dropdown:nth-child(2) .btn i {
+        margin: 0 !important;
+        font-size: .9rem;
+    }
+
+    .app-topbar-actions > .dropdown:nth-child(3) .btn {
+        max-width: 110px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .app-topbar-actions > .dropdown:nth-child(4) .btn {
+        max-width: 125px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .app-topbar {
+        min-height: 52px;
+    }
+
+    .app-topbar .navbar-text {
+        max-width: 28vw;
+        font-size: .82rem;
+    }
+
+    .app-topbar-actions > .dropdown:nth-child(3) .btn {
+        width: 42px;
+        padding-left: .5rem;
+        padding-right: .5rem;
+        font-size: 0;
+    }
+
+    .app-topbar-actions > .dropdown:nth-child(3) .btn i {
+        margin: 0 !important;
+        font-size: .9rem;
+    }
+
+    .app-topbar-actions > .dropdown:nth-child(4) .btn {
+        width: 42px;
+        padding-left: .5rem;
+        padding-right: .5rem;
+        font-size: 0;
+    }
+
+    .app-topbar-actions > .dropdown:nth-child(4) .btn i {
+        margin: 0 !important;
+        font-size: .9rem;
+    }
+
+    #app-content {
+        padding: .75rem !important;
+    }
+
+    .resident-page-header .btn {
+        width: 100%;
+    }
+
+    .resident-page-header > div:last-child {
+        width: 100%;
+    }
+}
+
+/* ===== Global dark-theme readability guard =====
+   Bootstrap's .text-dark is intentionally fixed to a dark color and therefore becomes
+   unreadable when used inside the native dark color mode. Keep semantic text color tied
+   to the active theme so older pages/components cannot silently lose contrast. */
+[data-bs-theme="dark"] .text-dark {
+    color: var(--bs-body-color) !important;
+}
+
+/* Common hard-coded dark surfaces should also follow the active color mode. */
+[data-bs-theme="dark"] .bg-white {
+    background-color: var(--bs-body-bg) !important;
+}
+
+[data-bs-theme="dark"] .border-white {
+    border-color: var(--bs-border-color) !important;
+}
+
+/* ===== Report directory cards ===== */
+.report-card-link {
+    color: inherit;
+}
+
+.report-card-link .card {
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.report-card-link:hover .card {
+    transform: translateY(-1px);
+    box-shadow: 0 .5rem 1.25rem rgba(0, 0, 0, .12) !important;
+}
+
+.report-card-heading {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    margin: 0 0 .35rem;
+    color: var(--bs-heading-color);
+    font-size: 1rem;
+    font-weight: 650;
+}
+
+.report-card-heading i {
+    flex: 0 0 auto;
+}
+
+[data-bs-theme="dark"] .report-card-link:hover .card {
+    box-shadow: 0 .5rem 1.25rem rgba(0, 0, 0, .28) !important;
+}
+
+
+/* ===== Authentication CAPTCHA ===== */
+.captcha-box {
+    --captcha-bg: var(--bs-tertiary-bg);
+}
+
+.captcha-challenge {
+    min-height: 84px;
+}
+
+.captcha-image {
+    min-width: 0;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .65rem;
+    background: var(--captcha-bg);
+    color: var(--bs-body-color);
+    overflow: hidden;
+}
+
+.captcha-svg {
+    display: block;
+    width: 100%;
+    height: 82px;
+}
+
+.captcha-refresh {
+    white-space: nowrap;
+}
+
+[data-bs-theme="dark"] .captcha-image {
+    background: #1c1f2b;
+}
+
+
+/* ===== Accessibility and keyboard focus ===== */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 3px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+.visitor-pass-qr {
+    width: 100px;
+    max-width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: .5rem;
+    overflow: hidden;
+}
+
+.visitor-pass-qr svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
