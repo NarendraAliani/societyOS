@@ -247,6 +247,18 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
             modal.innerHTML = '<div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Edit / Manage</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"></div></div></div>';
             var modalBody = modal.querySelector('.modal-body');
 
+            // Choose a wider dialog for multi-field management forms so labels and
+            // controls have room to breathe instead of collapsing into narrow columns.
+            var sourceForm = target.querySelector('form[method="post"], form[method="POST"]');
+            if (sourceForm) {
+                var gridFields = sourceForm.querySelectorAll(':scope > [class*="col-"]');
+                if (gridFields.length >= 5) {
+                    modal.querySelector('.modal-dialog').classList.add('modal-xl');
+                } else if (gridFields.length >= 3) {
+                    modal.querySelector('.modal-dialog').classList.add('modal-lg');
+                }
+            }
+
             // Move the live form nodes instead of cloning them. Cloning would drop event
             // listeners installed by a page (for example dependent role/home dropdowns).
             // Also unwrap table rows: a <tr> directly inside a modal body is invalid markup
