@@ -327,6 +327,38 @@ body {
     font-weight: 600;
 }
 
+.app-form-modal form {
+    width: 100%;
+}
+
+.app-form-modal form > .row,
+.app-form-modal .row {
+    width: 100%;
+}
+
+.app-form-modal .form-control,
+.app-form-modal .form-select,
+.app-form-modal textarea {
+    min-width: 0;
+}
+
+.app-form-modal .form-text,
+.app-form-modal small {
+    line-height: 1.4;
+}
+
+@media (max-width: 767.98px) {
+    .app-form-modal .modal-dialog {
+        width: auto;
+        max-width: none;
+    }
+
+    .app-form-modal .row > [class*="col-"] {
+        width: 100%;
+    }
+}
+
+
 .app-form-modal .btn-close {
     align-self: flex-start;
 }
