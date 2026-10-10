@@ -37,11 +37,12 @@ ob_start();
     <div class="col-lg-5">
         <div class="card border-0 shadow-sm">
             <div class="card-body">
-                <div class="d-flex justify-content-between"><h6>Latest Notices</h6><a href="/resident/notices">View all</a></div>
+                <div class="d-flex justify-content-between align-items-center mb-2"><h6 class="mb-0">Latest Notices</h6></div>
                 <?php foreach ($notices as $notice): ?>
                     <div class="border-bottom py-2">
                         <div class="fw-semibold"><?= htmlspecialchars($notice['title']) ?></div>
                         <div class="small text-muted"><?= htmlspecialchars($notice['published_at']) ?></div>
+                        <a class="btn btn-outline-primary btn-sm mt-2" href="/resident/notices/<?= (int) $notice['id'] ?>"><i class="fa-solid fa-eye me-1"></i>View <?= $notice['notice_type'] === 'circular' ? 'Circular' : 'Notice' ?></a>
                     </div>
                 <?php endforeach; ?>
                 <?php if (!$notices): ?><div class="text-muted">No active notices.</div><?php endif; ?>
