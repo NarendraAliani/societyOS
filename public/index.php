@@ -93,6 +93,7 @@ $router->post('/resident/family-members/{id}/delete', [ResidentController::class
 $router->post('/resident/emergency-contacts', [ResidentController::class, 'storeEmergencyContact'], [$auth, $can('dashboard.view')]);
 $router->post('/resident/emergency-contacts/{id}/delete', [ResidentController::class, 'deleteEmergencyContact'], [$auth, $can('dashboard.view')]);
 $router->get('/resident/notices', [ResidentController::class, 'notices'], [$auth, $can('dashboard.view')]);
+$router->get('/resident/notices/{id}', [ResidentController::class, 'showNotice'], [$auth, $can('dashboard.view')]);
 $router->get('/resident/complaints', [ResidentController::class, 'complaints'], [$auth, $can('complaints.view')]);
 $router->post('/resident/complaints', [ResidentController::class, 'storeComplaint'], [$auth, $can('complaints.view')]);
 $router->get('/resident/visitor-passes', [ResidentController::class, 'visitorPasses'], [$auth, $can('visitors.manage')]);
