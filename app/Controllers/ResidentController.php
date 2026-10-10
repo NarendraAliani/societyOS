@@ -339,6 +339,21 @@ final class ResidentController
         require __DIR__ . '/../Views/resident/notices.php';
     }
 
+    public function showNotice(string $id): void
+    {
+        $this->member();
+        $notice = Notice::find((int) $id);
+        if (!$notice || (int) $notice['society_id'] !== Society::currentId()
+            || (!empty($notice['expires_at']) && strtotime((string) $notice['expires_at']) < time())) {
+            http_response_code(404);
+            require __DIR__ . '/../Views/errors/404.php';
+            return;
+        }
+
+        $pageTitle = $notice['notice_type'] === 'circular' ? 'Circular Details' : 'Notice Details';
+        require __DIR__ . '/../Views/resident/notice_detail.php';
+    }
+
     public function complaints(): void
     {
         $member = $this->member();
