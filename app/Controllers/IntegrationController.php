@@ -118,12 +118,12 @@ final class IntegrationController
     {
         $sid = Society::currentId();
         $cfg = IntegrationService::config($sid);
-        $bill = \App\Models\\MaintenanceBill::find((int) $billId);
+        $bill = \App\Models\MaintenanceBill::find((int) $billId);
 
         // Do not reveal whether another resident's bill exists.
         $allowed = false;
         if ($bill && Auth::memberId() !== null) {
-            foreach (\App\Models\\MaintenanceBill::forMember((int) Auth::memberId()) as $row) {
+            foreach (\App\Models\MaintenanceBill::forMember((int) Auth::memberId()) as $row) {
                 if ((int) $row['id'] === (int) $billId) {
                     $allowed = true;
                     break;
@@ -150,7 +150,7 @@ final class IntegrationController
                 'cu' => 'INR',
                 'tn' => 'Maintenance ' . $bill['bill_number'],
             ], '', '&', PHP_QUERY_RFC3986);
-            $qrSvg = \App\Helpers\\QrCode::svg($uri, 280);
+            $qrSvg = \App\Helpers\QrCode::svg($uri, 280);
         }
 
         $pageTitle = 'UPI QR Payment';
