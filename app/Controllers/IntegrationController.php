@@ -116,13 +116,45 @@ final class IntegrationController
 
     public function upiQr(string $billId): void
     {
-        $cfg=IntegrationService::config(Society::currentId());
-        $bill=\App\Models\MaintenanceBill::find((int)$billId);
-        if(!$cfg['upi_enabled'] || $cfg['upi_id']==='' || !$bill || (int)$bill['society_id']!==Society::currentId()){http_response_code(404);exit;}
-        $allowed=false; foreach(\App\Models\MaintenanceBill::forMember((int)(Auth::memberId()??0)) as $row) if((int)$row['id']===(int)$billId){$allowed=true;break;}
-        $amount=max(0,(float)$bill['total_amount']-(float)$bill['paid_amount']); if(!$allowed||$amount<=0){http_response_code(404);exit;}
-        $uri='upi://pay?'.http_build_query(['pa'=>$cfg['upi_id'],'pn'=>$cfg['upi_name']?:'SocietyOS Society','am'=>number_format($amount,2,'.',''),'cu'=>'INR','tn'=>'Maintenance '.$bill['bill_number']], '', '&', PHP_QUERY_RFC3986);
-        header('Content-Type:image/svg+xml; charset=UTF-8'); echo \App\Helpers\QrCode::svg($uri,320); exit;
+        $sid = Society::currentId();
+        $cfg = IntegrationService::config($sid);
+        $bill = \\App\\Models\\MaintenanceBill::find((int) $billId);
+
+        // Do not reveal whether another resident's bill exists.
+        $allowed = false;
+        if ($bill && Auth::memberId() !== null) {
+            foreach (\\App\\Models\\MaintenanceBill::forMember((int) Auth::memberId()) as $row) {
+                if ((int) $row['id'] === (int) $billId) {
+                    $allowed = true;
+                    break;
+                }
+            }
+        }
+        if (!$bill || (int) $bill['society_id'] !== $sid || !$allowed) {
+            http_response_code(404);
+            require __DIR__ . '/../Views/errors/404.php';
+            return;
+        }
+
+        $amount = max(0, (float) $bill['total_amount'] - (float) $bill['paid_amount']);
+        if ($amount <= 0) {
+            $upiUnavailableMessage = 'This bill has no outstanding balance, so a UPI QR code is not needed.';
+        } elseif (!$cfg['upi_enabled'] || $cfg['upi_id'] === '') {
+            http_response_code(503);
+            $upiUnavailableMessage = 'UPI QR payments are not configured for this society yet. Please contact your society administrator or use another payment option.';
+        } else {
+            $uri = 'upi://pay?' . http_build_query([
+                'pa' => $cfg['upi_id'],
+                'pn' => $cfg['upi_name'] ?: 'SocietyOS Society',
+                'am' => number_format($amount, 2, '.', ''),
+                'cu' => 'INR',
+                'tn' => 'Maintenance ' . $bill['bill_number'],
+            ], '', '&', PHP_QUERY_RFC3986);
+            $qrSvg = \\App\\Helpers\\QrCode::svg($uri, 280);
+        }
+
+        $pageTitle = 'UPI QR Payment';
+        require __DIR__ . '/../Views/resident/upi_qr.php';
     }
 
     private function csrf(): void{if(!Csrf::verify($_POST['_csrf']??null)){http_response_code(419);exit('Session expired. Go back and try again.');}}
