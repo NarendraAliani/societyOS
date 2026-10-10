@@ -2,6 +2,37 @@
 $pageTitle = 'My Home';
 ob_start();
 ?>
+<style>
+.notice-grid-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 1rem;
+    row-gap: .25rem;
+}
+.notice-grid-details {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+.notice-grid-action {
+    grid-column: 2;
+    grid-row: 1;
+    white-space: nowrap;
+}
+@media (max-width: 420px) {
+    .notice-grid-row {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: .5rem;
+    }
+    .notice-grid-action {
+        grid-column: 1;
+        grid-row: auto;
+        justify-self: start;
+    }
+}
+</style>
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
         <h5 class="mb-1">Welcome, <?= htmlspecialchars($member['name']) ?></h5>
@@ -42,12 +73,12 @@ ob_start();
                     <a href="/resident/notices" class="small">View all</a>
                 </div>
                 <?php foreach ($notices as $notice): ?>
-                    <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap border-bottom py-2">
-                        <div class="d-flex align-items-center justify-content-between gap-3 flex-grow-1 flex-wrap">
-                            <span class="fw-semibold"><?= htmlspecialchars($notice['title']) ?></span>
+                    <div class="notice-grid-row border-bottom py-2">
+                        <div class="notice-grid-details">
+                            <span class="fw-semibold text-break"><?= htmlspecialchars($notice['title']) ?></span>
                             <span class="small text-muted text-nowrap"><?= htmlspecialchars($notice['published_at']) ?></span>
                         </div>
-                        <a class="btn btn-outline-primary btn-sm flex-shrink-0" href="/resident/notices/<?= (int) $notice['id'] ?>"><i class="fa-solid fa-eye me-1"></i>View <?= $notice['notice_type'] === 'circular' ? 'Circular' : 'Notice' ?></a>
+                        <a class="btn btn-outline-primary btn-sm notice-grid-action" href="/resident/notices/<?= (int) $notice['id'] ?>"><i class="fa-solid fa-eye me-1"></i>View <?= $notice['notice_type'] === 'circular' ? 'Circular' : 'Notice' ?></a>
                     </div>
                 <?php endforeach; ?>
                 <?php if (!$notices): ?><div class="text-muted">No active notices.</div><?php endif; ?>
