@@ -197,6 +197,7 @@ $router->post('/parking-allocations/{id}/release', [VehicleController::class, 'r
 $router->get('/accounting/accounts', [AccountingController::class, 'accounts'], [$auth, $backOffice, $can('accounting.view')]);
 $router->post('/accounting/accounts', [AccountingController::class, 'storeAccount'], [$auth, $backOffice, $can('accounting.manage')]);
 $router->post('/accounting/accounts/{id}', [AccountingController::class, 'updateAccount'], [$auth, $backOffice, $can('accounting.manage')]);
+$router->get('/accounting/income-details', [AccountingController::class, 'incomeDetails'], [$auth, $backOffice, $can('accounting.view')]);
 $router->get('/accounting/income', [AccountingController::class, 'income'], [$auth, $backOffice, $can('accounting.view')]);
 $router->post('/accounting/income', [AccountingController::class, 'storeIncome'], [$auth, $backOffice, $can('accounting.manage')]);
 $router->get('/accounting/expenses', [AccountingController::class, 'expenses'], [$auth, $backOffice, $can('accounting.view')]);
