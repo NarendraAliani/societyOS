@@ -26,7 +26,7 @@ $renderNoticeCards = static function (array $items, bool $expired = false): void
                         </h6>
                     </div>
                     <form method="post" action="/notices/<?= (int) $notice['id'] ?>/delete" onsubmit="return confirm('Remove this notice?');" class="flex-shrink-0">
-                        <?= \\App\\Helpers\\Csrf::field() ?>
+                        <?= \App\Helpers\Csrf::field() ?>
                         <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="Delete notice" title="Delete notice"><i class="fa-solid fa-trash"></i></button>
                     </form>
                 </div>
@@ -86,7 +86,7 @@ $renderNoticeCards = static function (array $items, bool $expired = false): void
             </div>
             <div class="modal-body">
                 <form method="post" action="/notices">
-                    <?= \\App\\Helpers\\Csrf::field() ?>
+                    <?= \App\Helpers\Csrf::field() ?>
                     <div class="mb-3">
                         <label class="form-label" for="notice-type">Type</label>
                         <select id="notice-type" name="notice_type" class="form-select">
