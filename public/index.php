@@ -207,6 +207,7 @@ $router->post('/accounting/income/{id}', [AccountingController::class, 'updateIn
 $router->post('/accounting/income/{id}/delete', [AccountingController::class, 'deleteIncome'], [$auth, $backOffice, $can('accounting.manage')]);
 $router->get('/accounting/expenses', [AccountingController::class, 'expenses'], [$auth, $backOffice, $can('accounting.view')]);
 $router->post('/accounting/expenses', [AccountingController::class, 'storeExpense'], [$auth, $backOffice, $can('accounting.manage')]);
+$router->post('/accounting/expense-categories', [AccountingController::class, 'storeExpenseCategory'], [$auth, $backOffice, $can('accounting.manage')]);
 $router->get('/accounting/vendors', [AccountingController::class, 'vendors'], [$auth, $backOffice, $can('accounting.view')]);
 $router->post('/accounting/vendors', [AccountingController::class, 'storeVendor'], [$auth, $backOffice, $can('accounting.manage')]);
 $router->post('/accounting/vendors/{id}/delete', [AccountingController::class, 'deleteVendor'], [$auth, $backOffice, $can('accounting.manage')]);
