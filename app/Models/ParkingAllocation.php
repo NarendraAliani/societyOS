@@ -40,6 +40,7 @@ final class ParkingAllocation
         $stmt = db()->prepare(
             'SELECT pa.*, f.flat_number, w.name AS wing_name, v.registration_number
              FROM parking_allocations pa
+             JOIN parking_slots ps ON ps.id = pa.parking_slot_id
              JOIN flats f ON f.id = pa.flat_id
              JOIN floors fl ON fl.id = f.floor_id
              JOIN wings w ON w.id = fl.wing_id
