@@ -80,10 +80,27 @@ final class IntegrationController
     public function testTelegram(): void
     {
         $this->csrf();
-        try{IntegrationService::sendTelegramText(Society::currentId(),trim((string)($_POST['chat_id']??'')),'SocietyOS test message — Telegram integration is working.');Flash::set('success','Telegram test sent.');}
-        catch(\Throwable $e){Flash::set('error',$e->getMessage());}
-        header('Location:/admin/integrations');exit;
+        $cfg = IntegrationService::config(Society::currentId());
+        // An explicit value is an optional one-off override. Otherwise use the
+        // society's saved default chat/channel ID.
+        $chatId = trim((string) ($_POST['chat_id'] ?? ''));
+        if ($chatId === '') {
+            $chatId = trim((string) ($cfg['telegram_default_chat_id'] ?? ''));
+        }
+        try {
+            IntegrationService::sendTelegramText(
+                Society::currentId(),
+                $chatId,
+                'SocietyOS test message — Telegram integration is working.'
+            );
+            Flash::set('success', 'Telegram test sent to the saved default chat/channel.');
+        } catch (\\Throwable $e) {
+            Flash::set('error', $e->getMessage());
+        }
+        header('Location:/admin/integrations');
+        exit;
     }
+
     public function razorpayOrder(): void
     {
         $this->csrf();
