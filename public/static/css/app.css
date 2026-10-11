@@ -704,3 +704,38 @@ body {
 [data-bs-theme="dark"] .dashboard-card-link:focus-visible .card {
     box-shadow: 0 .5rem 1.25rem rgba(0, 0, 0, .3) !important;
 }
+
+
+/* SocietyOS navigation and dashboard refresh */
+.sidebar{display:flex;flex-direction:column;padding:1.1rem .85rem!important;background:#11131b!important;border-right:1px solid rgba(148,163,184,.16)}
+.sidebar-brand{display:flex;align-items:center;gap:.65rem;padding:.3rem .5rem .9rem;font-size:1.3rem;font-weight:750;letter-spacing:-.035em}
+.sidebar-brand-icon{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:.65rem;color:#fff;background:var(--bs-primary);font-size:1rem}
+.sidebar-context{margin:0 .5rem .65rem;color:#8f9bb0;font-size:.65rem;font-weight:750;letter-spacing:.12em}
+.sidebar-nav{gap:.18rem!important}
+.sidebar-section-label{list-style:none;padding:1rem .7rem .35rem;color:#8792a5;font-size:.64rem;font-weight:750;letter-spacing:.11em}
+.sidebar-section-label:first-child{padding-top:.25rem}
+.sidebar .nav-link{display:flex;align-items:center;gap:.65rem;min-height:2.45rem;padding:.62rem .7rem;border-radius:.65rem;color:#d2d8e4!important;font-size:.875rem;font-weight:550;line-height:1.25;transition:background-color .15s ease,color .15s ease}
+.sidebar .nav-link:hover{color:#fff!important;background:rgba(148,163,184,.12)}
+.sidebar .nav-link.active{color:#fff!important;background:rgba(13,110,253,.22);box-shadow:inset 3px 0 0 var(--bs-primary);font-weight:700}
+.sidebar-nav-icon{display:inline-flex;align-items:center;justify-content:center;width:1.1rem;flex:0 0 1.1rem;color:#9ba8bd}
+.sidebar .nav-link.active .sidebar-nav-icon{color:#6ea8fe}
+.sidebar-footer{display:flex;align-items:center;gap:.5rem;margin-top:auto;padding:1rem .6rem .15rem;color:#aeb8c9;font-size:.72rem}
+.sidebar-footer-dot{width:.45rem;height:.45rem;border-radius:50%;background:#20c997;box-shadow:0 0 0 3px rgba(32,201,151,.12)}
+.app-topbar{min-height:58px;padding-top:.55rem!important;padding-bottom:.55rem!important}
+.app-topbar-heading{min-width:0}
+.app-topbar .navbar-text{color:var(--bs-body-color);font-weight:650}
+.dashboard-page{max-width:1800px;margin-inline:auto}
+.dashboard-page>h3{font-size:clamp(1.25rem,2vw,1.8rem);letter-spacing:-.025em}
+.dashboard-card-link{border-radius:.8rem}
+.dashboard-card-link .card{min-height:104px;border-radius:.85rem}
+.dashboard-card-link .card-body{padding:1.15rem}
+.kpi-card .fs-3{font-size:clamp(1.25rem,1.65vw,1.8rem)!important;line-height:1.25;overflow-wrap:anywhere}
+.resident-dashboard-header{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1.25rem}
+.resident-dashboard-title{margin:0 0 .3rem;font-size:clamp(1.35rem,2vw,1.8rem);font-weight:750;letter-spacing:-.03em}
+.resident-dashboard-actions{display:flex;flex-wrap:wrap;gap:.5rem}
+.resident-summary-link{display:block;height:100%;color:inherit;text-decoration:none;border-radius:.8rem}
+.resident-summary-link .card{height:100%;min-height:125px;transition:transform .15s ease,box-shadow .15s ease}
+.resident-summary-link:hover .card,.resident-summary-link:focus-visible .card{transform:translateY(-2px);box-shadow:0 .6rem 1.35rem rgba(0,0,0,.12)!important}
+.resident-summary-link:focus-visible{outline:2px solid var(--bs-primary);outline-offset:3px}
+@media(max-width:991.98px){.sidebar{padding:1rem .8rem!important}.sidebar-footer{margin-top:1.5rem}}
+@media(max-width:575.98px){.resident-dashboard-header{align-items:flex-start;flex-direction:column}.resident-dashboard-actions{width:100%}.resident-dashboard-actions .btn{flex:1 1 auto}.dashboard-card-link .card-body{padding:.9rem}}
