@@ -165,12 +165,12 @@ final class VehicleController
 
         $assignedVehicleIds = [];
         foreach ($activeAllocations as $allocation) {
-            if ($allocation['vehicle_id'] !== null && $allocation['slot_type'] === 'four_wheeler') {
+            if ($allocation['vehicle_id'] !== null) {
                 $assignedVehicleIds[(int) $allocation['vehicle_id']] = true;
             }
         }
         $vehicles = array_values(array_filter($vehicles, static function (array $vehicle) use ($assignedVehicleIds, $slots): bool {
-            if ($vehicle['vehicle_type'] === 'four_wheeler' && isset($assignedVehicleIds[(int) $vehicle['id']])) {
+            if (isset($assignedVehicleIds[(int) $vehicle['id']])) {
                 return false;
             }
             foreach ($slots as $slot) {
@@ -232,7 +232,7 @@ final class VehicleController
             ActivityLog::log('vehicles', 'parking_allocate', 'Allocated vehicle ' . $vehicle['registration_number'] . ' to parking slot ' . $slot['slot_number']);
             Flash::set('success', 'Vehicle allocated to parking successfully.');
         } catch (\Throwable $e) {
-            Flash::set('error', $e->getMessage() === 'This vehicle already has an active 4-wheeler parking allocation.'
+            Flash::set('error', $e->getMessage() === 'This vehicle already has an active parking allocation.'
                 ? $e->getMessage()
                 : 'Unable to allocate the vehicle. Please verify the selections and try again.');
         }
@@ -400,8 +400,7 @@ final class VehicleController
             if ($vehicle['vehicle_type'] !== $slotType) {
                 return false;
             }
-            return $slotType !== 'four_wheeler'
-                || !ParkingAllocation::vehicleHasActiveFourWheelerAllocation((int) $vehicle['id']);
+            return !ParkingAllocation::vehicleHasActiveAllocation((int) $vehicle['id']);
         }));
         // A flat is eligible only when it has a registered vehicle that can be assigned to this slot.
         $eligibleFlatIds = [];
@@ -435,8 +434,7 @@ final class VehicleController
             && (int) $vehicleMember['flat_id'] === $flatId
             && $slot && $vehicle['vehicle_type'] === $slot['slot_type']);
         $activeAllocation = $slot ? ParkingAllocation::activeForSlot((int) $id) : null;
-        $vehicleAlreadyAllocated = $vehicleId && $slot && $slot['slot_type'] === 'four_wheeler'
-            && ParkingAllocation::vehicleHasActiveFourWheelerAllocation($vehicleId);
+        $vehicleAlreadyAllocated = $vehicleId && ParkingAllocation::vehicleHasActiveAllocation($vehicleId);
 
         if (!$slot || (int) $slot['society_id'] !== Society::currentId() || !$flat || (int) $flat['society_id'] !== Society::currentId() || !$validVehicle || !$validDate) {
             Flash::set('error', 'A valid society slot, flat, matching vehicle type, and allocation date are required.');
