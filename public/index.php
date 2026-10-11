@@ -180,6 +180,7 @@ $router->post('/vehicles/{id}/delete', [VehicleController::class, 'destroy'], [$
 // otherwise POST /vehicles/parking would wrongly match /vehicles/{id} with id="parking".
 $router->get('/vehicles/parking', [VehicleController::class, 'parkingIndex'], [$auth, $backOffice, $can('vehicles.manage')]);
 $router->post('/vehicles/parking', [VehicleController::class, 'storeSlot'], [$auth, $backOffice, $can('vehicles.manage')]);
+$router->post('/vehicles/parking/common-capacity', [VehicleController::class, 'resizeCommonParking'], [$auth, $backOffice, $can('vehicles.manage')]);
 
 // /vehicles/parking/rates must be registered before the /vehicles/parking/{id} wildcard below,
 // same reasoning as the /vehicles/{id} note above.
