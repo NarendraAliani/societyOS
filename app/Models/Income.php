@@ -46,6 +46,40 @@ final class Income
         return $stmt->fetchAll();
     }
 
+    public static function findForSociety(int $id, int $societyId): ?array
+    {
+        $stmt = db()->prepare('SELECT * FROM income WHERE id = :id AND society_id = :sid');
+        $stmt->execute(['id' => $id, 'sid' => $societyId]);
+        return $stmt->fetch() ?: null;
+    }
+
+    public static function updateForSociety(int $id, int $societyId, array $fields): bool
+    {
+        $stmt = db()->prepare(
+            'UPDATE income
+             SET account_id = :account_id, category = :category, amount = :amount,
+                 description = :description, income_date = :income_date
+             WHERE id = :id AND society_id = :sid'
+        );
+        $stmt->execute([
+            'account_id' => $fields['account_id'],
+            'category' => $fields['category'],
+            'amount' => $fields['amount'],
+            'description' => $fields['description'] !== '' ? $fields['description'] : null,
+            'income_date' => $fields['income_date'],
+            'id' => $id,
+            'sid' => $societyId,
+        ]);
+        return $stmt->rowCount() > 0;
+    }
+
+    public static function deleteForSociety(int $id, int $societyId): bool
+    {
+        $stmt = db()->prepare('DELETE FROM income WHERE id = :id AND society_id = :sid');
+        $stmt->execute(['id' => $id, 'sid' => $societyId]);
+        return $stmt->rowCount() > 0;
+    }
+
     public static function create(int $societyId, array $fields): int
     {
         $stmt = db()->prepare(
