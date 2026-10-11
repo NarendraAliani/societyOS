@@ -121,6 +121,8 @@ jobs:
 
       - name: Common parking capacity regression contract
         run: php tests/regression/common_parking_capacity.php
+      - name: Resident-first parking allotment regression contract
+        run: php tests/regression/parking_allotment_interface.php
 
       - name: Prepare deployment branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
