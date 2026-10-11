@@ -394,16 +394,24 @@ final class VehicleController
             return;
         }
         $history = ParkingAllocation::historyForSlot((int) $id);
-        $flats = Flat::allForSociety(Society::currentId());
         $vehicles = Vehicle::allForSociety(Society::currentId());
-        if ($slot['slot_type'] === 'four_wheeler') {
-            $vehicles = array_values(array_filter($vehicles, static function (array $vehicle): bool {
-                return $vehicle['vehicle_type'] === 'four_wheeler'
-                    && !ParkingAllocation::vehicleHasActiveFourWheelerAllocation((int) $vehicle['id']);
-            }));
-        } else {
-            $vehicles = array_values(array_filter($vehicles, static fn (array $vehicle): bool => $vehicle['vehicle_type'] === 'two_wheeler'));
+        $slotType = $slot['slot_type'];
+        $vehicles = array_values(array_filter($vehicles, static function (array $vehicle) use ($slotType): bool {
+            if ($vehicle['vehicle_type'] !== $slotType) {
+                return false;
+            }
+            return $slotType !== 'four_wheeler'
+                || !ParkingAllocation::vehicleHasActiveFourWheelerAllocation((int) $vehicle['id']);
+        }));
+        // A flat is eligible only when it has a registered vehicle that can be assigned to this slot.
+        $eligibleFlatIds = [];
+        foreach ($vehicles as $vehicle) {
+            $eligibleFlatIds[(int) $vehicle['flat_id']] = true;
         }
+        $flats = array_values(array_filter(
+            Flat::allForSociety(Society::currentId()),
+            static fn (array $flat): bool => isset($eligibleFlatIds[(int) $flat['id']])
+        ));
         require __DIR__ . '/../Views/vehicles/slot_detail.php';
     }
 
@@ -441,7 +449,17 @@ final class VehicleController
                 ParkingAllocation::allocate((int) $id, $flatId, $vehicleId, $fromDate, $isChargeable);
                 Flash::set('success', 'Slot allocated.');
             } catch (\Throwable $e) {
-                Flash::set('error', 'Unable to allocate this parking slot. Please verify the details and try again.');
+                error_log(sprintf(
+                    'Parking allocation failed (slot=%d, flat=%d, vehicle=%s): %s',
+                    (int) $id,
+                    $flatId,
+                    $vehicleId === null ? 'unassigned' : (string) $vehicleId,
+                    $e->getMessage()
+                ));
+                $message = $e instanceof \DomainException || $e instanceof \InvalidArgumentException
+                    ? $e->getMessage()
+                    : 'Unable to allocate this parking slot due to a system error. Please contact the administrator.';
+                Flash::set('error', $message);
             }
         }
         header("Location: /vehicles/parking/{$id}");
