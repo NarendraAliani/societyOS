@@ -144,7 +144,12 @@ final class PaymentProofController
     {
         try {
             $stmt = db()->prepare(
-                'SELECT m.name, m.email FROM members m WHERE m.id = :member AND m.society_id = :sid LIMIT 1'
+                "SELECT m.name, COALESCE(NULLIF(m.email, ''), u.email) AS email
+                 FROM members m
+                 LEFT JOIN user_roles ur ON ur.member_id = m.id AND ur.society_id = m.society_id
+                 LEFT JOIN users u ON u.id = ur.user_id AND u.society_id = m.society_id AND u.status = 'active'
+                 WHERE m.id = :member AND m.society_id = :sid
+                 ORDER BY ur.is_default DESC LIMIT 1"
             );
             $stmt->execute(['member' => $memberId, 'sid' => $societyId]);
             $recipient = $stmt->fetch();
