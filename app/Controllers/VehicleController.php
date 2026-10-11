@@ -290,6 +290,14 @@ final class VehicleController
         $history = ParkingAllocation::historyForSlot((int) $id);
         $flats = Flat::allForSociety(Society::currentId());
         $vehicles = Vehicle::allForSociety(Society::currentId());
+        if ($slot['slot_type'] === 'four_wheeler') {
+            $vehicles = array_values(array_filter($vehicles, static function (array $vehicle): bool {
+                return $vehicle['vehicle_type'] === 'four_wheeler'
+                    && !ParkingAllocation::vehicleHasActiveFourWheelerAllocation((int) $vehicle['id']);
+            }));
+        } else {
+            $vehicles = array_values(array_filter($vehicles, static fn (array $vehicle): bool => $vehicle['vehicle_type'] === 'two_wheeler'));
+        }
         require __DIR__ . '/../Views/vehicles/slot_detail.php';
     }
 
@@ -301,25 +309,32 @@ final class VehicleController
         $vehicleId = (int) ($_POST['vehicle_id'] ?? 0) ?: null;
         $fromDate = trim((string) ($_POST['allocated_from'] ?? date('Y-m-d')));
         $isChargeable = ($_POST['billing_status'] ?? 'paid') !== 'free';
-        $parsedDate = \\DateTimeImmutable::createFromFormat('!Y-m-d', $fromDate);
+        $parsedDate = \DateTimeImmutable::createFromFormat('!Y-m-d', $fromDate);
         $validDate = $parsedDate && $parsedDate->format('Y-m-d') === $fromDate;
 
         $slot = ParkingSlot::find((int) $id);
         $flat = $flatId > 0 ? Flat::find($flatId) : null;
         $vehicle = $vehicleId ? Vehicle::find($vehicleId) : null;
         $vehicleMember = $vehicle ? Member::find((int) $vehicle['member_id']) : null;
-        $validVehicle = !$vehicleId || ($vehicle && $vehicleMember && (int) $vehicleMember['society_id'] === Society::currentId() && (int) $vehicleMember['flat_id'] === $flatId);
+        $validVehicle = !$vehicleId || ($vehicle && $vehicleMember
+            && (int) $vehicleMember['society_id'] === Society::currentId()
+            && (int) $vehicleMember['flat_id'] === $flatId
+            && $slot && $vehicle['vehicle_type'] === $slot['slot_type']);
         $activeAllocation = $slot ? ParkingAllocation::activeForSlot((int) $id) : null;
+        $vehicleAlreadyAllocated = $vehicleId && $slot && $slot['slot_type'] === 'four_wheeler'
+            && ParkingAllocation::vehicleHasActiveFourWheelerAllocation($vehicleId);
 
         if (!$slot || (int) $slot['society_id'] !== Society::currentId() || !$flat || (int) $flat['society_id'] !== Society::currentId() || !$validVehicle || !$validDate) {
-            Flash::set('error', 'A valid society slot, flat, matching vehicle, and allocation date are required.');
+            Flash::set('error', 'A valid society slot, flat, matching vehicle type, and allocation date are required.');
         } elseif ($activeAllocation) {
             Flash::set('error', 'This parking slot is already allocated.');
+        } elseif ($vehicleAlreadyAllocated) {
+            Flash::set('error', 'This vehicle already has an active 4-wheeler parking allocation.');
         } else {
             try {
                 ParkingAllocation::allocate((int) $id, $flatId, $vehicleId, $fromDate, $isChargeable);
                 Flash::set('success', 'Slot allocated.');
-            } catch (\\Throwable $e) {
+            } catch (\Throwable $e) {
                 Flash::set('error', 'Unable to allocate this parking slot. Please verify the details and try again.');
             }
         }
