@@ -3,6 +3,7 @@ $pageTitle = 'My Maintenance Bills';
 ob_start();
 ?>
 <p><a href="/dashboard">&laquo; My Home</a></p>
+<p><a class="btn btn-sm btn-outline-primary" href="/resident/payment-proofs"><i class="fa-solid fa-file-circle-check me-1"></i>My Payment Proofs / Review Status</a></p>
 <div class="card border-0 shadow-sm">
     <div class="card-body">
         <h5>My Maintenance Bills</h5>
