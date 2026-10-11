@@ -77,7 +77,7 @@ SocietyOS";
         $mailConfig = config()['mail'] ?? [];
         $host = trim((string) ($mailConfig['host'] ?? ''));
         $from = trim((string) ($mailConfig['from_address'] ?? ''));
-        if ($host === '' || $from === '') throw new \\RuntimeException('Notification email is not configured.');
+        if ($host === '' || $from === '') throw new \RuntimeException('Notification email is not configured.');
 
         $mail = new PHPMailer(true);
         $mail->isSMTP();
