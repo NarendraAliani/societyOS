@@ -45,31 +45,81 @@ final class AccountingController
         exit;
     }
 
-    public function updateAccount(string $id): void
-    {
-        $this->verifyCsrf();
-
-        $name = trim((string) ($_POST['name'] ?? ''));
-        $type = ($_POST['account_type'] ?? '') === 'bank' ? 'bank' : 'cash';
-        $opening = $_POST['opening_balance'] ?? '0';
-
-        if ($name === '' || !is_numeric($opening)) {
-            Flash::set('error', 'Account name and a numeric opening balance are required.');
-        } else {
-            Account::update((int) $id, $name, $type, (float) $opening);
-            ActivityLog::log('accounting', 'update', "Updated account \"{$name}\" (id {$id})");
-            Flash::set('success', 'Account updated.');
-        }
-        header('Location: /accounting/accounts');
-        exit;
-    }
-
     public function income(): void
     {
         $pageTitle = 'Income';
         $entries = Income::allForSociety(Society::currentId());
         $accounts = Account::allForSociety(Society::currentId());
         require __DIR__ . '/../Views/accounting/income.php';
+    }
+
+    /**
+     * Auditable breakdown of the dashboard's monthly income KPI: manual income entries
+     * plus confirmed maintenance payments, restricted to this society and selected dates.
+     */
+    public function incomeDetails(): void
+    {
+        $pageTitle = 'Income Details';
+        $societyId = Society::currentId();
+        $from = (string) ($_GET['from'] ?? date('Y-m-01'));
+        $to = (string) ($_GET['to'] ?? date('Y-m-d'));
+
+        foreach ([$from, $to] as $date) {
+            $parsed = \DateTimeImmutable::createFromFormat('!Y-m-d', $date);
+            if (!$parsed || $parsed->format('Y-m-d') !== $date) {
+                $from = date('Y-m-01');
+                $to = date('Y-m-d');
+                break;
+            }
+        }
+        if ($from > $to) {
+            [$from, $to] = [$to, $from];
+        }
+
+        $manual = db()->prepare(
+            'SELECT i.income_date AS entry_date, i.category AS source, i.description,
+                    i.amount, a.name AS account_name, NULL AS bill_number,
+                    NULL AS flat_number, NULL AS payment_mode, NULL AS reference_number,
+                    "Manual income" AS entry_type
+             FROM income i
+             LEFT JOIN accounts a ON a.id = i.account_id AND a.society_id = i.society_id
+             WHERE i.society_id = :sid AND i.income_date BETWEEN :from_date AND :to_date'
+        );
+        $manual->execute(['sid' => $societyId, 'from_date' => $from, 'to_date' => $to]);
+        $rows = $manual->fetchAll();
+
+        $payments = db()->prepare(
+            'SELECT DATE(p.paid_at) AS entry_date, "Maintenance payment" AS source,
+                    CONCAT("Bill ", b.bill_number) AS description, p.amount,
+                    NULL AS account_name, b.bill_number, f.flat_number,
+                    p.payment_mode, p.reference_number, "Confirmed payment" AS entry_type
+             FROM payments p
+             JOIN maintenance_bills b ON b.id = p.maintenance_bill_id
+             JOIN flats f ON f.id = b.flat_id
+             JOIN floors fl ON fl.id = f.floor_id
+             JOIN wings w ON w.id = fl.wing_id
+             WHERE b.society_id = :sid AND w.society_id = :wing_sid
+               AND DATE(p.paid_at) BETWEEN :from_date AND :to_date'
+        );
+        $payments->execute(['sid' => $societyId, 'wing_sid' => $societyId, 'from_date' => $from, 'to_date' => $to]);
+        $rows = array_merge($rows, $payments->fetchAll());
+
+        usort($rows, static fn (array $a, array $b): int =>
+            strcmp((string) $b['entry_date'], (string) $a['entry_date'])
+        );
+
+        $manualTotal = 0.0;
+        $paymentTotal = 0.0;
+        foreach ($rows as $row) {
+            if ($row['entry_type'] === 'Confirmed payment') {
+                $paymentTotal += (float) $row['amount'];
+            } else {
+                $manualTotal += (float) $row['amount'];
+            }
+        }
+        $totalIncome = $manualTotal + $paymentTotal;
+
+        require __DIR__ . '/../Views/accounting/income_details.php';
     }
 
     public function storeIncome(): void
@@ -176,8 +226,7 @@ final class AccountingController
         ActivityLog::log('accounting', 'create', "Added vendor \"{$name}\"");
         Flash::set('success', "Vendor \"{$name}\" added.");
 
-        // Pre-select the newly created vendor back on the asset page, so the admin doesn't
-        // have to find it again in the dropdown they just left to create it.
+        // Pre-select the newly created vendor back on the asset page, so the caller lands back where they started.
         if ($returnToAsset) {
             $redirect .= "?vendor_id={$vendorId}";
         }
@@ -199,9 +248,10 @@ final class AccountingController
                 'contact_person' => trim((string) ($_POST['contact_person'] ?? '')),
                 'phone' => trim((string) ($_POST['phone'] ?? '')),
                 'email' => trim((string) ($_POST['email'] ?? '')),
-                'category' => trim((string) ($_POST['category'] ?? '')),
+                'category' => trim((string) ($_POST['email'] ?? '')),
+                'email' => trim((string) ($_POST['email'] ?? '')),
             ]);
-            ActivityLog::log('accounting', 'update', "Updated vendor \"{$name}\" (id {$id})");
+            ActivityLog::log('accounting', 'update', "Updated vendor \"{$name}\"");
             Flash::set('success', 'Vendor updated.');
         }
         header('Location: /accounting/vendors');
@@ -214,7 +264,6 @@ final class AccountingController
         Vendor::delete((int) $id);
         ActivityLog::log('accounting', 'delete', "Removed vendor id {$id}");
         Flash::set('success', 'Vendor removed.');
-        header('Location: /accounting/vendors');
         exit;
     }
 
