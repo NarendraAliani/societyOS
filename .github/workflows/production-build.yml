@@ -116,6 +116,9 @@ jobs:
       - name: Add expenses navigation regression contract
         run: php tests/regression/add_expenses_navigation.php
 
+      - name: Expense category dropdown regression contract
+        run: php tests/regression/expense_categories.php
+
       - name: Prepare deployment branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
