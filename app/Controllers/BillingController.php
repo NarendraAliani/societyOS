@@ -24,7 +24,7 @@ final class BillingController
         $pageTitle = 'Maintenance Bills';
         $status = $_GET['status'] ?? '';
         $bills = MaintenanceBill::allForSociety(Society::currentId(), $status ?: null);
-        $pendingPaymentProofs = count(\\App\\Models\\PaymentProof::pendingForSociety(Society::currentId()));
+        $pendingPaymentProofs = count(\App\Models\PaymentProof::pendingForSociety(Society::currentId()));
         require __DIR__ . '/../Views/billing/index.php';
     }
 
