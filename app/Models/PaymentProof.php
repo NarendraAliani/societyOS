@@ -4,15 +4,20 @@ namespace App\Models;
 
 final class PaymentProof
 {
-    public static function submit(int $societyId, int $memberId, int $billId, string $platform, string $transactionId, ?string $screenshotPath, string $notes): int
+    public static function submit(int $societyId, int $memberId, int $billId, float $amount, string $platform, string $transactionId, ?string $screenshotPath, string $notes): int
     {
         $check = db()->prepare('SELECT b.id FROM maintenance_bills b JOIN members m ON m.flat_id=b.flat_id WHERE b.id=:bill AND b.society_id=:sid AND m.id=:member AND m.society_id=:sid2 AND m.status=\'active\'');
         $check->execute(['bill'=>$billId,'sid'=>$societyId,'member'=>$memberId,'sid2'=>$societyId]);
         if (!$check->fetchColumn()) throw new \InvalidArgumentException('That bill is not linked to your home.');
+        $billStmt=db()->prepare('SELECT total_amount,paid_amount FROM maintenance_bills WHERE id=:bill AND society_id=:sid');
+        $billStmt->execute(['bill'=>$billId,'sid'=>$societyId]);
+        $bill=$billStmt->fetch();
+        $outstanding=$bill ? max(0.0,(float)$bill['total_amount']-(float)$bill['paid_amount']) : 0.0;
+        if ($amount<=0 || $amount>$outstanding+0.00001) throw new \\InvalidArgumentException('Enter an amount within the bill outstanding balance.');
         $pending = db()->prepare("SELECT id FROM payment_proofs WHERE maintenance_bill_id=:bill AND member_id=:member AND status='pending' LIMIT 1");
         $pending->execute(['bill'=>$billId,'member'=>$memberId]);
         if ($pending->fetchColumn()) throw new \InvalidArgumentException('You already have a payment proof awaiting verification for this bill.');
-        $stmt=db()->prepare("INSERT INTO payment_proofs (society_id, maintenance_bill_id, member_id, submitted_by, platform, transaction_id, screenshot_path, notes, status) VALUES (:sid,:bill,:member,:user,:platform,:txn,:path,:notes,'pending')");
+        $stmt=db()->prepare("INSERT INTO payment_proofs (society_id, maintenance_bill_id, member_id, submitted_by, amount, platform, transaction_id, screenshot_path, notes, status) VALUES (:sid,:bill,:member,:user,:amount,:platform,:txn,:path,:notes,'pending')");
         $stmt->execute(['sid'=>$societyId,'bill'=>$billId,'member'=>$memberId,'user'=>\App\Helpers\Auth::id(),'platform'=>$platform,'txn'=>$transactionId,'path'=>$screenshotPath,'notes'=>$notes !== '' ? $notes : null]);
         return (int)db()->lastInsertId();
     }
