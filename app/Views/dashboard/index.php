@@ -6,7 +6,8 @@ ob_start();
 
 <div class="row g-3">
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm kpi-card kpi-primary">
+        <a href="/society/wings" class="dashboard-card-link text-decoration-none text-reset d-block h-100" aria-label="View flats and wings">
+        <div class="card border-0 shadow-sm kpi-card kpi-primary h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="kpi-icon"><i class="fa-solid fa-door-open"></i></div>
                 <div>
@@ -15,9 +16,11 @@ ob_start();
                 </div>
             </div>
         </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm kpi-card kpi-info">
+        <a href="/members" class="dashboard-card-link text-decoration-none text-reset d-block h-100" aria-label="View active residents">
+        <div class="card border-0 shadow-sm kpi-card kpi-info h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="kpi-icon"><i class="fa-solid fa-users"></i></div>
                 <div>
@@ -26,9 +29,11 @@ ob_start();
                 </div>
             </div>
         </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm kpi-card kpi-secondary">
+        <a href="/visitors" class="dashboard-card-link text-decoration-none text-reset d-block h-100" aria-label="View today's visitors">
+        <div class="card border-0 shadow-sm kpi-card kpi-secondary h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="kpi-icon"><i class="fa-solid fa-id-card"></i></div>
                 <div>
@@ -37,9 +42,11 @@ ob_start();
                 </div>
             </div>
         </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm kpi-card kpi-warning">
+        <a href="/complaints" class="dashboard-card-link text-decoration-none text-reset d-block h-100" aria-label="View pending complaints">
+        <div class="card border-0 shadow-sm kpi-card kpi-warning h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="kpi-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
                 <div>
@@ -48,20 +55,23 @@ ob_start();
                 </div>
             </div>
         </div>
+        </a>
     </div>
     <div class="col-md-4">
-        <div class="card border-0 shadow-sm kpi-card kpi-danger">
+        <a href="/billing/defaulters" class="dashboard-card-link text-decoration-none text-reset d-block h-100" aria-label="View outstanding dues">
+        <div class="card border-0 shadow-sm kpi-card kpi-danger h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="kpi-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
                 <div>
                     <div class="text-muted small">Outstanding Dues</div>
                     <div class="fs-3 fw-bold text-danger"><?= number_format((float) $stats['outstanding_amount'], 2) ?></div>
                     <?php if ($stats['defaulter_count'] > 0): ?>
-                        <a href="/billing/defaulters" class="small text-decoration-none"><?= (int) $stats['defaulter_count'] ?> flat<?= $stats['defaulter_count'] > 1 ? 's' : '' ?> overdue</a>
+                        <div class="small text-muted"><?= (int) $stats['defaulter_count'] ?> flat<?= $stats['defaulter_count'] > 1 ? 's' : '' ?> overdue</div>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
+        </a>
     </div>
     <div class="col-md-4">
         <a href="/accounting/income-details" class="text-decoration-none text-reset d-block h-100" aria-label="View income calculation details">
@@ -78,7 +88,8 @@ ob_start();
         </a>
     </div>
     <div class="col-md-4">
-        <div class="card border-0 shadow-sm kpi-card kpi-warning">
+        <a href="/accounting/expenses" class="dashboard-card-link text-decoration-none text-reset d-block h-100" aria-label="View expenses">
+        <div class="card border-0 shadow-sm kpi-card kpi-warning h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="kpi-icon"><i class="fa-solid fa-arrow-trend-down"></i></div>
                 <div>
@@ -87,40 +98,46 @@ ob_start();
                 </div>
             </div>
         </div>
+        </a>
     </div>
     <div class="col-md-4">
-        <div class="card border-0 shadow-sm kpi-card kpi-primary">
+        <a href="/accounting/accounts" class="dashboard-card-link text-decoration-none text-reset d-block h-100" aria-label="View account balances">
+        <div class="card border-0 shadow-sm kpi-card kpi-primary h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="kpi-icon"><i class="fa-solid fa-scale-balanced"></i></div>
                 <div>
                     <div class="text-muted small">Total Account Balance</div>
                     <div class="fs-3 fw-bold"><?= number_format((float) $stats['account_balance'], 2) ?></div>
-                    <a href="/accounting/accounts" class="small text-decoration-none">View accounts</a>
+                    <div class="small dashboard-card-hint">View accounts <i class="fa-solid fa-arrow-right ms-1"></i></div>
                 </div>
             </div>
         </div>
+        </a>
     </div>
     <div class="col-md-4">
-        <div class="card border-0 shadow-sm kpi-card kpi-info">
+        <a href="/vehicles/parking" class="dashboard-card-link text-decoration-none text-reset d-block h-100" aria-label="Manage parking">
+        <div class="card border-0 shadow-sm kpi-card kpi-info h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="kpi-icon"><i class="fa-solid fa-car"></i></div>
                 <div>
                     <div class="text-muted small">Parking Occupancy</div>
                     <div class="fs-3 fw-bold"><?= (int) $stats['parking_occupied'] ?> / <?= (int) $stats['parking_total'] ?></div>
-                    <a href="/vehicles/parking" class="small text-decoration-none">Manage parking</a>
+                    <div class="small dashboard-card-hint">Manage parking <i class="fa-solid fa-arrow-right ms-1"></i></div>
                 </div>
             </div>
         </div>
+        </a>
     </div>
     <div class="col-md-4">
-        <div class="card border-0 shadow-sm kpi-card <?= $stats['staff_verification_pending'] > 0 ? 'kpi-warning' : 'kpi-secondary' ?>">
+        <a href="/staff" class="dashboard-card-link text-decoration-none text-reset d-block h-100" aria-label="Review staff verification">
+        <div class="card border-0 shadow-sm kpi-card <?= $stats['staff_verification_pending'] > 0 ? 'kpi-warning' : 'kpi-secondary' ?> h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="kpi-icon"><i class="fa-solid fa-user-shield"></i></div>
                 <div>
                     <div class="text-muted small">Staff Verification Pending</div>
                     <div class="fs-3 fw-bold <?= $stats['staff_verification_pending'] > 0 ? 'text-warning' : '' ?>"><?= (int) $stats['staff_verification_pending'] ?></div>
                     <?php if ($stats['staff_verification_pending'] > 0): ?>
-                        <a href="/staff" class="small text-decoration-none">Review staff</a>
+                        <div class="small dashboard-card-hint">Review staff <i class="fa-solid fa-arrow-right ms-1"></i></div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -171,6 +188,7 @@ ob_start();
             <?php endif; ?>
             </tbody>
         </table>
+        </a>
     </div>
 </div>
 </div>
