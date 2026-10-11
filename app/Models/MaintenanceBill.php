@@ -28,6 +28,31 @@ final class MaintenanceBill
         return $stmt->fetchAll();
     }
 
+    /**
+     * Open maintenance bills for front-desk collection, scoped to the active society.
+     * Resident name is resolved without multiplying rows if legacy duplicate links exist.
+     */
+    public static function outstandingForSociety(int $societyId): array
+    {
+        $stmt = db()->prepare(
+            "SELECT b.id, b.bill_number, b.bill_period_start, b.bill_period_end,
+                    b.total_amount, b.paid_amount, b.due_date,
+                    (b.total_amount - b.paid_amount) AS outstanding,
+                    f.flat_number, fl.floor_number, w.name AS wing_name,
+                    (SELECT GROUP_CONCAT(m.name ORDER BY m.id DESC SEPARATOR ', ')
+                     FROM members m
+                     WHERE m.flat_id = b.flat_id AND m.society_id = b.society_id) AS resident_name
+             FROM maintenance_bills b
+             JOIN flats f ON f.id = b.flat_id
+             JOIN floors fl ON fl.id = f.floor_id
+             JOIN wings w ON w.id = fl.wing_id
+             WHERE b.society_id = :sid AND b.paid_amount < b.total_amount
+             ORDER BY w.name, fl.floor_number, f.flat_number, b.due_date, b.id"
+        );
+        $stmt->execute(['sid' => $societyId]);
+        return $stmt->fetchAll();
+    }
+
     public static function find(int $id): ?array
     {
         $stmt = db()->prepare(
