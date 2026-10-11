@@ -299,18 +299,29 @@ final class VehicleController
 
         $flatId = (int) ($_POST['flat_id'] ?? 0);
         $vehicleId = (int) ($_POST['vehicle_id'] ?? 0) ?: null;
-        $fromDate = $_POST['allocated_from'] ?? date('Y-m-d');
+        $fromDate = trim((string) ($_POST['allocated_from'] ?? date('Y-m-d')));
         $isChargeable = ($_POST['billing_status'] ?? 'paid') !== 'free';
+        $parsedDate = \\DateTimeImmutable::createFromFormat('!Y-m-d', $fromDate);
+        $validDate = $parsedDate && $parsedDate->format('Y-m-d') === $fromDate;
 
         $slot = ParkingSlot::find((int) $id);
         $flat = $flatId > 0 ? Flat::find($flatId) : null;
         $vehicle = $vehicleId ? Vehicle::find($vehicleId) : null;
         $vehicleMember = $vehicle ? Member::find((int) $vehicle['member_id']) : null;
         $validVehicle = !$vehicleId || ($vehicle && $vehicleMember && (int) $vehicleMember['society_id'] === Society::currentId() && (int) $vehicleMember['flat_id'] === $flatId);
-        if (!$slot || (int) $slot['society_id'] !== Society::currentId() || !$flat || (int) $flat['society_id'] !== Society::currentId() || !$validVehicle) {
-            Flash::set('error', 'A valid society slot, flat, and matching vehicle are required.');
+        $activeAllocation = $slot ? ParkingAllocation::activeForSlot((int) $id) : null;
+
+        if (!$slot || (int) $slot['society_id'] !== Society::currentId() || !$flat || (int) $flat['society_id'] !== Society::currentId() || !$validVehicle || !$validDate) {
+            Flash::set('error', 'A valid society slot, flat, matching vehicle, and allocation date are required.');
+        } elseif ($activeAllocation) {
+            Flash::set('error', 'This parking slot is already allocated.');
         } else {
-            Flash::set('success', 'Slot allocated.');
+            try {
+                ParkingAllocation::allocate((int) $id, $flatId, $vehicleId, $fromDate, $isChargeable);
+                Flash::set('success', 'Slot allocated.');
+            } catch (\\Throwable $e) {
+                Flash::set('error', 'Unable to allocate this parking slot. Please verify the details and try again.');
+            }
         }
         header("Location: /vehicles/parking/{$id}");
         exit;
