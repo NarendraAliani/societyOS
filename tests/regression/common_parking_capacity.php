@@ -21,7 +21,7 @@ $checks = [
     'allocation model prevents a vehicle from taking multiple active four-wheeler slots' => str_contains($allocationModel, 'vehicleHasActiveFourWheelerAllocation') && str_contains($allocationModel, 'already has an active 4-wheeler parking allocation'),
     'vehicle type must match parking slot type' => str_contains($allocationModel, 'Vehicle type must match parking slot type.'),
     'allocation scope uses unique PDO placeholders for each society check' => str_contains($allocationModel, 'ps.society_id = :slot_society_id AND w.society_id = :wing_society_id') && str_contains($allocationModel, "'wing_society_id' => Society::currentId()"),
-    'slot occupancy update binds only declared placeholders and stays society scoped' => str_contains($parkingSlotModel, 'WHERE id = :id AND society_id = :sid') && str_contains($parkingSlotModel, "'sid' => Society::currentId()"),
+    'slot occupancy update binds only declared placeholders and stays society scoped' => str_contains($model, 'WHERE id = :id AND society_id = :sid') && str_contains($model, "'sid' => Society::currentId()"),
     'allocation form requires an allocation start date' => str_contains($slotDetailView, 'name="allocated_from"') && str_contains($slotDetailView, 'required>'),
     'slot detail flat list includes only flats with eligible compatible vehicles' => str_contains($controller, '$eligibleFlatIds') && str_contains($controller, 'use ($slotType)'),
     'slot detail vehicle dropdown is filtered by selected flat' => str_contains($slotDetailView, 'data-flat-id=') && str_contains($slotDetailView, 'filterVehicles()'),
