@@ -45,6 +45,25 @@ final class AccountingController
         exit;
     }
 
+    public function updateAccount(string $id): void
+    {
+        $this->verifyCsrf();
+
+        $name = trim((string) ($_POST['name'] ?? ''));
+        $type = ($_POST['account_type'] ?? '') === 'bank' ? 'bank' : 'cash';
+        $opening = $_POST['opening_balance'] ?? '0';
+
+        if ($name === '' || !is_numeric($opening)) {
+            Flash::set('error', 'Account name and a numeric opening balance are required.');
+        } else {
+            Account::update((int) $id, $name, $type, (float) $opening);
+            ActivityLog::log('accounting', 'update', "Updated account \"{$name}\" (id {$id})");
+            Flash::set('success', 'Account updated.');
+        }
+        header('Location: /accounting/accounts');
+        exit;
+    }
+
     public function income(): void
     {
         $pageTitle = 'Income';
@@ -53,9 +72,9 @@ final class AccountingController
         require __DIR__ . '/../Views/accounting/income.php';
     }
 
+
     /**
-     * Auditable breakdown of the dashboard's monthly income KPI: manual income entries
-     * plus confirmed maintenance payments, restricted to this society and selected dates.
+     * Auditable breakdown of dashboard income: manual income plus confirmed maintenance payments.
      */
     public function incomeDetails(): void
     {
@@ -65,7 +84,7 @@ final class AccountingController
         $to = (string) ($_GET['to'] ?? date('Y-m-d'));
 
         foreach ([$from, $to] as $date) {
-            $parsed = \DateTimeImmutable::createFromFormat('!Y-m-d', $date);
+            $parsed = \\DateTimeImmutable::createFromFormat('!Y-m-d', $date);
             if (!$parsed || $parsed->format('Y-m-d') !== $date) {
                 $from = date('Y-m-01');
                 $to = date('Y-m-d');
@@ -104,9 +123,7 @@ final class AccountingController
         $payments->execute(['sid' => $societyId, 'wing_sid' => $societyId, 'from_date' => $from, 'to_date' => $to]);
         $rows = array_merge($rows, $payments->fetchAll());
 
-        usort($rows, static fn (array $a, array $b): int =>
-            strcmp((string) $b['entry_date'], (string) $a['entry_date'])
-        );
+        usort($rows, static fn (array $a, array $b): int => strcmp((string) $b['entry_date'], (string) $a['entry_date']));
 
         $manualTotal = 0.0;
         $paymentTotal = 0.0;
@@ -226,7 +243,8 @@ final class AccountingController
         ActivityLog::log('accounting', 'create', "Added vendor \"{$name}\"");
         Flash::set('success', "Vendor \"{$name}\" added.");
 
-        // Pre-select the newly created vendor back on the asset page, so the caller lands back where they started.
+        // Pre-select the newly created vendor back on the asset page, so the admin doesn't
+        // have to find it again in the dropdown they just left to create it.
         if ($returnToAsset) {
             $redirect .= "?vendor_id={$vendorId}";
         }
@@ -248,10 +266,9 @@ final class AccountingController
                 'contact_person' => trim((string) ($_POST['contact_person'] ?? '')),
                 'phone' => trim((string) ($_POST['phone'] ?? '')),
                 'email' => trim((string) ($_POST['email'] ?? '')),
-                'category' => trim((string) ($_POST['email'] ?? '')),
-                'email' => trim((string) ($_POST['email'] ?? '')),
+                'category' => trim((string) ($_POST['category'] ?? '')),
             ]);
-            ActivityLog::log('accounting', 'update', "Updated vendor \"{$name}\"");
+            ActivityLog::log('accounting', 'update', "Updated vendor \"{$name}\" (id {$id})");
             Flash::set('success', 'Vendor updated.');
         }
         header('Location: /accounting/vendors');
@@ -264,6 +281,7 @@ final class AccountingController
         Vendor::delete((int) $id);
         ActivityLog::log('accounting', 'delete', "Removed vendor id {$id}");
         Flash::set('success', 'Vendor removed.');
+        header('Location: /accounting/vendors');
         exit;
     }
 
