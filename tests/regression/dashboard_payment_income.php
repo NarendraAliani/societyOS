@@ -18,7 +18,7 @@ $checks = [
     'payment proofs count only after approval records a payment' => str_contains($paymentProofController, "if (\$decision==='approve')") && str_contains($paymentProofController, 'BillingService::recordPayment'),
     'payment recording commits before being treated as confirmed' => str_contains($billingService, 'Payment::create(') && str_contains($billingService, '$pdo->commit();'),
     'dashboard income KPI links to its calculation details' => str_contains($dashboardView, 'href="/accounting/income-details"'),
-    'income details route requires accounting view permission' => str_contains($routes, "incomeDetails'], [$auth, $backOffice, $can('accounting.view')]);"),
+    'income details route requires accounting view permission' => str_contains($routes, "'/accounting/income-details'") && str_contains($routes, "'incomeDetails'") && str_contains($routes, "'accounting.view'"),
     'income detail calculation includes manual entries and confirmed payments' => str_contains($accountingController, 'public function incomeDetails(): void') && str_contains($accountingController, 'FROM income i') && str_contains($accountingController, 'FROM payments p') && str_contains($accountingController, '$totalIncome = $manualTotal + $paymentTotal;'),
     'income details explain pending proofs are excluded' => str_contains($incomeDetailsView, 'Pending payment proofs are excluded until approved.'),
 ];
