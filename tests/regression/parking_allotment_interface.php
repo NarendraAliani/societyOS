@@ -14,12 +14,12 @@ $checks = [
     'parking allotment is restricted to authorised vehicle managers' => str_contains($routes, "'/vehicles/parking-allotment'") && str_contains($routes, "'vehicles.manage'"),
     'interface selects flat, resident vehicle, compatible available slot and allocation date' => str_contains($view, 'name="flat_id"') && str_contains($view, 'name="vehicle_id"') && str_contains($view, 'name="parking_slot_id"') && str_contains($view, 'name="allocated_from"'),
     'flat selection filters vehicle options and slot type filters compatible slots' => str_contains($view, 'data-flat-id') && str_contains($view, 'data-slot-type'),
-    'currently allocated vehicles are excluded from four-wheeler choices' => str_contains($controller, 'assignedVehicleIds') && str_contains($controller, 'vehicle[\'vehicle_type\'] === \'four_wheeler\' && isset($assignedVehicleIds[(int) $vehicle[\'id\']])'),
+    'all currently allocated vehicles are excluded from choices without restricting a flat to one vehicle' => str_contains($controller, 'assignedVehicleIds') && str_contains($controller, 'if (isset($assignedVehicleIds[(int) $vehicle[\'id\']]))') && str_contains($view, 'data-flat-id'),
     'flat dropdown is limited to flats with an eligible registered vehicle and compatible free slot' => str_contains($controller, '$eligibleFlatIds') && str_contains($controller, 'Flat::allForSociety($societyId)'),
     'form submits through existing validated allocation model' => str_contains($controller, 'ParkingAllocation::allocate($slotId, $flatId, $vehicleId, $fromDate, $billing === \'paid\')'),
     'parking overview links directly to resident-first allotment' => str_contains($parkingView, '/vehicles/parking-allotment') && str_contains($parkingView, 'Allot Vehicle to Parking'),
     'vehicle listing prominently links to vehicle parking allotment' => str_contains($vehiclesView, '/vehicles/parking-allotment') && str_contains($vehiclesView, 'Allot Parking to Vehicle'),
-    'model prevents duplicate active four-wheeler assignments' => str_contains($allocationModel, 'vehicleHasActiveFourWheelerAllocation'),
+    'model prevents any vehicle from having multiple active parking assignments while allowing multiple vehicles per flat' => str_contains($allocationModel, 'vehicleHasActiveAllocation') && str_contains($controller, 'foreach ($vehicles as $vehicle)') && str_contains($controller, '$eligibleFlatIds[(int) $vehicle[\'flat_id\']] = true'),
 ];
 
 $failed = false;
