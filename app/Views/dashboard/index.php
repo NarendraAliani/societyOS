@@ -143,6 +143,7 @@ ob_start();
                 </div>
             </div>
         </div>
+        </a>
     </div>
 </div>
 
@@ -189,7 +190,6 @@ ob_start();
             <?php endif; ?>
             </tbody>
         </table>
-        </a>
     </div>
 </div>
 </div>
