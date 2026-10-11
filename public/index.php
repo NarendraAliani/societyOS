@@ -30,6 +30,7 @@ use App\Controllers\ProfileController;
 use App\Controllers\SettingsController;
 use App\Controllers\IntegrationController;
 use App\Controllers\ResidentController;
+use App\Controllers\PaymentProofController;
 use App\Controllers\PlatformController;
 use App\Middleware\BackOfficeMiddleware;
 use App\Middleware\PlatformAdminMiddleware;
