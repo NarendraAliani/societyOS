@@ -11,6 +11,7 @@ final class Document
         $stmt = db()->prepare(
             'SELECT d.*, u.name AS uploaded_by_name
              FROM documents d
+             JOIN members m ON m.id = d.member_id
              LEFT JOIN users u ON u.id = d.uploaded_by
              WHERE d.member_id = :member_id AND m.society_id = :sid
              ORDER BY d.created_at DESC'
