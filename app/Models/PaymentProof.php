@@ -18,7 +18,7 @@ final class PaymentProof
         $pending->execute(['bill'=>$billId,'member'=>$memberId]);
         if ($pending->fetchColumn()) throw new \InvalidArgumentException('You already have a payment proof awaiting verification for this bill.');
         $stmt=db()->prepare("INSERT INTO payment_proofs (society_id, maintenance_bill_id, member_id, submitted_by, amount, platform, transaction_id, screenshot_path, notes, status) VALUES (:sid,:bill,:member,:user,:amount,:platform,:txn,:path,:notes,'pending')");
-        $stmt->execute(['sid'=>$societyId,'bill'=>$billId,'member'=>$memberId,'user'=>\App\Helpers\Auth::id(),'platform'=>$platform,'txn'=>$transactionId,'path'=>$screenshotPath,'notes'=>$notes !== '' ? $notes : null]);
+        $stmt->execute(['sid'=>$societyId,'bill'=>$billId,'member'=>$memberId,'user'=>\App\Helpers\Auth::id(),'amount'=>$amount,'platform'=>$platform,'txn'=>$transactionId,'path'=>$screenshotPath,'notes'=>$notes !== '' ? $notes : null]);
         return (int)db()->lastInsertId();
     }
 
