@@ -156,9 +156,9 @@ final class VehicleController
         try {
             $stats = ParkingSlot::resizeCommonTwoWheeler(Society::currentId(), $capacity);
             Flash::set('success', "Common two-wheeler parking updated: {$stats['capacity']} spaces, {$stats['occupied']} occupied.");
-        } catch (\\DomainException $e) {
+        } catch (\DomainException $e) {
             Flash::set('error', $e->getMessage());
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             Flash::set('error', 'Unable to update common parking capacity. Please try again.');
         }
 
