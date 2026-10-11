@@ -77,6 +77,9 @@ jobs:
       - name: Global UI and layout regression contract
         run: php tests/regression/global_ui_layout.php
 
+      - name: Dashboard and navigation regression contract
+        run: php tests/regression/dashboard_navigation.php
+
       - name: Account menu logout regression contract
         run: php tests/regression/account_menu_logout.php
 
