@@ -27,6 +27,28 @@ final class Flat
         return $stmt->fetchAll();
     }
 
+    /**
+     * Flats without any resident assignment, for the Add Resident form.
+     * A flat already linked to a resident is not available for another assignment.
+     */
+    public static function availableForResidents(int $societyId): array
+    {
+        $stmt = db()->prepare(
+            'SELECT f.*, fl.floor_number, w.name AS wing_name
+             FROM flats f
+             JOIN floors fl ON fl.id = f.floor_id
+             JOIN wings w ON w.id = fl.wing_id
+             WHERE w.society_id = :society_id
+               AND NOT EXISTS (
+                   SELECT 1 FROM members m
+                   WHERE m.flat_id = f.id AND m.society_id = :member_society_id
+               )
+             ORDER BY w.name, fl.floor_number, f.flat_number'
+        );
+        $stmt->execute(['society_id' => $societyId, 'member_society_id' => $societyId]);
+        return $stmt->fetchAll();
+    }
+
     public static function find(int $id): ?array
     {
         $stmt = db()->prepare(
