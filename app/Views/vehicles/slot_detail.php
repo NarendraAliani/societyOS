@@ -31,7 +31,7 @@ ob_start();
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Vehicle (optional)</label>
-                        <div class="form-text mb-2"><?= $slot['slot_type'] === 'four_wheeler' ? 'Only unallocated 4-wheelers are listed. Each 4-wheeler can have one active parking slot.' : 'Only vehicles matching this slot type are listed.' ?></div>
+                        <div class="form-text mb-2"><?= $slot['slot_type'] === 'four_wheeler' ? 'Only vehicles without an active parking allocation are listed. Each vehicle can have one active parking slot; flats may have multiple slots.' : 'Only vehicles matching this slot type are listed.' ?></div>
                         <select name="vehicle_id" id="parking-slot-vehicle" class="form-select" required>
                             <option value="">Select vehicle</option>
                             <?php foreach ($vehicles as $vehicle): ?>
