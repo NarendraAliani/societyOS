@@ -20,16 +20,15 @@ final class ParkingAllocation
         return $stmt->fetch() ?: null;
     }
 
-    public static function vehicleHasActiveFourWheelerAllocation(int $vehicleId): bool
+    public static function vehicleHasActiveAllocation(int $vehicleId): bool
     {
         $stmt = db()->prepare(
-            "SELECT COUNT(*)
+            'SELECT COUNT(*)
              FROM parking_allocations pa
              JOIN parking_slots ps ON ps.id = pa.parking_slot_id
              WHERE pa.vehicle_id = :vehicle_id
                AND pa.allocated_to IS NULL
-               AND ps.slot_type = 'four_wheeler'
-               AND ps.society_id = :sid"
+               AND ps.society_id = :sid'
         );
         $stmt->execute(['vehicle_id' => $vehicleId, 'sid' => Society::currentId()]);
         return (int) $stmt->fetchColumn() > 0;
@@ -112,7 +111,7 @@ final class ParkingAllocation
                     throw new \InvalidArgumentException('Vehicle type must match parking slot type.');
                 }
                 if ($slotType === 'four_wheeler' && self::vehicleHasActiveFourWheelerAllocation($vehicleId)) {
-                    throw new \DomainException('This vehicle already has an active 4-wheeler parking allocation.');
+                    throw new \DomainException('This vehicle already has an active parking allocation.');
                 }
             }
 
