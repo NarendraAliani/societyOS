@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 $css = file_get_contents(__DIR__ . '/../../public/static/css/app.css');
 $reports = file_get_contents(__DIR__ . '/../../app/Views/reports/index.php');
+$members = file_get_contents(__DIR__ . '/../../app/Views/members/index.php');
 
 $contracts = [
     '[data-bs-theme="dark"] .text-dark',
@@ -27,6 +28,11 @@ if (strpos($reports, 'report-card-heading') === false || strpos($reports, 'repor
 
 if (strpos($reports, 'text-dark') !== false) {
     fwrite(STDERR, "Report directory still contains a hard-coded text-dark heading.\n");
+    exit(1);
+}
+
+if (strpos($members, 'bg-body-tertiary text-body border') === false || strpos($members, 'bg-light text-dark') !== false) {
+    fwrite(STDERR, "Resident member/vehicle count badges are not theme-aware.\n");
     exit(1);
 }
 
