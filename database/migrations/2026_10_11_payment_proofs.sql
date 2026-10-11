@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS payment_proofs (
     society_id INT UNSIGNED NOT NULL,
     maintenance_bill_id INT UNSIGNED NOT NULL,
     member_id INT UNSIGNED NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
     submitted_by INT UNSIGNED NULL,
     platform ENUM('UPI app','Bank transfer','Debit/Credit card','Other') NOT NULL,
     transaction_id VARCHAR(100) NOT NULL,
