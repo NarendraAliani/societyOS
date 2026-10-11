@@ -7,6 +7,32 @@ ob_start();
     <p class="mb-0"><a href="/vehicles">&laquo; Back to Vehicles</a></p>
     <a href="/vehicles/parking/rates" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-tags me-1"></i>Manage Rates</a>
 </div>
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-5">
+                <h5 class="mb-1"><i class="fa-solid fa-motorcycle me-2"></i>Common 2-Wheeler Parking</h5>
+                <p class="text-muted mb-0 small">Manage shared parking capacity. Each space is still tracked individually for allocation and billing.</p>
+            </div>
+            <div class="col-lg-3">
+                <div class="small text-muted">Occupied / Capacity</div>
+                <div class="fs-5 fw-semibold"><?= (int) $commonParking['occupied'] ?> / <?= (int) $commonParking['capacity'] ?></div>
+                <div class="small text-muted"><?= max(0, (int) $commonParking['capacity'] - (int) $commonParking['occupied']) ?> spaces available</div>
+            </div>
+            <div class="col-lg-4">
+                <form method="post" action="/vehicles/parking/common-capacity" class="d-flex gap-2 align-items-end">
+                    <?= \\App\\Helpers\\Csrf::field() ?>
+                    <div class="flex-grow-1">
+                        <label class="form-label mb-1" for="common-parking-capacity">Total spaces (0–500)</label>
+                        <input type="number" min="0" max="500" step="1" id="common-parking-capacity" name="capacity" class="form-control" value="<?= (int) $commonParking['capacity'] ?>" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-md-8">
         <div class="card border-0 shadow-sm">
@@ -16,7 +42,7 @@ ob_start();
                     <tbody>
                     <?php foreach ($slots as $slot): ?>
                         <tr>
-                            <td><a href="/vehicles/parking/<?= (int) $slot['id'] ?>"><?= htmlspecialchars($slot['slot_number']) ?></a></td>
+                            <td><a href="/vehicles/parking/<?= (int) $slot['id'] ?>"><?= str_starts_with((string) $slot['slot_number'], 'COMMON-2W-') ? 'Common Area · ' . htmlspecialchars(substr((string) $slot['slot_number'], strlen('COMMON-2W-'))) : htmlspecialchars($slot['slot_number']) ?></a></td>
                             <td><span class="badge bg-<?= $slot['slot_type'] === 'two_wheeler' ? 'info' : 'primary' ?>"><?= $slot['slot_type'] === 'two_wheeler' ? '2-Wheeler' : '4-Wheeler' ?></span></td>
                             <td><?= $slot['current_rate'] !== null ? number_format((float) $slot['current_rate'], 2) . '/mo' : '<span class="text-muted">Not priced</span>' ?></td>
                             <td><span class="badge bg-<?= $slot['is_allocated'] ? 'success' : 'secondary' ?>"><?= $slot['is_allocated'] ? 'Occupied' : 'Free' ?></span></td>
