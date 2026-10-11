@@ -178,6 +178,8 @@ $router->post('/vehicles/{id}/delete', [VehicleController::class, 'destroy'], [$
 
 // Static /vehicles/parking* routes must be registered before the generic POST /vehicles/{id} below,
 // otherwise POST /vehicles/parking would wrongly match /vehicles/{id} with id="parking".
+$router->get('/vehicles/parking-allotment', [VehicleController::class, 'parkingAllotment'], [$auth, $backOffice, $can('vehicles.manage')]);
+$router->post('/vehicles/parking-allotment', [VehicleController::class, 'storeParkingAllotment'], [$auth, $backOffice, $can('vehicles.manage')]);
 $router->get('/vehicles/parking', [VehicleController::class, 'parkingIndex'], [$auth, $backOffice, $can('vehicles.manage')]);
 $router->post('/vehicles/parking', [VehicleController::class, 'storeSlot'], [$auth, $backOffice, $can('vehicles.manage')]);
 $router->post('/vehicles/parking/common-capacity', [VehicleController::class, 'resizeCommonParking'], [$auth, $backOffice, $can('vehicles.manage')]);
