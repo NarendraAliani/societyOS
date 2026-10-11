@@ -200,6 +200,9 @@ $router->post('/accounting/accounts/{id}', [AccountingController::class, 'update
 $router->get('/accounting/income-details', [AccountingController::class, 'incomeDetails'], [$auth, $backOffice, $can('accounting.view')]);
 $router->get('/accounting/income', [AccountingController::class, 'income'], [$auth, $backOffice, $can('accounting.view')]);
 $router->post('/accounting/income', [AccountingController::class, 'storeIncome'], [$auth, $backOffice, $can('accounting.manage')]);
+$router->get('/accounting/income/{id}/edit', [AccountingController::class, 'editIncome'], [$auth, $backOffice, $can('accounting.manage')]);
+$router->post('/accounting/income/{id}', [AccountingController::class, 'updateIncome'], [$auth, $backOffice, $can('accounting.manage')]);
+$router->post('/accounting/income/{id}/delete', [AccountingController::class, 'deleteIncome'], [$auth, $backOffice, $can('accounting.manage')]);
 $router->get('/accounting/expenses', [AccountingController::class, 'expenses'], [$auth, $backOffice, $can('accounting.view')]);
 $router->post('/accounting/expenses', [AccountingController::class, 'storeExpense'], [$auth, $backOffice, $can('accounting.manage')]);
 $router->get('/accounting/vendors', [AccountingController::class, 'vendors'], [$auth, $backOffice, $can('accounting.view')]);
