@@ -171,7 +171,7 @@ final class AccountingController
         $category = trim((string) ($_POST['category'] ?? ''));
         $amount = $_POST['amount'] ?? '';
         $date = (string) ($_POST['income_date'] ?? '');
-        $parsedDate = \\DateTimeImmutable::createFromFormat('!Y-m-d', $date);
+        $parsedDate = \DateTimeImmutable::createFromFormat('!Y-m-d', $date);
         $validDate = $parsedDate && $parsedDate->format('Y-m-d') === $date;
         $account = $accountId > 0 ? Account::find($accountId) : null;
 
