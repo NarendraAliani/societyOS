@@ -29,6 +29,7 @@ ob_start();
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Vehicle (optional)</label>
+                        <div class="form-text mb-2"><?= $slot['slot_type'] === 'four_wheeler' ? 'Only unallocated 4-wheelers are listed. Each 4-wheeler can have one active parking slot.' : 'Only vehicles matching this slot type are listed.' ?></div>
                         <select name="vehicle_id" class="form-select">
                             <option value="">Unassigned</option>
                             <?php foreach ($vehicles as $vehicle): ?>
@@ -44,8 +45,8 @@ ob_start();
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Allocated From</label>
-                        <input type="date" name="allocated_from" class="form-control" value="<?= date('Y-m-d') ?>">
+                        <label class="form-label">Allocated From *</label>
+                        <input type="date" name="allocated_from" class="form-control" value="<?= date('Y-m-d') ?>" required>
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Allocate Slot</button>
                 </form>
