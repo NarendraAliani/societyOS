@@ -1,0 +1,512 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controllers;
+
+use App\Helpers\Auth;
+use App\Helpers\Csrf;
+use App\Helpers\Flash;
+use App\Models\Account;
+use App\Models\ActivityLog;
+use App\Models\Income;
+use App\Models\Expense;
+use App\Models\LedgerEntry;
+use App\Models\MaintenanceBill;
+use App\Models\Society;
+use App\Models\Vendor;
+use App\Services\AccountingService;
+
+final class AccountingController
+{
+    public function accounts(): void
+    {
+        $pageTitle = 'Accounts';
+        $accounts = Account::allForSociety(Society::currentId());
+        require __DIR__ . '/../Views/accounting/accounts.php';
+    }
+
+    public function storeAccount(): void
+    {
+        $this->verifyCsrf();
+
+        $name = trim((string) ($_POST['name'] ?? ''));
+        $type = ($_POST['account_type'] ?? '') === 'bank' ? 'bank' : 'cash';
+        $opening = $_POST['opening_balance'] ?? '0';
+
+        if ($name === '' || !is_numeric($opening)) {
+            Flash::set('error', 'Account name and a numeric opening balance are required.');
+        } else {
+            Account::create(Society::currentId(), $name, $type, (float) $opening);
+            ActivityLog::log('accounting', 'create', "Created account \"{$name}\"");
+            Flash::set('success', "Account \"{$name}\" created.");
+        }
+        header('Location: /accounting/accounts');
+        exit;
+    }
+
+    public function updateAccount(string $id): void
+    {
+        $this->verifyCsrf();
+
+        $name = trim((string) ($_POST['name'] ?? ''));
+        $type = ($_POST['account_type'] ?? '') === 'bank' ? 'bank' : 'cash';
+        $opening = $_POST['opening_balance'] ?? '0';
+
+        if ($name === '' || !is_numeric($opening)) {
+            Flash::set('error', 'Account name and a numeric opening balance are required.');
+        } else {
+            Account::update((int) $id, $name, $type, (float) $opening);
+            ActivityLog::log('accounting', 'update', "Updated account \"{$name}\" (id {$id})");
+            Flash::set('success', 'Account updated.');
+        }
+        header('Location: /accounting/accounts');
+        exit;
+    }
+
+    public function income(): void
+    {
+        $pageTitle = 'Income';
+        $entries = Income::allForSociety(Society::currentId());
+        $accounts = Account::allForSociety(Society::currentId());
+        require __DIR__ . '/../Views/accounting/income.php';
+    }
+
+
+    /**
+     * Auditable breakdown of dashboard income: manual income plus confirmed maintenance payments.
+     */
+    public function incomeDetails(): void
+    {
+        $pageTitle = 'Income Details';
+        $societyId = Society::currentId();
+        $from = (string) ($_GET['from'] ?? date('Y-m-01'));
+        $to = (string) ($_GET['to'] ?? date('Y-m-d'));
+
+        foreach ([$from, $to] as $date) {
+            $parsed = \DateTimeImmutable::createFromFormat('!Y-m-d', $date);
+            if (!$parsed || $parsed->format('Y-m-d') !== $date) {
+                $from = date('Y-m-01');
+                $to = date('Y-m-d');
+                break;
+            }
+        }
+        if ($from > $to) {
+            [$from, $to] = [$to, $from];
+        }
+
+        $manual = db()->prepare(
+            'SELECT i.id AS income_id, i.income_date AS entry_date, i.category AS source, i.description,
+                    i.amount, a.name AS account_name, NULL AS bill_number,
+                    NULL AS flat_number, NULL AS payment_mode, NULL AS reference_number,
+                    "Manual income" AS entry_type
+             FROM income i
+             LEFT JOIN accounts a ON a.id = i.account_id AND a.society_id = i.society_id
+             WHERE i.society_id = :sid AND i.income_date BETWEEN :from_date AND :to_date'
+        );
+        $manual->execute(['sid' => $societyId, 'from_date' => $from, 'to_date' => $to]);
+        $rows = $manual->fetchAll();
+
+        $payments = db()->prepare(
+            'SELECT DATE(p.paid_at) AS entry_date, "Maintenance payment" AS source,
+                    CONCAT("Bill ", b.bill_number) AS description, p.amount,
+                    NULL AS account_name, b.bill_number, f.flat_number,
+                    p.payment_mode, p.reference_number, "Confirmed payment" AS entry_type
+             FROM payments p
+             JOIN maintenance_bills b ON b.id = p.maintenance_bill_id
+             JOIN flats f ON f.id = b.flat_id
+             JOIN floors fl ON fl.id = f.floor_id
+             JOIN wings w ON w.id = fl.wing_id
+             WHERE b.society_id = :sid AND w.society_id = :wing_sid
+               AND DATE(p.paid_at) BETWEEN :from_date AND :to_date'
+        );
+        $payments->execute(['sid' => $societyId, 'wing_sid' => $societyId, 'from_date' => $from, 'to_date' => $to]);
+        $rows = array_merge($rows, $payments->fetchAll());
+
+        usort($rows, static fn (array $a, array $b): int => strcmp((string) $b['entry_date'], (string) $a['entry_date']));
+
+        $manualTotal = 0.0;
+        $paymentTotal = 0.0;
+        foreach ($rows as $row) {
+            if ($row['entry_type'] === 'Confirmed payment') {
+                $paymentTotal += (float) $row['amount'];
+            } else {
+                $manualTotal += (float) $row['amount'];
+            }
+        }
+        $totalIncome = $manualTotal + $paymentTotal;
+
+        require __DIR__ . '/../Views/accounting/income_details.php';
+    }
+
+    public function editIncome(string $id): void
+    {
+        $incomeId = filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $societyId = Society::currentId();
+        $entry = $incomeId ? Income::findForSociety((int) $incomeId, $societyId) : null;
+        if (!$entry) {
+            Flash::set('error', 'Income entry not found.');
+            header('Location: /accounting/income-details');
+            exit;
+        }
+
+        $pageTitle = 'Edit Income';
+        $accounts = Account::allForSociety($societyId);
+        require __DIR__ . '/../Views/accounting/income_edit.php';
+    }
+
+    public function updateIncome(string $id): void
+    {
+        $this->verifyCsrf();
+        $incomeId = filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $societyId = Society::currentId();
+        $entry = $incomeId ? Income::findForSociety((int) $incomeId, $societyId) : null;
+        if (!$entry) {
+            Flash::set('error', 'Income entry not found.');
+            header('Location: /accounting/income-details');
+            exit;
+        }
+
+        $accountId = (int) ($_POST['account_id'] ?? 0);
+        $category = trim((string) ($_POST['category'] ?? ''));
+        $amount = $_POST['amount'] ?? '';
+        $date = (string) ($_POST['income_date'] ?? '');
+        $parsedDate = \DateTimeImmutable::createFromFormat('!Y-m-d', $date);
+        $validDate = $parsedDate && $parsedDate->format('Y-m-d') === $date;
+        $account = $accountId > 0 ? Account::find($accountId) : null;
+
+        if (!$account || $category === '' || !is_numeric($amount) || (float) $amount <= 0 || !$validDate) {
+            Flash::set('error', 'Choose a valid account and provide a category, positive amount, and valid date.');
+            header('Location: /accounting/income/' . (int) $incomeId . '/edit');
+            exit;
+        }
+
+        $fields = [
+            'account_id' => $accountId,
+            'category' => $category,
+            'amount' => (float) $amount,
+            'description' => trim((string) ($_POST['description'] ?? '')),
+            'income_date' => $date,
+        ];
+        AccountingService::updateIncome($societyId, (int) $incomeId, $fields);
+        ActivityLog::log('accounting', 'update', "Updated manual income id {$incomeId} ({$category})");
+        Flash::set('success', 'Income entry updated.');
+        header('Location: /accounting/income-details');
+        exit;
+    }
+
+    public function deleteIncome(string $id): void
+    {
+        $this->verifyCsrf();
+        $incomeId = filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $societyId = Society::currentId();
+        $entry = $incomeId ? Income::findForSociety((int) $incomeId, $societyId) : null;
+        if (!$entry) {
+            Flash::set('error', 'Income entry not found.');
+            header('Location: /accounting/income-details');
+            exit;
+        }
+
+        AccountingService::deleteIncome($societyId, (int) $incomeId);
+        ActivityLog::log('accounting', 'delete', "Deleted manual income id {$incomeId} ({$entry['category']})");
+        Flash::set('success', 'Income entry deleted.');
+        header('Location: /accounting/income-details');
+        exit;
+    }
+
+    public function storeIncome(): void
+    {
+        $this->verifyCsrf();
+
+        $accountId = (int) ($_POST['account_id'] ?? 0);
+        $category = trim((string) ($_POST['category'] ?? ''));
+        $amount = $_POST['amount'] ?? '';
+        $date = $_POST['income_date'] ?? '';
+
+        if ($accountId <= 0 || $category === '' || !in_array($category, Expense::categoriesForSociety(Society::currentId()), true) || !is_numeric($amount) || (float) $amount <= 0 || !$date) {
+            Flash::set('error', 'Account, category, a positive amount, and date are required.');
+            header('Location: /accounting/income');
+            exit;
+        }
+
+        AccountingService::recordIncome(Society::currentId(), [
+            'account_id' => $accountId,
+            'category' => $category,
+            'amount' => (float) $amount,
+            'description' => trim((string) ($_POST['description'] ?? '')),
+            'income_date' => $date,
+            'created_by' => Auth::id(),
+        ]);
+
+        ActivityLog::log('accounting', 'income', "Recorded income of {$amount} ({$category})");
+        Flash::set('success', 'Income recorded.');
+        header('Location: /accounting/income');
+        exit;
+    }
+
+    public function expenses(): void
+    {
+        $pageTitle = 'Expenses';
+        $entries = Expense::allForSociety(Society::currentId());
+        $accounts = Account::allForSociety(Society::currentId());
+        $vendors = Vendor::allForSociety(Society::currentId());
+        $categories = Expense::categoriesForSociety(Society::currentId());
+        require __DIR__ . '/../Views/accounting/expenses.php';
+    }
+
+    public function storeExpenseCategory(): void
+    {
+        $this->verifyCsrf();
+        $name = trim((string) ($_POST['name'] ?? ''));
+        if ($name === '' || mb_strlen($name) > 100) {
+            Flash::set('error', 'Enter an expense category name (up to 100 characters).');
+            header('Location: /accounting/expenses');
+            exit;
+        }
+
+        if (!Expense::addCategory(Society::currentId(), $name)) {
+            Flash::set('error', 'That expense category already exists, or the name is invalid.');
+            header('Location: /accounting/expenses');
+            exit;
+        }
+
+        ActivityLog::log('accounting', 'expense_category', "Added expense category {$name}");
+        Flash::set('success', "Expense category '{$name}' added. It is now available in the category dropdown.");
+        header('Location: /accounting/expenses');
+        exit;
+    }
+
+    public function storeExpense(): void
+    {
+        $this->verifyCsrf();
+
+        $accountId = (int) ($_POST['account_id'] ?? 0);
+        $category = trim((string) ($_POST['category'] ?? ''));
+        $amount = $_POST['amount'] ?? '';
+        $date = $_POST['expense_date'] ?? '';
+
+        if ($accountId <= 0 || $category === '' || !is_numeric($amount) || (float) $amount <= 0 || !$date) {
+            Flash::set('error', 'Account, category, a positive amount, and date are required.');
+            header('Location: /accounting/expenses');
+            exit;
+        }
+
+        AccountingService::recordExpense(Society::currentId(), [
+            'account_id' => $accountId,
+            'vendor_id' => (int) ($_POST['vendor_id'] ?? 0) ?: null,
+            'category' => $category,
+            'amount' => (float) $amount,
+            'description' => trim((string) ($_POST['description'] ?? '')),
+            'expense_date' => $date,
+            'created_by' => Auth::id(),
+        ]);
+
+        ActivityLog::log('accounting', 'expense', "Recorded expense of {$amount} ({$category})");
+        Flash::set('success', 'Expense recorded.');
+        header('Location: /accounting/expenses');
+        exit;
+    }
+
+    public function vendors(): void
+    {
+        $pageTitle = 'Vendors';
+        $vendors = Vendor::allForSociety(Society::currentId());
+        require __DIR__ . '/../Views/accounting/vendors.php';
+    }
+
+    public function storeVendor(): void
+    {
+        $this->verifyCsrf();
+
+        $name = trim((string) ($_POST['name'] ?? ''));
+        // Set when the vendor is being added from another page (e.g. an asset's "Add AMC
+        // Record" form) rather than the main Vendors screen — same pattern as the vehicle
+        // create form's return_to_member, so the caller lands back where they started.
+        $returnToAsset = is_numeric($_POST['return_to_asset'] ?? '') ? (int) $_POST['return_to_asset'] : null;
+        $redirect = $returnToAsset ? "/assets/{$returnToAsset}" : '/accounting/vendors';
+
+        if ($name === '') {
+            Flash::set('error', 'Vendor name is required.');
+            header("Location: {$redirect}");
+            exit;
+        }
+
+        $vendorId = Vendor::create(Society::currentId(), [
+            'name' => $name,
+            'contact_person' => trim((string) ($_POST['contact_person'] ?? '')),
+            'phone' => trim((string) ($_POST['phone'] ?? '')),
+            'email' => trim((string) ($_POST['email'] ?? '')),
+            'category' => trim((string) ($_POST['category'] ?? '')),
+        ]);
+        ActivityLog::log('accounting', 'create', "Added vendor \"{$name}\"");
+        Flash::set('success', "Vendor \"{$name}\" added.");
+
+        // Pre-select the newly created vendor back on the asset page, so the admin doesn't
+        // have to find it again in the dropdown they just left to create it.
+        if ($returnToAsset) {
+            $redirect .= "?vendor_id={$vendorId}";
+        }
+
+        header("Location: {$redirect}");
+        exit;
+    }
+
+    public function updateVendor(string $id): void
+    {
+        $this->verifyCsrf();
+
+        $name = trim((string) ($_POST['name'] ?? ''));
+        if ($name === '') {
+            Flash::set('error', 'Vendor name is required.');
+        } else {
+            Vendor::update((int) $id, [
+                'name' => $name,
+                'contact_person' => trim((string) ($_POST['contact_person'] ?? '')),
+                'phone' => trim((string) ($_POST['phone'] ?? '')),
+                'email' => trim((string) ($_POST['email'] ?? '')),
+                'category' => trim((string) ($_POST['category'] ?? '')),
+            ]);
+            ActivityLog::log('accounting', 'update', "Updated vendor \"{$name}\" (id {$id})");
+            Flash::set('success', 'Vendor updated.');
+        }
+        header('Location: /accounting/vendors');
+        exit;
+    }
+
+    public function deleteVendor(string $id): void
+    {
+        $this->verifyCsrf();
+        Vendor::delete((int) $id);
+        ActivityLog::log('accounting', 'delete', "Removed vendor id {$id}");
+        Flash::set('success', 'Vendor removed.');
+        header('Location: /accounting/vendors');
+        exit;
+    }
+
+    public function ledger(): void
+    {
+        $pageTitle = 'Ledger';
+        $accountId = isset($_GET['account_id']) && $_GET['account_id'] !== '' ? (int) $_GET['account_id'] : null;
+        $entries = LedgerEntry::allForSociety(Society::currentId(), $accountId);
+        $accounts = Account::allForSociety(Society::currentId());
+        require __DIR__ . '/../Views/accounting/ledger.php';
+    }
+
+    public function cashBook(): void
+    {
+        $this->renderBook('cash', 'Cash Book', '/accounting/cash-book');
+    }
+
+    public function bankBook(): void
+    {
+        $this->renderBook('bank', 'Bank Book', '/accounting/bank-book');
+    }
+
+    /**
+     * A traditional cash/bank book: one account at a time (running balance across several
+     * accounts summed together wouldn't mean anything), oldest-first, with a running balance
+     * column starting from the balance as of the day before the range began.
+     */
+    private function renderBook(string $accountType, string $pageTitle, string $basePath): void
+    {
+        $accounts = Account::allForSocietyByType(Society::currentId(), $accountType);
+
+        $accountId = isset($_GET['account_id']) && $_GET['account_id'] !== ''
+            ? (int) $_GET['account_id']
+            : ($accounts[0]['id'] ?? null);
+
+        $from = $_GET['from'] ?? date('Y-m-01');
+        $to = $_GET['to'] ?? date('Y-m-d');
+
+        $account = null;
+        $entries = [];
+        $openingBalance = 0.0;
+        $closingBalance = 0.0;
+
+        if ($accountId !== null) {
+            $account = Account::find($accountId);
+            $rawEntries = LedgerEntry::forAccountInRange($accountId, $from, $to);
+            $openingBalance = Account::balanceBefore($accountId, $from);
+
+            $running = $openingBalance;
+            foreach ($rawEntries as $entry) {
+                $running += $entry['entry_type'] === 'credit' ? (float) $entry['amount'] : -(float) $entry['amount'];
+                $entry['running_balance'] = $running;
+                $entries[] = $entry;
+            }
+            $closingBalance = $running;
+        }
+
+        require __DIR__ . '/../Views/accounting/book.php';
+    }
+
+    public function reports(): void
+    {
+        $pageTitle = 'Financial Reports';
+        require __DIR__ . '/../Views/accounting/reports_index.php';
+    }
+
+    /**
+     * Not a true double-entry trial balance — this app only tracks cash/bank accounts, not
+     * a full chart of accounts, so it's really an account-balances summary as of a date.
+     * Labeled plainly as such in the view rather than implying more accounting rigor than
+     * the underlying data supports.
+     */
+    public function trialBalance(): void
+    {
+        $pageTitle = 'Trial Balance';
+        $asOf = $_GET['as_of'] ?? date('Y-m-d');
+        $accounts = Account::allForSociety(Society::currentId());
+
+        $rows = [];
+        $total = 0.0;
+        foreach ($accounts as $acc) {
+            $balance = Account::balanceAsOf((int) $acc['id'], $asOf);
+            $rows[] = ['name' => $acc['name'], 'account_type' => $acc['account_type'], 'balance' => $balance];
+            $total += $balance;
+        }
+
+        require __DIR__ . '/../Views/accounting/trial_balance.php';
+    }
+
+    public function incomeExpenseStatement(): void
+    {
+        $pageTitle = 'Income & Expense Statement';
+        $from = $_GET['from'] ?? date('Y-m-01');
+        $to = $_GET['to'] ?? date('Y-m-d');
+
+        $incomeByCategory = Income::summaryByCategory(Society::currentId(), $from, $to);
+        $expenseByCategory = Expense::summaryByCategory(Society::currentId(), $from, $to);
+        $totalIncome = array_sum(array_column($incomeByCategory, 'total'));
+        $totalExpense = array_sum(array_column($expenseByCategory, 'total'));
+        $net = $totalIncome - $totalExpense;
+
+        require __DIR__ . '/../Views/accounting/income_expense_statement.php';
+    }
+
+    /**
+     * Assets = cash/bank balances + outstanding maintenance dues (Accounts Receivable).
+     * Liabilities are always ₹0 — this schema has no loans/payables table — so Equity
+     * (Accumulated Fund) equals total Assets by construction. Labeled plainly in the view;
+     * this is a snapshot of today's state, not a historical as-of-date statement, since
+     * bill balances aren't tracked with historical snapshots.
+     */
+    public function balanceSheet(): void
+    {
+        $pageTitle = 'Balance Sheet';
+        $accounts = Account::allForSociety(Society::currentId());
+        $accountsTotal = array_sum(array_column($accounts, 'current_balance'));
+        $receivables = MaintenanceBill::totalOutstanding(Society::currentId());
+        $totalAssets = $accountsTotal + $receivables;
+
+        require __DIR__ . '/../Views/accounting/balance_sheet.php';
+    }
+
+    private function verifyCsrf(): void
+    {
+        if (!Csrf::verify($_POST['_csrf'] ?? null)) {
+            http_response_code(419);
+            exit('Session expired. Go back and try again.');
+        }
+    }
+}

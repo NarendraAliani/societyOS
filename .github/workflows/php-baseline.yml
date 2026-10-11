@@ -1,0 +1,40 @@
+name: PHP baseline checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  php-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+          coverage: none
+
+      - name: Validate Composer manifest
+        run: composer validate --no-check-publish
+
+      - name: Lint all PHP source files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -d '' php_files < <(find . -path './.git' -prune -o -path './vendor' -prune -o -type f -name '*.php' -print0)
+          if (("${#php_files[@]}" == 0)); then
+            echo "No PHP files found."
+            exit 1
+          fi
+          for file in "${php_files[@]}"; do
+            php -l "$file"
+          done

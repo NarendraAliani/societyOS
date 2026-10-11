@@ -1,0 +1,10 @@
+---
+deployment:
+  tasks:
+    # Keep Apache-readable permissions for the application tree.
+    - /bin/find app config database public vendor -type d -exec /bin/chmod 755 {} +
+    - /bin/find app config database public vendor -type f -exec /bin/chmod 644 {} +
+    - /bin/chmod 755 .
+    - /bin/chmod 644 .htaccess public/.htaccess
+    # Production configuration is server-only and is never committed to Git.
+    - /bin/test ! -f .env || /bin/chmod 600 .env

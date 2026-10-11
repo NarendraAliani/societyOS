@@ -1,0 +1,30 @@
+-- SocietyOS payment proof review workflow.
+-- Run once in phpMyAdmin after taking a database backup.
+CREATE TABLE IF NOT EXISTS payment_proofs (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    society_id INT UNSIGNED NOT NULL,
+    maintenance_bill_id INT UNSIGNED NOT NULL,
+    member_id INT UNSIGNED NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    submitted_by INT UNSIGNED NULL,
+    platform ENUM('UPI app','Bank transfer','Debit/Credit card','Other') NOT NULL,
+    transaction_id VARCHAR(100) NOT NULL,
+    screenshot_path VARCHAR(255) NULL,
+    notes VARCHAR(1000) NULL,
+    status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+    reviewed_by INT UNSIGNED NULL,
+    reviewed_at DATETIME NULL,
+    review_notes VARCHAR(1000) NULL,
+    payment_id INT UNSIGNED NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_payment_proofs_society FOREIGN KEY (society_id) REFERENCES society(id) ON DELETE CASCADE,
+    CONSTRAINT fk_payment_proofs_bill FOREIGN KEY (maintenance_bill_id) REFERENCES maintenance_bills(id) ON DELETE CASCADE,
+    CONSTRAINT fk_payment_proofs_member FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE,
+    CONSTRAINT fk_payment_proofs_submitter FOREIGN KEY (submitted_by) REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT fk_payment_proofs_reviewer FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT fk_payment_proofs_payment FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE SET NULL,
+    INDEX idx_payment_proofs_pending (society_id, status, created_at),
+    INDEX idx_payment_proofs_member (society_id, member_id, created_at),
+    INDEX idx_payment_proofs_bill (maintenance_bill_id, status)
+) ENGINE=InnoDB;
