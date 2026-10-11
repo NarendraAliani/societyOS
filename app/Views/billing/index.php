@@ -6,6 +6,7 @@ ob_start();
     <h5 class="mb-0">Maintenance Bills</h5>
     <div>
         <a href="/billing/defaulters" class="btn btn-outline-danger btn-sm me-2"><i class="fa-solid fa-triangle-exclamation me-1"></i>Defaulters</a>
+        <a href="/billing/payment-proofs" class="btn btn-outline-primary btn-sm me-2"><i class="fa-solid fa-file-circle-check me-1"></i>Payment Proofs<?php if (!empty($pendingPaymentProofs)): ?> <span class="badge bg-danger"><?= (int)$pendingPaymentProofs ?></span><?php endif; ?></a>
         <a href="/billing/generate" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus me-1"></i>Generate Bills</a>
     </div>
 </div>
