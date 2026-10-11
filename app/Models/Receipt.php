@@ -24,7 +24,7 @@ final class Receipt
     {
         $stmt = db()->prepare(
             'SELECT r.*, p.amount, p.payment_mode, p.reference_number, p.paid_at,
-                    b.bill_number, b.flat_id, f.flat_number, fl.floor_number, w.name AS wing_name,
+                    b.bill_number, b.bill_period_start, b.bill_period_end, b.flat_id, f.flat_number, fl.floor_number, w.name AS wing_name,
                     b.society_id
              FROM receipts r
              JOIN payments p ON p.id = r.payment_id
