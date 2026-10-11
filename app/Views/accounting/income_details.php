@@ -71,7 +71,7 @@ ob_start();
                                     <span class="text-muted small">No edit permission</span>
                                 <?php endif; ?>
                             <?php else: ?>
-                                <span class="text-muted small">Managed in Payments</span>
+                                <a class="small" href="/billing/payment-proofs">Managed in Payments <span aria-hidden="true">→</span></a>
                             <?php endif; ?>
                         </td>
                     </tr>
