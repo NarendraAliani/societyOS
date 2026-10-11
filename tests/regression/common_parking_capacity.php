@@ -7,6 +7,7 @@ $allocationModel = file_get_contents($root . '/app/Models/ParkingAllocation.php'
 $controller = file_get_contents($root . '/app/Controllers/VehicleController.php');
 $view = file_get_contents($root . '/app/Views/vehicles/parking.php');
 $routes = file_get_contents($root . '/public/index.php');
+$slotDetailView = file_get_contents($root . '/app/Views/vehicles/slot_detail.php');
 
 $checks = [
     'common parking capacity is managed as society-scoped two-wheeler slots' => str_contains($model, "COMMON-2W-") && str_contains($model, 'resizeCommonTwoWheeler'),
@@ -19,7 +20,9 @@ $checks = [
     'four-wheeler dropdown hides vehicles with active allocations' => str_contains($controller, 'vehicleHasActiveFourWheelerAllocation') && str_contains($controller, "vehicle['vehicle_type'] === 'four_wheeler'"),
     'allocation model prevents a vehicle from taking multiple active four-wheeler slots' => str_contains($allocationModel, 'vehicleHasActiveFourWheelerAllocation') && str_contains($allocationModel, 'already has an active 4-wheeler parking allocation'),
     'vehicle type must match parking slot type' => str_contains($model, 'Vehicle type must match parking slot type.'),
-    'allocation form requires an allocation start date' => str_contains($view, 'name="allocated_from"') && str_contains($view, 'required>'),
+    'allocation form requires an allocation start date' => str_contains($slotDetailView, 'name="allocated_from"') && str_contains($slotDetailView, 'required>'),
+    'parking list has a clearly labelled allocation link for free slots' => str_contains($view, 'Allocate Vehicle') && str_contains($view, '#allocation-form'),
+    'slot detail page has a labelled vehicle allocation form target' => str_contains($slotDetailView, 'id="allocation-form"') && str_contains($slotDetailView, 'Allocate Vehicle to This Slot'),
 ];
 
 $failed = false;
