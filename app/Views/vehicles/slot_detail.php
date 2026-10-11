@@ -7,7 +7,7 @@ ob_start();
     <div class="col-md-6">
         <div class="card border-0 shadow-sm">
             <div class="card-body">
-                <h6>Slot <?= htmlspecialchars($slot['slot_number']) ?>
+                <h6 id="current-allocation">Slot <?= htmlspecialchars($slot['slot_number']) ?>
                     <span class="badge bg-<?= $slot['is_allocated'] ? 'success' : 'secondary' ?>"><?= $slot['is_allocated'] ? 'Occupied' : 'Free' ?></span>
                 </h6>
                 <p class="text-muted small mb-0">
@@ -16,6 +16,8 @@ ob_start();
                 </p>
 
                 <?php if (!$slot['is_allocated']): ?>
+                <h6 id="allocation-form" class="mt-3">Allocate Vehicle to This Slot</h6>
+                <p class="text-muted small">Select the flat and a vehicle that is not already assigned to another active 4-wheeler slot, then confirm the allocation date and billing.</p>
                 <form method="post" action="/vehicles/parking/<?= (int) $slot['id'] ?>/allocate" class="mt-3">
                     <?= \App\Helpers\Csrf::field() ?>
                     <div class="mb-3">
