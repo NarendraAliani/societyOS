@@ -21,7 +21,7 @@ ob_start();
             </div>
             <div class="col-lg-4">
                 <form method="post" action="/vehicles/parking/common-capacity" class="d-flex gap-2 align-items-end">
-                    <?= \\App\\Helpers\\Csrf::field() ?>
+                    <?= \App\Helpers\Csrf::field() ?>
                     <div class="flex-grow-1">
                         <label class="form-label mb-1" for="common-parking-capacity">Total spaces (0–500)</label>
                         <input type="number" min="0" max="500" step="1" id="common-parking-capacity" name="capacity" class="form-control" value="<?= (int) $commonParking['capacity'] ?>" required>
