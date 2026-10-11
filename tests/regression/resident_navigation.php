@@ -36,7 +36,7 @@ $vehicleController = file_get_contents('app/Controllers/VehicleController.php');
 $documentModel = file_get_contents('app/Models/Document.php');
 
 $checks = [
-    'resident sidebar exposes My Family' => str_contains($layout, 'href="/resident/family"') && str_contains($layout, '>My Family</a>'),
+    'resident sidebar exposes My Family' => str_contains($layout, "'href'=>'/resident/family'") && str_contains($layout, "'label'=>'My Family'"),
     'logout is rendered in the shared topbar' => str_contains($layout, 'action="/logout"') && str_contains($layout, '>Logout</button>'),
     'responsive sidebar toggle exists' => str_contains($layout, 'app-sidebar-toggle') && str_contains($layout, 'id="app-sidebar"'),
     'responsive shell styles exist' => str_contains(file_get_contents('public/static/css/app.css'), '@media (max-width: 991.98px)') && str_contains(file_get_contents('public/static/css/app.css'), 'sidebar-open'),
