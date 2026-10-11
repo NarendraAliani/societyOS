@@ -25,6 +25,7 @@ final class PaymentProofController
         if (!$bill || !Member::find($memberId)) { Flash::set('error','Bill not found for your society.'); header('Location:/resident/bills'); exit; }
         $platform=trim((string)($_POST['platform']??''));
         $transactionId=trim((string)($_POST['transaction_id']??''));
+        $amount=is_numeric($_POST['amount']??null)?(float)$_POST['amount']:0.0;
         $notes=trim((string)($_POST['notes']??''));
         if (!in_array($platform,['UPI app','Bank transfer','Debit/Credit card','Other'],true) || $transactionId==='' || strlen($transactionId)>100 || strlen($notes)>1000) {
             Flash::set('error','Choose a payment platform and enter a valid transaction/reference ID.'); header('Location:/resident/upi-qr/'.$billId); exit;
@@ -32,7 +33,7 @@ final class PaymentProofController
         $path=null;
         try {
             if (!empty($_FILES['screenshot']['name'])) $path=FileUpload::storeImage($_FILES['screenshot'],'payment-proofs');
-            PaymentProof::submit(Society::currentId(),$memberId,$billId,$platform,$transactionId,$path,$notes);
+            PaymentProof::submit(Society::currentId(),$memberId,$billId,$amount,$platform,$transactionId,$path,$notes);
             ActivityLog::log('billing','payment_proof_submitted',"Payment proof submitted for bill {$bill['bill_number']}");
             Flash::set('success','Payment proof submitted. Your bill will remain unpaid until the society verifies it.');
         } catch (\Throwable $e) {
@@ -70,9 +71,10 @@ final class PaymentProofController
         $paymentId=null;
         try {
             if ($decision==='approve') {
-                $amount=(float)$proof['total_amount']-(float)$proof['paid_amount'];
+                $amount=(float)$proof['amount'];
                 if ($amount<=0) throw new \RuntimeException('This bill has no outstanding balance. Reject this proof and review the bill manually.');
-                $result=BillingService::recordPayment((int)$proof['maintenance_bill_id'],$amount,'upi',$proof['transaction_id'],Auth::id(),Society::currentId());
+                $mode=match($proof['platform']) {'Bank transfer'=>'bank_transfer','Debit/Credit card'=>'card',default=>'upi'};
+                $result=BillingService::recordPayment((int)$proof['maintenance_bill_id'],$amount,$mode,$proof['transaction_id'],Auth::id(),Society::currentId());
                 $paymentId=(int)$result['payment_id'];
             }
             PaymentProof::review((int)$id,Society::currentId(),(int)Auth::id(),$decision==='approve'?'approved':'rejected',$notes,$paymentId);
