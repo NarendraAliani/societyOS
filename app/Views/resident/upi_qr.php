@@ -28,7 +28,7 @@ ob_start();
                 <h5>Already paid? Submit payment proof</h5>
                 <p class="text-muted small">Enter the transaction/reference ID from your UPI app or bank and optionally attach a screenshot. The bill will remain outstanding until the society verifies the payment.</p>
                 <form method="post" action="/resident/payment-proofs" enctype="multipart/form-data">
-                    <?= \\App\\Helpers\\Csrf::field() ?>
+                    <?= \App\Helpers\Csrf::field() ?>
                     <input type="hidden" name="bill_id" value="<?= (int)$bill['id'] ?>">
                     <div class="row g-3">
                         <div class="col-md-6"><label class="form-label" for="proof-platform">Payment platform</label><select class="form-select" id="proof-platform" name="platform" required><option value="">Select platform</option><option>UPI app</option><option>Bank transfer</option><option>Debit/Credit card</option><option>Other</option></select></div>
