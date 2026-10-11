@@ -19,7 +19,7 @@ $checks = [
     'form submits through existing validated allocation model' => str_contains($controller, 'ParkingAllocation::allocate($slotId, $flatId, $vehicleId, $fromDate, $billing === \'paid\')'),
     'parking overview links directly to resident-first allotment' => str_contains($parkingView, '/vehicles/parking-allotment') && str_contains($parkingView, 'Allot Vehicle to Parking'),
     'vehicle listing prominently links to vehicle parking allotment' => str_contains($vehiclesView, '/vehicles/parking-allotment') && str_contains($vehiclesView, 'Allot Parking to Vehicle'),
-    'model prevents any vehicle from having multiple active parking assignments while allowing multiple vehicles per flat' => str_contains($allocationModel, 'vehicleHasActiveAllocation') && str_contains($controller, 'foreach ($vehicles as $vehicle)') && str_contains($controller, '$eligibleFlatIds[(int) $vehicle[\'flat_id\']] = true'),
+    'model prevents any vehicle from having multiple active parking assignments and uses the current guard method' => str_contains($allocationModel, 'vehicleHasActiveAllocation($vehicleId)') && !str_contains($allocationModel, 'vehicleHasActiveFourWheelerAllocation') && str_contains($controller, 'foreach ($vehicles as $vehicle)') && str_contains($controller, '$eligibleFlatIds[(int) $vehicle[\'flat_id\']] = true'),
 ];
 
 $failed = false;
