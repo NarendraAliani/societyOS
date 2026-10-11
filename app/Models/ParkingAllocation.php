@@ -89,7 +89,7 @@ final class ParkingAllocation
         try {
             $existing = self::activeForSlot($slotId);
             if ($existing) {
-                throw new \\DomainException('This parking slot is already allocated.');
+                throw new \DomainException('This parking slot is already allocated.');
             }
             $slotStmt = $pdo->prepare('SELECT slot_type FROM parking_slots WHERE id = :id AND society_id = :sid');
             $slotStmt->execute(['id' => $slotId, 'sid' => Society::currentId()]);
@@ -103,10 +103,10 @@ final class ParkingAllocation
                 $vehicleStmt->execute(['vehicle_id' => $vehicleId, 'sid' => Society::currentId(), 'flat_id' => $flatId]);
                 $vehicleType = $vehicleStmt->fetchColumn();
                 if (!$slotType || $vehicleType !== $slotType) {
-                    throw new \\InvalidArgumentException('Vehicle type must match parking slot type.');
+                    throw new \InvalidArgumentException('Vehicle type must match parking slot type.');
                 }
                 if ($slotType === 'four_wheeler' && self::vehicleHasActiveFourWheelerAllocation($vehicleId)) {
-                    throw new \\DomainException('This vehicle already has an active 4-wheeler parking allocation.');
+                    throw new \DomainException('This vehicle already has an active 4-wheeler parking allocation.');
                 }
             }
 
