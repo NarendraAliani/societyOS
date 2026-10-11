@@ -2,7 +2,8 @@
 $pageTitle = 'Dashboard';
 ob_start();
 ?>
-<div class="dashboard-page" style="display:block;min-height:200px;color:var(--bs-body-color);">\n<h3 class="mb-4">Welcome, <?= htmlspecialchars($userName) ?> <span class="badge bg-secondary"><?= htmlspecialchars($roleName ?? '') ?></span></h3>
+<div class="dashboard-page" style="display:block;min-height:200px;color:var(--bs-body-color);">
+<h3 class="mb-4">Welcome, <?= htmlspecialchars($userName) ?> <span class="badge bg-secondary"><?= htmlspecialchars($roleName ?? '') ?></span></h3>
 
 <div class="row g-3">
     <div class="col-md-3">
