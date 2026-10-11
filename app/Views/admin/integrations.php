@@ -52,7 +52,7 @@ $cfg=$cfg??[];
 </form>
 <hr>
 <p class="small text-muted mb-2">The test message uses the saved Default Chat ID above. Save Telegram settings once; you do not need to enter the ID again here.</p>
-<form method="post" action="/admin/integrations/telegram/test" class="d-flex justify-content-end"><?= \\App\\Helpers\\Csrf::field() ?><button class="btn btn-outline-primary" type="submit"><i class="fa-brands fa-telegram me-1"></i>Send Test to Saved Chat</button></form></div></div></div>
+<form method="post" action="/admin/integrations/telegram/test" class="d-flex justify-content-end"><?= \App\Helpers\Csrf::field() ?><button class="btn btn-outline-primary" type="submit"><i class="fa-brands fa-telegram me-1"></i>Send Test to Saved Chat</button></form></div></div></div>
 </div>
 <script>
 document.querySelectorAll('.js-integration-toggle').forEach(function(toggle){
