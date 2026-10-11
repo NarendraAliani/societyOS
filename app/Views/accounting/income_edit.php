@@ -9,7 +9,7 @@ ob_start();
                 <h5 class="mb-3">Edit Manual Income</h5>
                 <p class="text-muted small">Changes update the linked account ledger entry as well.</p>
                 <form method="post" action="/accounting/income/<?= (int) $entry['id'] ?>">
-                    <?= \\App\\Helpers\\Csrf::field() ?>
+                    <?= \App\Helpers\Csrf::field() ?>
                     <div class="mb-3">
                         <label class="form-label" for="income-account">Account *</label>
                         <select id="income-account" name="account_id" class="form-select" required>
