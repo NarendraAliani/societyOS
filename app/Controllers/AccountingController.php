@@ -84,7 +84,7 @@ final class AccountingController
         $to = (string) ($_GET['to'] ?? date('Y-m-d'));
 
         foreach ([$from, $to] as $date) {
-            $parsed = \\DateTimeImmutable::createFromFormat('!Y-m-d', $date);
+            $parsed = \DateTimeImmutable::createFromFormat('!Y-m-d', $date);
             if (!$parsed || $parsed->format('Y-m-d') !== $date) {
                 $from = date('Y-m-01');
                 $to = date('Y-m-d');
