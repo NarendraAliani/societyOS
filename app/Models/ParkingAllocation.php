@@ -110,7 +110,7 @@ final class ParkingAllocation
                 if (!$slotType || $vehicleType !== $slotType) {
                     throw new \InvalidArgumentException('Vehicle type must match parking slot type.');
                 }
-                if ($slotType === 'four_wheeler' && self::vehicleHasActiveFourWheelerAllocation($vehicleId)) {
+                if (self::vehicleHasActiveAllocation($vehicleId)) {
                     throw new \DomainException('This vehicle already has an active parking allocation.');
                 }
             }
