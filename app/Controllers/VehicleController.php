@@ -185,7 +185,7 @@ final class VehicleController
         $slotId = (int) ($_POST['parking_slot_id'] ?? 0);
         $fromDate = trim((string) ($_POST['allocated_from'] ?? date('Y-m-d')));
         $billing = (string) ($_POST['billing_status'] ?? 'paid');
-        $parsedDate = \\DateTimeImmutable::createFromFormat('!Y-m-d', $fromDate);
+        $parsedDate = \DateTimeImmutable::createFromFormat('!Y-m-d', $fromDate);
         $validDate = $parsedDate && $parsedDate->format('Y-m-d') === $fromDate;
         $flat = $flatId > 0 ? Flat::find($flatId) : null;
         $vehicle = $vehicleId > 0 ? Vehicle::find($vehicleId) : null;
@@ -214,7 +214,7 @@ final class VehicleController
             ParkingAllocation::allocate($slotId, $flatId, $vehicleId, $fromDate, $billing === 'paid');
             ActivityLog::log('vehicles', 'parking_allocate', 'Allocated vehicle ' . $vehicle['registration_number'] . ' to parking slot ' . $slot['slot_number']);
             Flash::set('success', 'Vehicle allocated to parking successfully.');
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             Flash::set('error', $e->getMessage() === 'This vehicle already has an active 4-wheeler parking allocation.'
                 ? $e->getMessage()
                 : 'Unable to allocate the vehicle. Please verify the selections and try again.');
