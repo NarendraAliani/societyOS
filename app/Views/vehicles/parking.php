@@ -55,7 +55,12 @@ ob_start();
                                     <span class="text-muted">&mdash;</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-end">
+                            <td class="text-end text-nowrap">
+                                <?php if (!$slot['is_allocated']): ?>
+                                    <a class="btn btn-sm btn-primary mb-1" href="/vehicles/parking/<?= (int) $slot['id'] ?>#allocation-form" title="Allocate a vehicle to this slot"><i class="fa-solid fa-car-side me-1"></i>Allocate Vehicle</a>
+                                <?php else: ?>
+                                    <a class="btn btn-sm btn-outline-primary mb-1" href="/vehicles/parking/<?= (int) $slot['id'] ?>#current-allocation" title="View or release current allocation">Manage</a>
+                                <?php endif; ?>
                                 <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#edit-slot-<?= (int) $slot['id'] ?>"><i class="fa-solid fa-pen"></i></button>
                                 <form method="post" action="/vehicles/parking/<?= (int) $slot['id'] ?>/delete" onsubmit="return confirm('Delete this slot?');" class="d-inline">
                                     <?= \App\Helpers\Csrf::field() ?>
