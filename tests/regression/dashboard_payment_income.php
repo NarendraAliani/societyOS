@@ -5,6 +5,10 @@ $root = dirname(__DIR__, 2);
 $society = file_get_contents($root . '/app/Models/Society.php');
 $paymentProofController = file_get_contents($root . '/app/Controllers/PaymentProofController.php');
 $billingService = file_get_contents($root . '/app/Services/BillingService.php');
+$accountingController = file_get_contents($root . '/app/Controllers/AccountingController.php');
+$dashboardView = file_get_contents($root . '/app/Views/dashboard/index.php');
+$incomeDetailsView = file_get_contents($root . '/app/Views/accounting/income_details.php');
+$routes = file_get_contents($root . '/public/index.php');
 
 $checks = [
     'dashboard retains manually recorded income' => str_contains($society, 'FROM income i'),
@@ -13,6 +17,10 @@ $checks = [
     'payment totals use payment date for the current month' => str_contains($society, 'MONTH(p.paid_at) = MONTH(CURDATE())') && str_contains($society, 'YEAR(p.paid_at) = YEAR(CURDATE())'),
     'payment proofs count only after approval records a payment' => str_contains($paymentProofController, "if (\$decision==='approve')") && str_contains($paymentProofController, 'BillingService::recordPayment'),
     'payment recording commits before being treated as confirmed' => str_contains($billingService, 'Payment::create(') && str_contains($billingService, '$pdo->commit();'),
+    'dashboard income KPI links to its calculation details' => str_contains($dashboardView, 'href="/accounting/income-details"'),
+    'income details route requires accounting view permission' => str_contains($routes, "incomeDetails'], [$auth, $backOffice, $can('accounting.view')]);"),
+    'income detail calculation includes manual entries and confirmed payments' => str_contains($accountingController, 'public function incomeDetails(): void') && str_contains($accountingController, 'FROM income i') && str_contains($accountingController, 'FROM payments p') && str_contains($accountingController, '$totalIncome = $manualTotal + $paymentTotal;'),
+    'income details explain pending proofs are excluded' => str_contains($incomeDetailsView, 'Pending payment proofs are excluded until approved.'),
 ];
 
 $failed = false;
