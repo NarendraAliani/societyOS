@@ -20,6 +20,21 @@ final class ParkingAllocation
         return $stmt->fetch() ?: null;
     }
 
+    public static function vehicleHasActiveFourWheelerAllocation(int $vehicleId): bool
+    {
+        $stmt = db()->prepare(
+            "SELECT COUNT(*)
+             FROM parking_allocations pa
+             JOIN parking_slots ps ON ps.id = pa.parking_slot_id
+             WHERE pa.vehicle_id = :vehicle_id
+               AND pa.allocated_to IS NULL
+               AND ps.slot_type = 'four_wheeler'
+               AND ps.society_id = :sid"
+        );
+        $stmt->execute(['vehicle_id' => $vehicleId, 'sid' => Society::currentId()]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
     public static function historyForSlot(int $slotId): array
     {
         $stmt = db()->prepare(
@@ -74,8 +89,25 @@ final class ParkingAllocation
         try {
             $existing = self::activeForSlot($slotId);
             if ($existing) {
-                $pdo->prepare('UPDATE parking_allocations SET allocated_to = :to WHERE id = :id AND parking_slot_id IN (SELECT id FROM parking_slots WHERE society_id = :sid)')
-                    ->execute(['to' => $fromDate, 'id' => $existing['id'], 'sid' => Society::currentId()]);
+                throw new \\DomainException('This parking slot is already allocated.');
+            }
+            $slotStmt = $pdo->prepare('SELECT slot_type FROM parking_slots WHERE id = :id AND society_id = :sid');
+            $slotStmt->execute(['id' => $slotId, 'sid' => Society::currentId()]);
+            $slotType = $slotStmt->fetchColumn();
+            if ($vehicleId !== null) {
+                $vehicleStmt = $pdo->prepare(
+                    'SELECT v.vehicle_type FROM vehicles v
+                     JOIN members m ON m.id = v.member_id
+                     WHERE v.id = :vehicle_id AND m.society_id = :sid AND m.flat_id = :flat_id'
+                );
+                $vehicleStmt->execute(['vehicle_id' => $vehicleId, 'sid' => Society::currentId(), 'flat_id' => $flatId]);
+                $vehicleType = $vehicleStmt->fetchColumn();
+                if (!$slotType || $vehicleType !== $slotType) {
+                    throw new \\InvalidArgumentException('Vehicle type must match parking slot type.');
+                }
+                if ($slotType === 'four_wheeler' && self::vehicleHasActiveFourWheelerAllocation($vehicleId)) {
+                    throw new \\DomainException('This vehicle already has an active 4-wheeler parking allocation.');
+                }
             }
 
             $insert = $pdo->prepare(
