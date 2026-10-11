@@ -21,6 +21,9 @@ $checks = [
     'allocation model prevents a vehicle from taking multiple active four-wheeler slots' => str_contains($allocationModel, 'vehicleHasActiveFourWheelerAllocation') && str_contains($allocationModel, 'already has an active 4-wheeler parking allocation'),
     'vehicle type must match parking slot type' => str_contains($allocationModel, 'Vehicle type must match parking slot type.'),
     'allocation form requires an allocation start date' => str_contains($slotDetailView, 'name="allocated_from"') && str_contains($slotDetailView, 'required>'),
+    'slot detail flat list includes only flats with eligible compatible vehicles' => str_contains($controller, '$eligibleFlatIds') && str_contains($controller, 'use ($slotType)'),
+    'slot detail vehicle dropdown is filtered by selected flat' => str_contains($slotDetailView, 'data-flat-id=') && str_contains($slotDetailView, 'filterVehicles()'),
+    'vehicle is required and server reports allocation validation failures' => str_contains($slotDetailView, 'id="parking-slot-vehicle" class="form-select" required') && str_contains($controller, 'Parking allocation failed (slot=%d, flat=%d, vehicle=%s): %s'),
     'parking list has a clearly labelled allocation link for free slots' => str_contains($view, 'Allocate Vehicle') && str_contains($view, '#allocation-form'),
     'slot detail page has a labelled vehicle allocation form target' => str_contains($slotDetailView, 'id="allocation-form"') && str_contains($slotDetailView, 'Allocate Vehicle to This Slot'),
 ];
