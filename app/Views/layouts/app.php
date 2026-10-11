@@ -51,7 +51,7 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
                 <li class="nav-item"><a class="nav-link text-white" href="/members"><i class="fa-solid fa-users me-2"></i>Residents</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/vehicles"><i class="fa-solid fa-car me-2"></i>Vehicles</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/billing"><i class="fa-solid fa-file-invoice-dollar me-2"></i>Maintenance</a></li>
-                <?php if (\\App\\Helpers\\Auth::can('billing.manage')): ?><li class="nav-item"><a class="nav-link text-white" href="/billing/payment-proofs"><i class="fa-solid fa-file-circle-check me-2"></i>Payment Proof Review</a></li><?php endif; ?>
+                <?php if (\App\Helpers\Auth::can('billing.manage')): ?><li class="nav-item"><a class="nav-link text-white" href="/billing/payment-proofs"><i class="fa-solid fa-file-circle-check me-2"></i>Payment Proof Review</a></li><?php endif; ?>
                 <li class="nav-item"><a class="nav-link text-white" href="/accounting/accounts"><i class="fa-solid fa-scale-balanced me-2"></i>Accounts</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/visitors"><i class="fa-solid fa-id-card me-2"></i>Visitors</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/complaints"><i class="fa-solid fa-triangle-exclamation me-2"></i>Complaints</a></li>
