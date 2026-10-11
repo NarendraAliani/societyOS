@@ -96,7 +96,7 @@ final class AccountingController
         }
 
         $manual = db()->prepare(
-            'SELECT i.income_date AS entry_date, i.category AS source, i.description,
+            'SELECT i.id AS income_id, i.income_date AS entry_date, i.category AS source, i.description,
                     i.amount, a.name AS account_name, NULL AS bill_number,
                     NULL AS flat_number, NULL AS payment_mode, NULL AS reference_number,
                     "Manual income" AS entry_type
@@ -137,6 +137,81 @@ final class AccountingController
         $totalIncome = $manualTotal + $paymentTotal;
 
         require __DIR__ . '/../Views/accounting/income_details.php';
+    }
+
+    public function editIncome(string $id): void
+    {
+        $incomeId = filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $societyId = Society::currentId();
+        $entry = $incomeId ? Income::findForSociety((int) $incomeId, $societyId) : null;
+        if (!$entry) {
+            Flash::set('error', 'Income entry not found.');
+            header('Location: /accounting/income-details');
+            exit;
+        }
+
+        $pageTitle = 'Edit Income';
+        $accounts = Account::allForSociety($societyId);
+        require __DIR__ . '/../Views/accounting/income_edit.php';
+    }
+
+    public function updateIncome(string $id): void
+    {
+        $this->verifyCsrf();
+        $incomeId = filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $societyId = Society::currentId();
+        $entry = $incomeId ? Income::findForSociety((int) $incomeId, $societyId) : null;
+        if (!$entry) {
+            Flash::set('error', 'Income entry not found.');
+            header('Location: /accounting/income-details');
+            exit;
+        }
+
+        $accountId = (int) ($_POST['account_id'] ?? 0);
+        $category = trim((string) ($_POST['category'] ?? ''));
+        $amount = $_POST['amount'] ?? '';
+        $date = (string) ($_POST['income_date'] ?? '');
+        $parsedDate = \\DateTimeImmutable::createFromFormat('!Y-m-d', $date);
+        $validDate = $parsedDate && $parsedDate->format('Y-m-d') === $date;
+        $account = $accountId > 0 ? Account::find($accountId) : null;
+
+        if (!$account || $category === '' || !is_numeric($amount) || (float) $amount <= 0 || !$validDate) {
+            Flash::set('error', 'Choose a valid account and provide a category, positive amount, and valid date.');
+            header('Location: /accounting/income/' . (int) $incomeId . '/edit');
+            exit;
+        }
+
+        $fields = [
+            'account_id' => $accountId,
+            'category' => $category,
+            'amount' => (float) $amount,
+            'description' => trim((string) ($_POST['description'] ?? '')),
+            'income_date' => $date,
+        ];
+        AccountingService::updateIncome($societyId, (int) $incomeId, $fields);
+        ActivityLog::log('accounting', 'update', "Updated manual income id {$incomeId} ({$category})");
+        Flash::set('success', 'Income entry updated.');
+        header('Location: /accounting/income-details');
+        exit;
+    }
+
+    public function deleteIncome(string $id): void
+    {
+        $this->verifyCsrf();
+        $incomeId = filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $societyId = Society::currentId();
+        $entry = $incomeId ? Income::findForSociety((int) $incomeId, $societyId) : null;
+        if (!$entry) {
+            Flash::set('error', 'Income entry not found.');
+            header('Location: /accounting/income-details');
+            exit;
+        }
+
+        AccountingService::deleteIncome($societyId, (int) $incomeId);
+        ActivityLog::log('accounting', 'delete', "Deleted manual income id {$incomeId} ({$entry['category']})");
+        Flash::set('success', 'Income entry deleted.');
+        header('Location: /accounting/income-details');
+        exit;
     }
 
     public function storeIncome(): void
