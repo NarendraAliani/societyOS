@@ -9,7 +9,7 @@ final class Vehicle
     public static function allForSociety(int $societyId): array
     {
         $stmt = db()->prepare(
-            'SELECT v.*, m.name AS member_name, f.flat_number, w.name AS wing_name
+            'SELECT v.*, m.flat_id, m.name AS member_name, f.flat_number, w.name AS wing_name
              FROM vehicles v
              JOIN members m ON m.id = v.member_id
              JOIN flats f ON f.id = m.flat_id
