@@ -10,8 +10,9 @@ ob_start();
             <p class="resident-subtitle mb-0">Manage resident vehicles registered in the society.</p>
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
-            <a href="/vehicles/parking" class="btn btn-outline-secondary"><i class="fa-solid fa-square-parking me-1"></i>Parking</a>
-            <a href="/vehicles/create" class="btn btn-primary"><i class="fa-solid fa-plus me-1"></i>Add Vehicle</a>
+            <a href="/vehicles/parking-allotment" class="btn btn-primary"><i class="fa-solid fa-car-side me-1"></i>Allot Parking to Vehicle</a>
+            <a href="/vehicles/parking" class="btn btn-outline-secondary"><i class="fa-solid fa-square-parking me-1"></i>Parking Slots</a>
+            <a href="/vehicles/create" class="btn btn-outline-primary"><i class="fa-solid fa-plus me-1"></i>Add Vehicle</a>
         </div>
     </div>
 
