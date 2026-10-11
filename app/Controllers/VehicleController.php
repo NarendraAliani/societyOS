@@ -441,7 +441,7 @@ final class VehicleController
         } elseif ($activeAllocation) {
             Flash::set('error', 'This parking slot is already allocated.');
         } elseif ($vehicleAlreadyAllocated) {
-            Flash::set('error', 'This vehicle already has an active 4-wheeler parking allocation.');
+            Flash::set('error', 'This vehicle already has an active parking allocation.');
         } else {
             try {
                 ParkingAllocation::allocate((int) $id, $flatId, $vehicleId, $fromDate, $isChargeable);
