@@ -33,18 +33,12 @@ ob_start();
     }
 }
 </style>
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h5 class="mb-1">Welcome, <?= htmlspecialchars($member['name']) ?></h5>
-        <div class="text-muted">Home: <?= htmlspecialchars($member['wing_name'] . '-' . $member['flat_number']) ?> · <?= htmlspecialchars(ucfirst($member['member_type'])) ?></div>
-    </div>
-    <a href="/resident/visitor-passes" class="btn btn-primary btn-sm"><i class="fa-solid fa-user-plus me-1"></i>Visitor Pass</a>
-</div>
+<div class="resident-dashboard-header"><div><div class="small text-primary fw-bold text-uppercase mb-1">Resident portal</div><h3 class="resident-dashboard-title">Welcome, <?= htmlspecialchars($member['name']) ?></h3><div class="text-muted">Home: <?= htmlspecialchars($member['wing_name'] . '-' . $member['flat_number']) ?> · <?= htmlspecialchars(ucfirst($member['member_type'])) ?></div></div><div class="resident-dashboard-actions"><a href="/resident/bills" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-file-invoice-dollar me-1"></i>My Bills</a><a href="/resident/visitor-passes" class="btn btn-primary btn-sm"><i class="fa-solid fa-user-plus me-1"></i>Visitor Pass</a></div></div>
 
 <div class="row g-3 mb-4">
-    <div class="col-md-4"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-muted small">Outstanding Maintenance</div><div class="fs-4 fw-semibold">₹<?= number_format($outstanding, 2) ?></div><a href="/resident/bills" class="small">View my bills</a></div></div></div>
-    <div class="col-md-4"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-muted small">My Complaints</div><div class="fs-4 fw-semibold"><?= count($complaints) ?></div><a href="/resident/complaints" class="small">View / submit complaints</a></div></div></div>
-    <div class="col-md-4"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-muted small">Visitor Passes</div><div class="fs-4 fw-semibold"><?= count($passes) ?></div><a href="/resident/visitor-passes" class="small">Manage passes</a></div></div></div>
+<div class="col-md-4"><a class="resident-summary-link" href="/resident/bills" aria-label="View outstanding maintenance and bills"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-muted small">Outstanding Maintenance</div><div class="fs-4 fw-semibold">₹<?= number_format($outstanding, 2) ?></div><span class="small text-primary mt-2 d-inline-block">View my bills <i class="fa-solid fa-arrow-right ms-1"></i></span></div></div></a></div>
+<div class="col-md-4"><a class="resident-summary-link" href="/resident/complaints" aria-label="View or submit complaints"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-muted small">My Complaints</div><div class="fs-4 fw-semibold"><?= count($complaints) ?></div><span class="small text-primary mt-2 d-inline-block">View / submit complaints <i class="fa-solid fa-arrow-right ms-1"></i></span></div></div></a></div>
+<div class="col-md-4"><a class="resident-summary-link" href="/resident/visitor-passes" aria-label="Manage visitor passes"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-muted small">Visitor Passes</div><div class="fs-4 fw-semibold"><?= count($passes) ?></div><span class="small text-primary mt-2 d-inline-block">Manage passes <i class="fa-solid fa-arrow-right ms-1"></i></span></div></div></a></div>
 </div>
 
 <div class="row g-3">
