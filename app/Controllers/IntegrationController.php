@@ -94,7 +94,7 @@ final class IntegrationController
                 'SocietyOS test message — Telegram integration is working.'
             );
             Flash::set('success', 'Telegram test sent to the saved default chat/channel.');
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             Flash::set('error', $e->getMessage());
         }
         header('Location:/admin/integrations');
