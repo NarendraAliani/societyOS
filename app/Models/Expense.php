@@ -48,6 +48,60 @@ final class Expense
         return $stmt->fetchAll();
     }
 
+    /**
+     * Return society-specific configured categories plus any legacy categories already
+     * used by expense entries, so existing records remain selectable.
+     */
+    public static function categoriesForSociety(int $societyId): array
+    {
+        $configured = json_decode((string) Settings::get($societyId, 'expense_categories', '[]'), true);
+        if (!is_array($configured)) {
+            $configured = [];
+        }
+
+        $stmt = db()->prepare(
+            'SELECT DISTINCT category FROM expenses
+             WHERE society_id = :sid AND TRIM(category) <> \'\'
+             ORDER BY category'
+        );
+        $stmt->execute(['sid' => $societyId]);
+        $existing = array_column($stmt->fetchAll(), 'category');
+        $names = [];
+        foreach (array_merge($configured, $existing) as $name) {
+            if (!is_string($name)) {
+                continue;
+            }
+            $name = trim($name);
+            if ($name === '') {
+                continue;
+            }
+            $names[mb_strtolower($name)] = $name;
+        }
+        $names = array_values($names);
+        natcasesort($names);
+        return array_values($names);
+    }
+
+    public static function addCategory(int $societyId, string $name): bool
+    {
+        $name = trim($name);
+        if ($name === '' || mb_strlen($name) > 100) {
+            return false;
+        }
+
+        $categories = self::categoriesForSociety($societyId);
+        foreach ($categories as $category) {
+            if (mb_strtolower($category) === mb_strtolower($name)) {
+                return false;
+            }
+        }
+
+        $categories[] = $name;
+        natcasesort($categories);
+        Settings::set($societyId, 'expense_categories', json_encode(array_values($categories), JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
+        return true;
+    }
+
     public static function create(int $societyId, array $fields): int
     {
         $stmt = db()->prepare(
