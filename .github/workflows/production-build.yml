@@ -110,6 +110,9 @@ jobs:
       - name: Counter payment entry regression contract
         run: php tests/regression/counter_payment_entry.php
 
+      - name: Payment receipt period regression contract
+        run: php tests/regression/payment_receipt_period.php
+
       - name: Prepare deployment branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
