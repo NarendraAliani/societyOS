@@ -9,6 +9,7 @@ $accountingController = file_get_contents($root . '/app/Controllers/AccountingCo
 $dashboardView = file_get_contents($root . '/app/Views/dashboard/index.php');
 $incomeDetailsView = file_get_contents($root . '/app/Views/accounting/income_details.php');
 $routes = file_get_contents($root . '/public/index.php');
+$accountingService = file_get_contents($root . '/app/Services/AccountingService.php');
 
 $checks = [
     'dashboard retains manually recorded income' => str_contains($society, 'FROM income i'),
@@ -21,6 +22,11 @@ $checks = [
     'income details route requires accounting view permission' => str_contains($routes, "'/accounting/income-details'") && str_contains($routes, "'incomeDetails'") && str_contains($routes, "'accounting.view'"),
     'income detail calculation includes manual entries and confirmed payments' => str_contains($accountingController, 'public function incomeDetails(): void') && str_contains($accountingController, 'FROM income i') && str_contains($accountingController, 'FROM payments p') && str_contains($accountingController, '$totalIncome = $manualTotal + $paymentTotal;'),
     'income details explain pending proofs are excluded' => str_contains($incomeDetailsView, 'Pending payment proofs are excluded until approved.'),
+    'manual income rows expose edit and delete actions' => str_contains($incomeDetailsView, '/accounting/income/<?= (int) $row[\'income_id\'] ?>/edit') && str_contains($incomeDetailsView, '/delete'),
+    'confirmed maintenance payments remain read-only in income details' => str_contains($incomeDetailsView, 'Managed in Payments'),
+    'manual income CRUD routes require accounting manage permission' => str_contains($routes, "'editIncome'], [$auth, $backOffice, $can('accounting.manage')]") && str_contains($routes, "'updateIncome'], [$auth, $backOffice, $can('accounting.manage')]") && str_contains($routes, "'deleteIncome'], [$auth, $backOffice, $can('accounting.manage')]"),
+    'manual income edits and deletes maintain linked ledger entries' => str_contains($accountingController, 'AccountingService::updateIncome') && str_contains($accountingController, 'AccountingService::deleteIncome') && str_contains($accountingService, 'reference_type = "income"'),
+
 ];
 
 $failed = false;
