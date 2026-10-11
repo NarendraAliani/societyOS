@@ -84,7 +84,7 @@ ob_start();
                 <ul class="small text-muted mb-0 ps-3">
                     <li class="mb-2">The vehicle must already be registered under the selected flat.</li>
                     <li class="mb-2">The parking slot type must match the vehicle type.</li>
-                    <li class="mb-2">A 4-wheeler with an active parking allotment cannot be assigned a second 4-wheeler slot.</li>
+                    <li class="mb-2">Each vehicle can have only one active parking allotment; a flat may have multiple vehicles and slots.</li>
                     <li>For common two-wheeler parking, choose one of the available Common Area spaces.</li>
                 </ul>
             </div>
