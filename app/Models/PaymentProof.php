@@ -13,7 +13,7 @@ final class PaymentProof
         $billStmt->execute(['bill'=>$billId,'sid'=>$societyId]);
         $bill=$billStmt->fetch();
         $outstanding=$bill ? max(0.0,(float)$bill['total_amount']-(float)$bill['paid_amount']) : 0.0;
-        if ($amount<=0 || $amount>$outstanding+0.00001) throw new \\InvalidArgumentException('Enter an amount within the bill outstanding balance.');
+        if ($amount<=0 || $amount>$outstanding+0.00001) throw new \InvalidArgumentException('Enter an amount within the bill outstanding balance.');
         $pending = db()->prepare("SELECT id FROM payment_proofs WHERE maintenance_bill_id=:bill AND member_id=:member AND status='pending' LIMIT 1");
         $pending->execute(['bill'=>$billId,'member'=>$memberId]);
         if ($pending->fetchColumn()) throw new \InvalidArgumentException('You already have a payment proof awaiting verification for this bill.');
