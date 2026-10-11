@@ -54,6 +54,7 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
                 <?php if (\App\Helpers\Auth::can('billing.manage')): ?><li class="nav-item"><a class="nav-link text-white" href="/billing/receive-payment"><i class="fa-solid fa-cash-register me-2"></i>Receive Payment</a></li><?php endif; ?>
                 <?php if (\App\Helpers\Auth::can('billing.manage')): ?><li class="nav-item"><a class="nav-link text-white" href="/billing/payment-proofs"><i class="fa-solid fa-file-circle-check me-2"></i>Payment Proof Review</a></li><?php endif; ?>
                 <li class="nav-item"><a class="nav-link text-white" href="/accounting/accounts"><i class="fa-solid fa-scale-balanced me-2"></i>Accounts</a></li>
+                <?php if (\App\Helpers\Auth::can('accounting.manage')): ?><li class="nav-item"><a class="nav-link text-white" href="/accounting/expenses"><i class="fa-solid fa-money-bill-transfer me-2"></i>Add Expenses</a></li><?php endif; ?>
                 <li class="nav-item"><a class="nav-link text-white" href="/visitors"><i class="fa-solid fa-id-card me-2"></i>Visitors</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/complaints"><i class="fa-solid fa-triangle-exclamation me-2"></i>Complaints</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/notices"><i class="fa-solid fa-bullhorn me-2"></i>Notices</a></li>
