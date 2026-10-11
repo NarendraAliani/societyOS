@@ -119,6 +119,9 @@ jobs:
       - name: Expense category dropdown regression contract
         run: php tests/regression/expense_categories.php
 
+      - name: Common parking capacity regression contract
+        run: php tests/regression/common_parking_capacity.php
+
       - name: Prepare deployment branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
