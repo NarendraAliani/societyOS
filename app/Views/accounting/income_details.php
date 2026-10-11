@@ -63,7 +63,7 @@ ob_start();
                             <?php if ($row['entry_type'] === 'Manual income'): ?>
                                 <a class="btn btn-sm btn-outline-primary" href="/accounting/income/<?= (int) $row['income_id'] ?>/edit">Edit</a>
                                 <form method="post" action="/accounting/income/<?= (int) $row['income_id'] ?>/delete" class="d-inline" onsubmit="return confirm('Delete this manual income entry? Its linked ledger entry will also be removed.');">
-                                    <?= \\App\\Helpers\\Csrf::field() ?>
+                                    <?= \App\Helpers\Csrf::field() ?>
                                     <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                                 </form>
                             <?php else: ?>
