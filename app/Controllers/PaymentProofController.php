@@ -131,11 +131,11 @@ final class PaymentProofController
             foreach ($stmt->fetchAll() as $recipient) {
                 try {
                     Mailer::sendNotification((string)$recipient['email'], (string)$recipient['name'], $subject, $message, $baseUrl.$path, $actionLabel);
-                } catch (\\Throwable $mailError) {
+                } catch (\Throwable $mailError) {
                     error_log('SocietyOS payment proof notification email failed: '.$mailError->getMessage());
                 }
             }
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             error_log('SocietyOS payment proof admin notification lookup failed: '.$e->getMessage());
         }
     }
@@ -151,7 +151,7 @@ final class PaymentProofController
             if (!$recipient || !filter_var((string)$recipient['email'], FILTER_VALIDATE_EMAIL)) return;
             $baseUrl = rtrim((string) (config()['url'] ?? ''), '/');
             Mailer::sendNotification((string)$recipient['email'], (string)$recipient['name'], $subject, $message, $baseUrl.$path, $actionLabel);
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             error_log('SocietyOS payment proof resident notification failed: '.$e->getMessage());
         }
     }
