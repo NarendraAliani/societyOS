@@ -8,7 +8,7 @@ final class FamilyMember
 {
     public static function forMember(int $memberId): array
     {
-        $stmt = db()->prepare('SELECT fm.* FROM family_members fm JOIN members m ON m.id = fm.member_id WHERE fm.member_id = :member_id AND m.society_id = :sid ORDER BY name');
+        $stmt = db()->prepare('SELECT fm.* FROM family_members fm JOIN members m ON m.id = fm.member_id WHERE fm.member_id = :member_id AND m.society_id = :sid ORDER BY fm.name');
         $stmt->execute(['member_id' => $memberId, 'sid' => Society::currentId()]);
         return array_map([self::class, 'withDisplayAge'], $stmt->fetchAll());
     }
