@@ -70,7 +70,7 @@ final class Income
             'id' => $id,
             'sid' => $societyId,
         ]);
-        return $stmt->rowCount() > 0;
+        return true;
     }
 
     public static function deleteForSociety(int $id, int $societyId): bool
