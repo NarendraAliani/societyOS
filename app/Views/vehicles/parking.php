@@ -5,7 +5,10 @@ ob_start();
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <p class="mb-0"><a href="/vehicles">&laquo; Back to Vehicles</a></p>
-    <a href="/vehicles/parking/rates" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-tags me-1"></i>Manage Rates</a>
+    <div class="d-flex gap-2">
+        <a href="/vehicles/parking-allotment" class="btn btn-primary btn-sm"><i class="fa-solid fa-car-side me-1"></i>Allot Vehicle to Parking</a>
+        <a href="/vehicles/parking/rates" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-tags me-1"></i>Manage Rates</a>
+    </div>
 </div>
 <div class="card border-0 shadow-sm mb-3">
     <div class="card-body">
