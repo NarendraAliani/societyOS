@@ -163,11 +163,11 @@ final class IntegrationService
     {
         $cfg = self::config($societyId);
         if (!$cfg['telegram_enabled'] || $cfg['telegram_bot_token'] === '') {
-            throw new \\RuntimeException('Telegram is not configured for this society. Enable Telegram and save the bot token first.');
+            throw new \RuntimeException('Telegram is not configured for this society. Enable Telegram and save the bot token first.');
         }
         $chatId = trim($chatId !== '' ? $chatId : $cfg['telegram_default_chat_id']);
         if ($chatId === '') {
-            throw new \\RuntimeException('No Telegram chat/channel ID is saved. Enter the default Chat ID and click Save Telegram before testing.');
+            throw new \RuntimeException('No Telegram chat/channel ID is saved. Enter the default Chat ID and click Save Telegram before testing.');
         }
 
         $url = 'https://api.telegram.org/bot' . rawurlencode($cfg['telegram_bot_token']) . '/sendMessage';
@@ -217,14 +217,14 @@ final class IntegrationService
         curl_close($ch);
 
         if ($body === false) {
-            throw new \\RuntimeException('Could not connect to the messaging service' . ($curlError !== '' ? ': ' . $curlError : '.'));
+            throw new \RuntimeException('Could not connect to the messaging service' . ($curlError !== '' ? ': ' . $curlError : '.'));
         }
 
         $data = json_decode((string) $body, true);
         if ($status < 200 || $status >= 300 || !is_array($data) || (($data['ok'] ?? true) === false)) {
             $description = is_array($data) ? trim((string) ($data['description'] ?? '')) : '';
             $detail = $description !== '' ? $description : 'The service returned an unexpected response.';
-            throw new \\RuntimeException('Messaging service rejected the request (HTTP ' . $status . '): ' . $detail);
+            throw new \RuntimeException('Messaging service rejected the request (HTTP ' . $status . '): ' . $detail);
         }
         return $data;
     }
