@@ -13,7 +13,7 @@ $seed = file_get_contents($root . '/database/seed.sql');
 $checks = [
     'payment entry is protected by billing manage permission' => str_contains($routes, "'/billing/receive-payment'") && str_contains($routes, "'billing.manage'"),
     'counter payment uses the existing atomic payment and receipt service' => str_contains($controller, 'BillingService::recordPayment(') && str_contains($controller, "Flash::set('success', \"Payment received."),
-    'payment entry lists only society-scoped outstanding bills' => str_contains($model, 'outstandingForSociety(int $societyId)') && str_contains($model, 'b.society_id = :sid AND b.paid_amount < b.total_amount'),
+    'payment entry lists only society-scoped outstanding bills with active resident links' => str_contains($model, 'outstandingForSociety(int $societyId)') && str_contains($model, 'b.status <> \'paid\'') && str_contains($model, 'b.paid_amount < b.total_amount') && str_contains($model, 'active_member.status = \'active\'') && str_contains($model, 'AND EXISTS ('),
     'payment form captures bill amount and payment mode with CSRF' => str_contains($form, "Csrf::field()") && str_contains($form, 'name="bill_id"') && str_contains($form, 'name="amount"') && str_contains($form, 'name="payment_mode"'),
     'accountant and society admin roles have payment permission' => str_contains($seed, "'society_admin'") && str_contains($seed, "'accountant'") && str_contains($seed, "'billing.manage'"),
     'payment entry is discoverable from billing navigation' => str_contains($menu, 'href="/billing/receive-payment"') && str_contains($billingIndex, 'href="/billing/receive-payment"'),
