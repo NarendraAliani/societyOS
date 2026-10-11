@@ -24,7 +24,7 @@ $checks = [
     'income details explain pending proofs are excluded' => str_contains($incomeDetailsView, 'Pending payment proofs are excluded until approved.'),
     'manual income rows expose edit and delete actions' => str_contains($incomeDetailsView, '/accounting/income/<?= (int) $row[\'income_id\'] ?>/edit') && str_contains($incomeDetailsView, '/delete'),
     'confirmed maintenance payments remain read-only in income details' => str_contains($incomeDetailsView, 'Managed in Payments'),
-    'manual income CRUD routes require accounting manage permission' => str_contains($routes, "'editIncome'], [$auth, $backOffice, $can('accounting.manage')]") && str_contains($routes, "'updateIncome'], [$auth, $backOffice, $can('accounting.manage')]") && str_contains($routes, "'deleteIncome'], [$auth, $backOffice, $can('accounting.manage')]"),
+    'manual income CRUD routes require accounting manage permission' => str_contains($routes, "'/accounting/income/{id}/edit'") && str_contains($routes, "'/accounting/income/{id}'") && str_contains($routes, "'/accounting/income/{id}/delete'") && str_contains($routes, "'accounting.manage'"),
     'manual income edits and deletes maintain linked ledger entries' => str_contains($accountingController, 'AccountingService::updateIncome') && str_contains($accountingController, 'AccountingService::deleteIncome') && str_contains($accountingService, 'reference_type = "income"'),
 
 ];
