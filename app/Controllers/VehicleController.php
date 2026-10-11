@@ -139,7 +139,6 @@ final class VehicleController
     {
         $pageTitle = 'Parking Allotment';
         $societyId = Society::currentId();
-        $flats = Flat::allForSociety($societyId);
         $vehicles = Vehicle::allForSociety($societyId);
         $slots = array_values(array_filter(
             ParkingSlot::allForSociety($societyId),
@@ -170,9 +169,27 @@ final class VehicleController
                 $assignedVehicleIds[(int) $allocation['vehicle_id']] = true;
             }
         }
-        $vehicles = array_values(array_filter($vehicles, static function (array $vehicle) use ($assignedVehicleIds): bool {
-            return $vehicle['vehicle_type'] !== 'four_wheeler' || !isset($assignedVehicleIds[(int) $vehicle['id']]);
+        $vehicles = array_values(array_filter($vehicles, static function (array $vehicle) use ($assignedVehicleIds, $slots): bool {
+            if ($vehicle['vehicle_type'] === 'four_wheeler' && isset($assignedVehicleIds[(int) $vehicle['id']])) {
+                return false;
+            }
+            foreach ($slots as $slot) {
+                if ($slot['slot_type'] === $vehicle['vehicle_type']) {
+                    return true;
+                }
+            }
+            return false;
         }));
+
+        // Only show flats with a registered resident vehicle that can be assigned to a free compatible slot.
+        $eligibleFlatIds = [];
+        foreach ($vehicles as $vehicle) {
+            $eligibleFlatIds[(int) $vehicle['flat_id']] = true;
+        }
+        $flats = array_values(array_filter(
+            Flat::allForSociety($societyId),
+            static fn (array $flat): bool => isset($eligibleFlatIds[(int) $flat['id']])
+        ));
 
         require __DIR__ . '/../Views/vehicles/parking_allotment.php';
     }
