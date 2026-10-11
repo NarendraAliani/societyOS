@@ -20,6 +20,17 @@ final class NoticeController
     {
         $pageTitle = 'Notice Board';
         $notices = Notice::allForSociety(Society::currentId());
+        $activeNotices = [];
+        $expiredNotices = [];
+        $now = time();
+        foreach ($notices as $notice) {
+            $expiresAt = trim((string) ($notice['expires_at'] ?? ''));
+            if ($expiresAt !== '' && strtotime($expiresAt) !== false && strtotime($expiresAt) < $now) {
+                $expiredNotices[] = $notice;
+            } else {
+                $activeNotices[] = $notice;
+            }
+        }
         require __DIR__ . '/../Views/notices/index.php';
     }
 
