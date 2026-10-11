@@ -23,6 +23,22 @@ ob_start();
                 <button class="btn btn-outline-secondary" type="button" onclick="window.print()">Print QR</button>
                 <a class="btn btn-primary" href="/resident/bills">Back to My Bills</a>
             </div>
+            <hr class="my-4">
+            <div class="mx-auto text-start" style="max-width:680px">
+                <h5>Already paid? Submit payment proof</h5>
+                <p class="text-muted small">Enter the transaction/reference ID from your UPI app or bank and optionally attach a screenshot. The bill will remain outstanding until the society verifies the payment.</p>
+                <form method="post" action="/resident/payment-proofs" enctype="multipart/form-data">
+                    <?= \\App\\Helpers\\Csrf::field() ?>
+                    <input type="hidden" name="bill_id" value="<?= (int)$bill['id'] ?>">
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label" for="proof-platform">Payment platform</label><select class="form-select" id="proof-platform" name="platform" required><option value="">Select platform</option><option>UPI app</option><option>Bank transfer</option><option>Debit/Credit card</option><option>Other</option></select></div>
+                        <div class="col-md-6"><label class="form-label" for="proof-txn">Transaction / UTR / reference ID</label><input class="form-control" id="proof-txn" name="transaction_id" maxlength="100" required placeholder="Enter exact transaction reference"></div>
+                        <div class="col-12"><label class="form-label" for="proof-shot">Payment screenshot (optional)</label><input class="form-control" id="proof-shot" type="file" name="screenshot" accept="image/png,image/jpeg"><div class="form-text">PNG or JPG only. Do not upload screenshots containing PINs or passwords.</div></div>
+                        <div class="col-12"><label class="form-label" for="proof-notes">Additional details (optional)</label><textarea class="form-control" id="proof-notes" name="notes" maxlength="1000" rows="2" placeholder="Payment date, amount, or other context"></textarea></div>
+                    </div>
+                    <button class="btn btn-primary mt-3" type="submit">Submit Proof for Verification</button>
+                </form>
+            </div>
         <?php endif; ?>
     </div>
 </div>
