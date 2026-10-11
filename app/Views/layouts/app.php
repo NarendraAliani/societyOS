@@ -29,43 +29,73 @@ $siteFontSizeDefault = \App\Models\Settings::get((int) ($_SESSION['society_id'] 
 </head>
 <body>
 <div class="d-flex" id="app-shell">
-    <nav class="sidebar bg-dark text-white p-3" id="app-sidebar" aria-label="Primary navigation">
-
-        <h4 class="mb-4"><i class="fa-solid fa-building"></i> SocietyOS</h4>
-        <ul class="nav nav-pills flex-column gap-1">
-            <?php if (\App\Helpers\Auth::isResident()): ?>
-                <li class="nav-item"><a class="nav-link text-white" href="/dashboard"><i class="fa-solid fa-house me-2"></i>My Home</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/resident/bills"><i class="fa-solid fa-file-invoice-dollar me-2"></i>My Bills</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/resident/payment-proofs"><i class="fa-solid fa-receipt me-2"></i>My Payment Proofs</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/resident/visitor-passes"><i class="fa-solid fa-user-plus me-2"></i>Visitor Passes</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/resident/family"><i class="fa-solid fa-people-roof me-2"></i>My Family</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/resident/vehicles"><i class="fa-solid fa-car me-2"></i>My Vehicles</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/resident/documents"><i class="fa-solid fa-folder-open me-2"></i>My Documents</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/resident/complaints"><i class="fa-solid fa-triangle-exclamation me-2"></i>My Complaints</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/resident/notices"><i class="fa-solid fa-bullhorn me-2"></i>Society Notices</a></li>
-            <?php else: ?>
-                <li class="nav-item"><a class="nav-link text-white" href="/dashboard"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/society"><i class="fa-solid fa-sliders me-2"></i>Society Setup</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/society/wings"><i class="fa-solid fa-sitemap me-2"></i>Wings &amp; Flats</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/society/maintenance-heads"><i class="fa-solid fa-coins me-2"></i>Maintenance Config</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/members"><i class="fa-solid fa-users me-2"></i>Residents</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/vehicles"><i class="fa-solid fa-car me-2"></i>Vehicles</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/billing"><i class="fa-solid fa-file-invoice-dollar me-2"></i>Maintenance</a></li>
-                <?php if (\App\Helpers\Auth::can('billing.manage')): ?><li class="nav-item"><a class="nav-link text-white" href="/billing/receive-payment"><i class="fa-solid fa-cash-register me-2"></i>Receive Payment</a></li><?php endif; ?>
-                <?php if (\App\Helpers\Auth::can('billing.manage')): ?><li class="nav-item"><a class="nav-link text-white" href="/billing/payment-proofs"><i class="fa-solid fa-file-circle-check me-2"></i>Payment Proof Review</a></li><?php endif; ?>
-                <li class="nav-item"><a class="nav-link text-white" href="/accounting/accounts"><i class="fa-solid fa-scale-balanced me-2"></i>Accounts</a></li>
-                <?php if (\App\Helpers\Auth::can('accounting.manage')): ?><li class="nav-item"><a class="nav-link text-white" href="/accounting/expenses"><i class="fa-solid fa-money-bill-transfer me-2"></i>Add Expenses</a></li><?php endif; ?>
-                <li class="nav-item"><a class="nav-link text-white" href="/visitors"><i class="fa-solid fa-id-card me-2"></i>Visitors</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/complaints"><i class="fa-solid fa-triangle-exclamation me-2"></i>Complaints</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/notices"><i class="fa-solid fa-bullhorn me-2"></i>Notices</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/staff"><i class="fa-solid fa-user-tie me-2"></i>Staff</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/assets"><i class="fa-solid fa-toolbox me-2"></i>Assets</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/reports"><i class="fa-solid fa-chart-column me-2"></i>Reports</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/admin/users"><i class="fa-solid fa-user-shield me-2"></i>Administration</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/admin/integrations"><i class="fa-solid fa-plug me-2"></i>Integrations</a></li>
-            <?php endif; ?>
-        </ul>
-    </nav>
+<?php
+$currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$isNavActive = static function (string $href) use ($currentPath): bool {
+    if ($href === '/dashboard') return $currentPath === '/dashboard' || $currentPath === '/';
+    return $currentPath === $href || str_starts_with($currentPath, rtrim($href, '/') . '/');
+};
+$navGroups = [];
+if (\App\Helpers\Auth::isResident()) {
+    $navGroups = ['MY SOCIETY' => [
+        ['label'=>'My Home','href'=>'/dashboard','icon'=>'fa-house'],
+        ['label'=>'My Bills','href'=>'/resident/bills','icon'=>'fa-file-invoice-dollar'],
+        ['label'=>'My Payment Proofs','href'=>'/resident/payment-proofs','icon'=>'fa-receipt'],
+        ['label'=>'Visitor Passes','href'=>'/resident/visitor-passes','icon'=>'fa-user-plus'],
+        ['label'=>'My Family','href'=>'/resident/family','icon'=>'fa-people-roof'],
+        ['label'=>'My Vehicles','href'=>'/resident/vehicles','icon'=>'fa-car'],
+        ['label'=>'My Documents','href'=>'/resident/documents','icon'=>'fa-folder-open'],
+        ['label'=>'My Complaints','href'=>'/resident/complaints','icon'=>'fa-triangle-exclamation'],
+        ['label'=>'Society Notices','href'=>'/resident/notices','icon'=>'fa-bullhorn'],
+    ]];
+} else {
+    $allNavGroups = [
+        'OVERVIEW' => [['label'=>'Dashboard','href'=>'/dashboard','icon'=>'fa-gauge','permission'=>'dashboard.view']],
+        'SOCIETY' => [
+            ['label'=>'Society Setup','href'=>'/society','icon'=>'fa-sliders','permission'=>'society.manage'],
+            ['label'=>'Wings & Flats','href'=>'/society/wings','icon'=>'fa-sitemap','permission'=>'flats.manage'],
+        ],
+        'PEOPLE &amp; SERVICES' => [
+            ['label'=>'Residents','href'=>'/members','icon'=>'fa-users','permission'=>'members.view'],
+            ['label'=>'Vehicles &amp; Parking','href'=>'/vehicles','icon'=>'fa-car','permission'=>'vehicles.manage'],
+            ['label'=>'Maintenance Bills','href'=>'/billing','icon'=>'fa-file-invoice-dollar','permission'=>'billing.view'],
+            ['label'=>'Visitors','href'=>'/visitors','icon'=>'fa-id-card','permission'=>'visitors.manage'],
+            ['label'=>'Complaints','href'=>'/complaints','icon'=>'fa-triangle-exclamation','permission'=>'complaints.view'],
+            ['label'=>'Notices &amp; Events','href'=>'/notices','icon'=>'fa-bullhorn','permission'=>'notices.manage'],
+        ],
+        'FINANCE' => [
+            ['label'=>'Receive Payment','href'=>'/billing/receive-payment','icon'=>'fa-cash-register','permission'=>'billing.manage'],
+            ['label'=>'Payment Proof Review','href'=>'/billing/payment-proofs','icon'=>'fa-file-circle-check','permission'=>'billing.manage'],
+            ['label'=>'Accounts &amp; Ledger','href'=>'/accounting/accounts','icon'=>'fa-scale-balanced','permission'=>'accounting.view'],
+            ['label'=>'Add Expenses','href'=>'/accounting/expenses','icon'=>'fa-money-bill-transfer','permission'=>'accounting.manage'],
+        ],
+        'MANAGEMENT' => [
+            ['label'=>'Staff','href'=>'/staff','icon'=>'fa-user-tie','permission'=>'staff.manage'],
+            ['label'=>'Assets &amp; Contracts','href'=>'/assets','icon'=>'fa-toolbox','permission'=>'assets.manage'],
+            ['label'=>'Reports','href'=>'/reports','icon'=>'fa-chart-column','permission'=>'reports.view'],
+            ['label'=>'Users &amp; Roles','href'=>'/admin/users','icon'=>'fa-user-shield','permission'=>'users.manage'],
+            ['label'=>'Integrations','href'=>'/admin/integrations','icon'=>'fa-plug','permission'=>'settings.manage'],
+        ],
+    ];
+    foreach ($allNavGroups as $groupLabel => $items) {
+        $visibleItems = array_values(array_filter($items, static fn(array $item): bool => empty($item['permission']) || \App\Helpers\Auth::can($item['permission'])));
+        if ($visibleItems) $navGroups[$groupLabel] = $visibleItems;
+    }
+}
+?>
+<nav class="sidebar bg-dark text-white p-3" id="app-sidebar" aria-label="Primary navigation">
+ <a class="sidebar-brand text-white text-decoration-none" href="/dashboard"><span class="sidebar-brand-icon"><i class="fa-solid fa-building"></i></span><span>SocietyOS</span></a>
+ <div class="sidebar-context"><?= \App\Helpers\Auth::isResident() ? 'RESIDENT PORTAL' : 'SOCIETY MANAGEMENT' ?></div>
+ <ul class="nav nav-pills flex-column sidebar-nav">
+ <?php foreach ($navGroups as $groupLabel => $items): ?>
+  <li class="sidebar-section-label" aria-hidden="true"><?= htmlspecialchars($groupLabel) ?></li>
+  <?php foreach ($items as $item): $active = $isNavActive($item['href']); ?>
+   <li class="nav-item"><a class="nav-link <?= $active ? 'active' : '' ?>" href="<?= htmlspecialchars($item['href']) ?>" <?= $active ? 'aria-current="page"' : '' ?>><i class="fa-solid <?= htmlspecialchars($item['icon']) ?> sidebar-nav-icon" aria-hidden="true"></i><span><?= $item['label'] ?></span></a></li>
+  <?php endforeach; ?>
+ <?php endforeach; ?>
+ </ul>
+ <div class="sidebar-footer"><span class="sidebar-footer-dot"></span><span><?= htmlspecialchars(\App\Helpers\Auth::role() ?? 'Account') ?></span><span class="ms-auto small opacity-75">SocietyOS</span></div>
+</nav>
     <main class="flex-grow-1">
         <nav class="navbar app-topbar border-bottom px-3" aria-label="Application toolbar">
             <div class="d-flex align-items-center gap-2 min-w-0">
