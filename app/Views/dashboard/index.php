@@ -64,15 +64,18 @@ ob_start();
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card border-0 shadow-sm kpi-card kpi-success">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="kpi-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                <div>
-                    <div class="text-muted small">Income (This Month)</div>
-                    <div class="fs-3 fw-bold text-success"><?= number_format((float) $stats['income_this_month'], 2) ?></div>
+        <a href="/accounting/income-details" class="text-decoration-none text-reset d-block h-100" aria-label="View income calculation details">
+            <div class="card border-0 shadow-sm kpi-card kpi-success h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="kpi-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                    <div class="flex-grow-1">
+                        <div class="text-muted small">Income (This Month)</div>
+                        <div class="fs-3 fw-bold text-success"><?= number_format((float) $stats['income_this_month'], 2) ?></div>
+                        <span class="small text-success"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>View calculation details</span>
+                    </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-4">
         <div class="card border-0 shadow-sm kpi-card kpi-warning">
