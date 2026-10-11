@@ -76,7 +76,9 @@ final class ParkingSlot
             $stmt = $pdo->prepare(
                 "SELECT ps.id, ps.slot_number,
                         EXISTS (SELECT 1 FROM parking_allocations pa
-                                WHERE pa.parking_slot_id = ps.id AND pa.allocated_to IS NULL) AS occupied
+                                WHERE pa.parking_slot_id = ps.id AND pa.allocated_to IS NULL) AS occupied,
+                        EXISTS (SELECT 1 FROM parking_allocations pah
+                                WHERE pah.parking_slot_id = ps.id) AS has_history
                  FROM parking_slots ps
                  WHERE ps.society_id = :sid AND ps.slot_number LIKE 'COMMON-2W-%'
                  ORDER BY ps.slot_number DESC FOR UPDATE"
@@ -96,7 +98,7 @@ final class ParkingSlot
                     if ($toRemove === 0) {
                         break;
                     }
-                    if ((bool) $slot['occupied']) {
+                    if ((bool) $slot['has_history']) {
                         continue;
                     }
                     $delete = $pdo->prepare('DELETE FROM parking_slots WHERE id = :id AND society_id = :sid');
