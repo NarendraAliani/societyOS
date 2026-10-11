@@ -14,11 +14,11 @@ $checks = [
 
 $failed = false;
 foreach ($checks as $name => $passed) {
-    printf("[%s] %s\\n", $passed ? 'PASS' : 'FAIL', $name);
+    printf("[%s] %s\n", $passed ? 'PASS' : 'FAIL', $name);
     $failed = $failed || !$passed;
 }
 if ($failed) {
-    fwrite(STDERR, "Add Expenses navigation regression detected.\\n");
+    fwrite(STDERR, "Add Expenses navigation regression detected.\n");
     exit(1);
 }
-echo "Add Expenses navigation regression contract passed.\\n";
+echo "Add Expenses navigation regression contract passed.\n";
