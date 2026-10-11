@@ -22,7 +22,7 @@ ob_start();
         <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
                 <form method="post" action="/billing/receive-payment" id="receive-payment-form">
-                    <?= \\App\\Helpers\\Csrf::field() ?>
+                    <?= \App\Helpers\Csrf::field() ?>
                     <div class="mb-3">
                         <label class="form-label" for="bill_id">Resident / Flat / Bill <span class="text-danger">*</span></label>
                         <select class="form-select" name="bill_id" id="bill_id" required>
