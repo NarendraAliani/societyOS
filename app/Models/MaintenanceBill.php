@@ -41,12 +41,22 @@ final class MaintenanceBill
                     f.flat_number, fl.floor_number, w.name AS wing_name,
                     (SELECT GROUP_CONCAT(m.name ORDER BY m.id DESC SEPARATOR ', ')
                      FROM members m
-                     WHERE m.flat_id = b.flat_id AND m.society_id = b.society_id) AS resident_name
+                     WHERE m.flat_id = b.flat_id
+                       AND m.society_id = b.society_id
+                       AND m.status = 'active') AS resident_name
              FROM maintenance_bills b
              JOIN flats f ON f.id = b.flat_id
              JOIN floors fl ON fl.id = f.floor_id
              JOIN wings w ON w.id = fl.wing_id
-             WHERE b.society_id = :sid AND b.paid_amount < b.total_amount
+             WHERE b.society_id = :sid
+               AND b.status <> 'paid'
+               AND b.paid_amount < b.total_amount
+               AND EXISTS (
+                   SELECT 1 FROM members active_member
+                   WHERE active_member.flat_id = b.flat_id
+                     AND active_member.society_id = b.society_id
+                     AND active_member.status = 'active'
+               )
              ORDER BY w.name, fl.floor_number, f.flat_number, b.due_date, b.id"
         );
         $stmt->execute(['sid' => $societyId]);
