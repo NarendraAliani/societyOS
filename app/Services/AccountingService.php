@@ -40,7 +40,7 @@ final class AccountingService
         $pdo->beginTransaction();
         try {
             if (!Income::updateForSociety($incomeId, $societyId, $fields)) {
-                throw new \\RuntimeException('Income entry was not found or did not change.');
+                throw new \RuntimeException('Income entry was not found or did not change.');
             }
             $ledger = $pdo->prepare(
                 'UPDATE ledger_entries
@@ -56,7 +56,7 @@ final class AccountingService
                 'income_id' => $incomeId,
             ]);
             $pdo->commit();
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
@@ -75,10 +75,10 @@ final class AccountingService
             );
             $ledger->execute(['sid' => $societyId, 'income_id' => $incomeId]);
             if (!Income::deleteForSociety($incomeId, $societyId)) {
-                throw new \\RuntimeException('Income entry was not found.');
+                throw new \RuntimeException('Income entry was not found.');
             }
             $pdo->commit();
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
