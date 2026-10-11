@@ -14,6 +14,7 @@ $checks = [
     'parking page exposes capacity and availability controls' => str_contains($view, 'Common 2-Wheeler Parking') && str_contains($view, 'name="capacity"') && str_contains($view, "['occupied']"),
     'capacity update route requires vehicle management permission' => str_contains($routes, "'/vehicles/parking/common-capacity'") && str_contains($routes, "'vehicles.manage'"),
     'controller validates requested capacity range' => str_contains($controller, 'resizeCommonParking') && str_contains($controller, '$capacity > 500'),
+    'parking allocation form actually persists validated assignments' => str_contains($controller, 'ParkingAllocation::allocate((int) $id, $flatId, $vehicleId, $fromDate, $isChargeable)') && str_contains($controller, 'already allocated'),
 ];
 
 $failed = false;
