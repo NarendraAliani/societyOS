@@ -15,6 +15,10 @@ $checks = [
     'capacity update route requires vehicle management permission' => str_contains($routes, "'/vehicles/parking/common-capacity'") && str_contains($routes, "'vehicles.manage'"),
     'controller validates requested capacity range' => str_contains($controller, 'resizeCommonParking') && str_contains($controller, '$capacity > 500'),
     'parking allocation form actually persists validated assignments' => str_contains($controller, 'ParkingAllocation::allocate((int) $id, $flatId, $vehicleId, $fromDate, $isChargeable)') && str_contains($controller, 'already allocated'),
+    'four-wheeler dropdown hides vehicles with active allocations' => str_contains($controller, 'vehicleHasActiveFourWheelerAllocation') && str_contains($controller, "vehicle['vehicle_type'] === 'four_wheeler'"),
+    'allocation model prevents a vehicle from taking multiple active four-wheeler slots' => str_contains($model, 'vehicleHasActiveFourWheelerAllocation') && str_contains($model, 'already has an active 4-wheeler parking allocation'),
+    'vehicle type must match parking slot type' => str_contains($model, 'Vehicle type must match parking slot type.'),
+    'allocation form requires an allocation start date' => str_contains($view, 'name="allocated_from"') && str_contains($view, 'required>'),
 ];
 
 $failed = false;
