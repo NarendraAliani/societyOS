@@ -681,3 +681,26 @@ body {
     display: block;
 }
 
+
+
+/* ===== Dashboard KPI card navigation ===== */
+.dashboard-card-link .card {
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+.dashboard-card-link:hover .card,
+.dashboard-card-link:focus-visible .card {
+    transform: translateY(-2px);
+    box-shadow: 0 .5rem 1.25rem rgba(0, 0, 0, .14) !important;
+}
+.dashboard-card-link:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 3px;
+    border-radius: .75rem;
+}
+.dashboard-card-hint {
+    color: var(--bs-link-color);
+}
+[data-bs-theme="dark"] .dashboard-card-link:hover .card,
+[data-bs-theme="dark"] .dashboard-card-link:focus-visible .card {
+    box-shadow: 0 .5rem 1.25rem rgba(0, 0, 0, .3) !important;
+}
