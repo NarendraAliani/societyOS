@@ -37,7 +37,7 @@ final class MemberController
     public function create(): void
     {
         $pageTitle = 'Add Resident';
-        $flats = Flat::allForSociety(Society::currentId());
+        $flats = Flat::availableForResidents(Society::currentId());
         require __DIR__ . '/../Views/members/create.php';
     }
 
@@ -53,6 +53,14 @@ final class MemberController
         $flat = $flatId > 0 ? Flat::find($flatId) : null;
         if ($name === '' || $phone === '' || !$flat || (int) $flat['society_id'] !== Society::currentId()) {
             Flash::set('error', 'Name, phone, and a valid society flat are required.');
+            header('Location: /members/create');
+            exit;
+        }
+
+        // Enforce the same one-resident-per-flat rule server-side, not just in the dropdown.
+        $availableFlatIds = array_map('intval', array_column(Flat::availableForResidents(Society::currentId()), 'id'));
+        if (!in_array($flatId, $availableFlatIds, true)) {
+            Flash::set('error', 'This flat is already assigned to a resident. Choose an unassigned flat.');
             header('Location: /members/create');
             exit;
         }
