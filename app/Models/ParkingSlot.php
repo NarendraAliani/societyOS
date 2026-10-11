@@ -67,7 +67,7 @@ final class ParkingSlot
     public static function resizeCommonTwoWheeler(int $societyId, int $capacity): array
     {
         if ($capacity < 0 || $capacity > 500) {
-            throw new \\InvalidArgumentException('Common parking capacity must be between 0 and 500.');
+            throw new \InvalidArgumentException('Common parking capacity must be between 0 and 500.');
         }
 
         $pdo = db();
@@ -89,7 +89,7 @@ final class ParkingSlot
             $occupied = count(array_filter($slots, static fn (array $slot): bool => (bool) $slot['occupied']));
 
             if ($capacity < $occupied) {
-                throw new \\DomainException("Capacity cannot be lower than the {$occupied} currently occupied common parking spaces.");
+                throw new \DomainException("Capacity cannot be lower than the {$occupied} currently occupied common parking spaces.");
             }
 
             if ($capacity < $current) {
@@ -106,7 +106,7 @@ final class ParkingSlot
                     $toRemove--;
                 }
                 if ($toRemove !== 0) {
-                    throw new \\DomainException('Unable to reduce capacity because some spaces have parking history.');
+                    throw new \DomainException('Unable to reduce capacity because some spaces have parking history.');
                 }
             } elseif ($capacity > $current) {
                 $next = 1;
@@ -129,7 +129,7 @@ final class ParkingSlot
 
             $pdo->commit();
             return self::commonTwoWheelerStats($societyId);
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
