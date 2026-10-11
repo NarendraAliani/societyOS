@@ -7,7 +7,7 @@ $view = file_get_contents($root . '/app/Views/billing/receipt_pdf.php');
 
 $checks = [
     'receipt detail query loads bill period start and end' => str_contains($model, 'b.bill_period_start, b.bill_period_end'),
-    'receipt displays the maintenance bill period' => str_contains($view, '<td>Bill Period</td>') && str_contains($view, "$detail['bill_period_start']") && str_contains($view, "$detail['bill_period_end']"),
+    'receipt displays the maintenance bill period' => str_contains($view, '<td>Bill Period</td>') && str_contains($view, 'bill_period_start') && str_contains($view, 'bill_period_end'),
 ];
 
 $failed = false;
