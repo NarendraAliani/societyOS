@@ -80,6 +80,8 @@ $router->get('/dashboard', [DashboardController::class, 'index'], [$auth]);
 
 $router->get('/resident', [ResidentController::class, 'home'], [$auth, $can('dashboard.view')]);
 $router->get('/resident/bills', [ResidentController::class, 'bills'], [$auth, $can('billing.view')]);
+$router->post('/resident/payment-proofs', [PaymentProofController::class, 'submit'], [$auth, $can('billing.view')]);
+$router->get('/resident/payment-proofs', [PaymentProofController::class, 'mine'], [$auth, $can('billing.view')]);
 $router->get('/resident/family', [ResidentController::class, 'family'], [$auth, $can('dashboard.view')]);
 $router->get('/resident/vehicles', [ResidentController::class, 'vehicles'], [$auth, $can('dashboard.view')]);
 $router->post('/resident/vehicles', [ResidentController::class, 'storeVehicle'], [$auth, $can('dashboard.view')]);
@@ -155,6 +157,9 @@ $router->get('/leases/{id}/agreement', [MemberController::class, 'serveLeaseDocu
 
 // Maintenance Billing — static paths must be registered before the /billing/{id} wildcard
 $router->get('/billing', [BillingController::class, 'index'], [$auth, $backOffice, $can('billing.view')]);
+$router->get('/billing/payment-proofs', [PaymentProofController::class, 'index'], [$auth, $backOffice, $can('billing.manage')]);
+$router->post('/billing/payment-proofs/{id}/review', [PaymentProofController::class, 'review'], [$auth, $backOffice, $can('billing.manage')]);
+$router->get('/billing/payment-proofs/{id}/file', [PaymentProofController::class, 'file'], [$auth, $can('billing.view')]);
 $router->get('/billing/generate', [BillingController::class, 'showGenerateForm'], [$auth, $backOffice, $can('billing.manage')]);
 $router->post('/billing/generate', [BillingController::class, 'generate'], [$auth, $backOffice, $can('billing.manage')]);
 $router->get('/billing/defaulters', [BillingController::class, 'defaulters'], [$auth, $backOffice, $can('billing.view')]);
