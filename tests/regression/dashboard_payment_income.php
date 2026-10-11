@@ -23,7 +23,7 @@ $checks = [
     'income detail calculation includes manual entries and confirmed payments' => str_contains($accountingController, 'public function incomeDetails(): void') && str_contains($accountingController, 'FROM income i') && str_contains($accountingController, 'FROM payments p') && str_contains($accountingController, '$totalIncome = $manualTotal + $paymentTotal;'),
     'income details explain pending proofs are excluded' => str_contains($incomeDetailsView, 'Pending payment proofs are excluded until approved.'),
     'manual income rows expose edit and delete actions' => str_contains($incomeDetailsView, '/accounting/income/<?= (int) $row[\'income_id\'] ?>/edit') && str_contains($incomeDetailsView, '/delete'),
-    'confirmed maintenance payments remain read-only in income details' => str_contains($incomeDetailsView, 'Managed in Payments'),
+    'confirmed maintenance payments link to payment management' => str_contains($incomeDetailsView, 'href="/billing/payment-proofs"') && str_contains($incomeDetailsView, 'Managed in Payments'),
     'manual income CRUD routes require accounting manage permission' => str_contains($routes, "'/accounting/income/{id}/edit'") && str_contains($routes, "'/accounting/income/{id}'") && str_contains($routes, "'/accounting/income/{id}/delete'") && str_contains($routes, "'accounting.manage'"),
     'manual income edits and deletes maintain linked ledger entries' => str_contains($accountingController, 'AccountingService::updateIncome') && str_contains($accountingController, 'AccountingService::deleteIncome') && str_contains($accountingService, 'reference_type = "income"'),
 
