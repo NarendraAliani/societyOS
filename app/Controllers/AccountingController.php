@@ -223,7 +223,7 @@ final class AccountingController
         $amount = $_POST['amount'] ?? '';
         $date = $_POST['income_date'] ?? '';
 
-        if ($accountId <= 0 || $category === '' || !is_numeric($amount) || (float) $amount <= 0 || !$date) {
+        if ($accountId <= 0 || $category === '' || !in_array($category, Expense::categoriesForSociety(Society::currentId()), true) || !is_numeric($amount) || (float) $amount <= 0 || !$date) {
             Flash::set('error', 'Account, category, a positive amount, and date are required.');
             header('Location: /accounting/income');
             exit;
@@ -250,7 +250,30 @@ final class AccountingController
         $entries = Expense::allForSociety(Society::currentId());
         $accounts = Account::allForSociety(Society::currentId());
         $vendors = Vendor::allForSociety(Society::currentId());
+        $categories = Expense::categoriesForSociety(Society::currentId());
         require __DIR__ . '/../Views/accounting/expenses.php';
+    }
+
+    public function storeExpenseCategory(): void
+    {
+        $this->verifyCsrf();
+        $name = trim((string) ($_POST['name'] ?? ''));
+        if ($name === '' || mb_strlen($name) > 100) {
+            Flash::set('error', 'Enter an expense category name (up to 100 characters).');
+            header('Location: /accounting/expenses');
+            exit;
+        }
+
+        if (!Expense::addCategory(Society::currentId(), $name)) {
+            Flash::set('error', 'That expense category already exists, or the name is invalid.');
+            header('Location: /accounting/expenses');
+            exit;
+        }
+
+        ActivityLog::log('accounting', 'expense_category', "Added expense category {$name}");
+        Flash::set('success', "Expense category '{$name}' added. It is now available in the category dropdown.");
+        header('Location: /accounting/expenses');
+        exit;
     }
 
     public function storeExpense(): void
