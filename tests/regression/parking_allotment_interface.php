@@ -5,6 +5,7 @@ $root = dirname(__DIR__, 2);
 $controller = file_get_contents($root . '/app/Controllers/VehicleController.php');
 $view = file_get_contents($root . '/app/Views/vehicles/parking_allotment.php');
 $parkingView = file_get_contents($root . '/app/Views/vehicles/parking.php');
+$vehiclesView = file_get_contents($root . '/app/Views/vehicles/index.php');
 $routes = file_get_contents($root . '/public/index.php');
 $allocationModel = file_get_contents($root . '/app/Models/ParkingAllocation.php');
 
@@ -16,6 +17,7 @@ $checks = [
     'currently allocated vehicles are excluded from four-wheeler choices' => str_contains($controller, 'assignedVehicleIds') && str_contains($controller, "vehicle['vehicle_type'] !== 'four_wheeler'"),
     'form submits through existing validated allocation model' => str_contains($controller, 'ParkingAllocation::allocate($slotId, $flatId, $vehicleId, $fromDate, $billing === \'paid\')'),
     'parking overview links directly to resident-first allotment' => str_contains($parkingView, '/vehicles/parking-allotment') && str_contains($parkingView, 'Allot Vehicle to Parking'),
+    'vehicle listing prominently links to vehicle parking allotment' => str_contains($vehiclesView, '/vehicles/parking-allotment') && str_contains($vehiclesView, 'Allot Parking to Vehicle'),
     'model prevents duplicate active four-wheeler assignments' => str_contains($allocationModel, 'vehicleHasActiveFourWheelerAllocation'),
 ];
 
