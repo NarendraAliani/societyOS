@@ -46,7 +46,7 @@ ob_start();
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle">
-                <thead><tr><th>Date</th><th>Type</th><th>Source / Category</th><th>Details</th><th>Account / Flat</th><th class="text-end">Amount</th></tr></thead>
+                <thead><tr><th>Date</th><th>Type</th><th>Source / Category</th><th>Details</th><th>Account / Flat</th><th class="text-end">Amount</th><th>Actions</th></tr></thead>
                 <tbody>
                 <?php foreach ($rows as $row): ?>
                     <tr>
@@ -59,13 +59,24 @@ ob_start();
                         </td>
                         <td><?= htmlspecialchars((string) ($row['account_name'] ?: (!empty($row['flat_number']) ? 'Flat ' . $row['flat_number'] : '-'))) ?></td>
                         <td class="text-end fw-bold text-success"><?= number_format((float) $row['amount'], 2) ?></td>
+                        <td class="text-nowrap">
+                            <?php if ($row['entry_type'] === 'Manual income'): ?>
+                                <a class="btn btn-sm btn-outline-primary" href="/accounting/income/<?= (int) $row['income_id'] ?>/edit">Edit</a>
+                                <form method="post" action="/accounting/income/<?= (int) $row['income_id'] ?>/delete" class="d-inline" onsubmit="return confirm('Delete this manual income entry? Its linked ledger entry will also be removed.');">
+                                    <?= \\App\\Helpers\\Csrf::field() ?>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                            <?php else: ?>
+                                <span class="text-muted small">Managed in Payments</span>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
                 <?php if (empty($rows)): ?>
-                    <tr><td colspan="6" class="text-center text-muted py-4">No income entries or confirmed payments in this date range.</td></tr>
+                    <tr><td colspan="7" class="text-center text-muted py-4">No income entries or confirmed payments in this date range.</td></tr>
                 <?php endif; ?>
                 </tbody>
-                <tfoot><tr class="fw-bold"><td colspan="5">Total Income</td><td class="text-end text-success"><?= number_format($totalIncome, 2) ?></td></tr></tfoot>
+                <tfoot><tr class="fw-bold"><td colspan="5">Total Income</td><td class="text-end text-success"><?= number_format($totalIncome, 2) ?></td><td></td></tr></tfoot>
             </table>
         </div>
     </div>
