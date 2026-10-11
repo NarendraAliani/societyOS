@@ -139,7 +139,31 @@ final class VehicleController
     {
         $pageTitle = 'Parking';
         $slots = ParkingSlot::allForSociety(Society::currentId());
+        $commonParking = ParkingSlot::commonTwoWheelerStats(Society::currentId());
         require __DIR__ . '/../Views/vehicles/parking.php';
+    }
+
+    public function resizeCommonParking(): void
+    {
+        $this->verifyCsrf();
+        $capacity = filter_var($_POST['capacity'] ?? null, FILTER_VALIDATE_INT);
+        if ($capacity === false || $capacity < 0 || $capacity > 500) {
+            Flash::set('error', 'Enter a whole-number capacity between 0 and 500.');
+            header('Location: /vehicles/parking');
+            exit;
+        }
+
+        try {
+            $stats = ParkingSlot::resizeCommonTwoWheeler(Society::currentId(), $capacity);
+            Flash::set('success', "Common two-wheeler parking updated: {$stats['capacity']} spaces, {$stats['occupied']} occupied.");
+        } catch (\\DomainException $e) {
+            Flash::set('error', $e->getMessage());
+        } catch (\\Throwable $e) {
+            Flash::set('error', 'Unable to update common parking capacity. Please try again.');
+        }
+
+        header('Location: /vehicles/parking');
+        exit;
     }
 
     public function storeSlot(): void
