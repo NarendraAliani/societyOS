@@ -42,6 +42,99 @@ final class ParkingSlot
         return $stmt->fetch() ?: null;
     }
 
+    private const COMMON_TWO_WHEELER_PREFIX = 'COMMON-2W-';
+
+    public static function commonTwoWheelerStats(int $societyId): array
+    {
+        $stmt = db()->prepare(
+            "SELECT COUNT(*) AS capacity,
+                    SUM(CASE WHEN EXISTS (
+                        SELECT 1 FROM parking_allocations pa
+                        WHERE pa.parking_slot_id = ps.id AND pa.allocated_to IS NULL
+                    ) THEN 1 ELSE 0 END) AS occupied
+             FROM parking_slots ps
+             WHERE ps.society_id = :sid AND ps.slot_number LIKE 'COMMON-2W-%'"
+        );
+        $stmt->execute(['sid' => $societyId]);
+        $row = $stmt->fetch() ?: [];
+        return ['capacity' => (int) ($row['capacity'] ?? 0), 'occupied' => (int) ($row['occupied'] ?? 0)];
+    }
+
+    /**
+     * Resize the shared two-wheeler parking area using ordinary parking-slot records,
+     * so existing allocation, billing and history features continue to work unchanged.
+     */
+    public static function resizeCommonTwoWheeler(int $societyId, int $capacity): array
+    {
+        if ($capacity < 0 || $capacity > 500) {
+            throw new \\InvalidArgumentException('Common parking capacity must be between 0 and 500.');
+        }
+
+        $pdo = db();
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare(
+                "SELECT ps.id, ps.slot_number,
+                        EXISTS (SELECT 1 FROM parking_allocations pa
+                                WHERE pa.parking_slot_id = ps.id AND pa.allocated_to IS NULL) AS occupied
+                 FROM parking_slots ps
+                 WHERE ps.society_id = :sid AND ps.slot_number LIKE 'COMMON-2W-%'
+                 ORDER BY ps.slot_number DESC FOR UPDATE"
+            );
+            $stmt->execute(['sid' => $societyId]);
+            $slots = $stmt->fetchAll();
+            $current = count($slots);
+            $occupied = count(array_filter($slots, static fn (array $slot): bool => (bool) $slot['occupied']));
+
+            if ($capacity < $occupied) {
+                throw new \\DomainException("Capacity cannot be lower than the {$occupied} currently occupied common parking spaces.");
+            }
+
+            if ($capacity < $current) {
+                $toRemove = $current - $capacity;
+                foreach ($slots as $slot) {
+                    if ($toRemove === 0) {
+                        break;
+                    }
+                    if ((bool) $slot['occupied']) {
+                        continue;
+                    }
+                    $delete = $pdo->prepare('DELETE FROM parking_slots WHERE id = :id AND society_id = :sid');
+                    $delete->execute(['id' => $slot['id'], 'sid' => $societyId]);
+                    $toRemove--;
+                }
+                if ($toRemove !== 0) {
+                    throw new \\DomainException('Unable to reduce capacity because some spaces have parking history.');
+                }
+            } elseif ($capacity > $current) {
+                $next = 1;
+                $existingNumbers = [];
+                foreach ($slots as $slot) {
+                    $existingNumbers[$slot['slot_number']] = true;
+                }
+                while (count($existingNumbers) < $capacity) {
+                    $slotNumber = self::COMMON_TWO_WHEELER_PREFIX . str_pad((string) $next, 3, '0', STR_PAD_LEFT);
+                    if (!isset($existingNumbers[$slotNumber])) {
+                        $insert = $pdo->prepare(
+                            "INSERT INTO parking_slots (society_id, slot_number, slot_type) VALUES (:sid, :number, 'two_wheeler')"
+                        );
+                        $insert->execute(['sid' => $societyId, 'number' => $slotNumber]);
+                        $existingNumbers[$slotNumber] = true;
+                    }
+                    $next++;
+                }
+            }
+
+            $pdo->commit();
+            return self::commonTwoWheelerStats($societyId);
+        } catch (\\Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
     public static function create(int $societyId, string $slotNumber, string $slotType): int
     {
         $stmt = db()->prepare(
