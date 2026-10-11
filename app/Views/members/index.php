@@ -21,8 +21,8 @@ ob_start();
                     <td><span class="badge bg-<?= $member['member_type'] === 'tenant' ? 'info' : 'primary' ?>"><?= htmlspecialchars($member['member_type']) ?></span></td>
                     <td><?= htmlspecialchars($member['phone']) ?></td>
                     <td><span class="badge bg-<?= $member['status'] === 'active' ? 'success' : 'secondary' ?>"><?= htmlspecialchars($member['status']) ?></span></td>
-                    <td class="text-center"><span class="badge bg-light text-dark border"><?= (int) $member['member_count'] ?></span></td>
-                    <td class="text-center"><span class="badge bg-light text-dark border"><?= (int) $member['vehicle_count'] ?></span></td>
+                    <td class="text-center"><span class="badge bg-body-tertiary text-body border"><?= (int) $member['member_count'] ?></span></td>
+                    <td class="text-center"><span class="badge bg-body-tertiary text-body border"><?= (int) $member['vehicle_count'] ?></span></td>
                     <td class="text-end"><a href="/members/<?= (int) $member['id'] ?>" class="btn btn-sm btn-outline-secondary">View</a></td>
                 </tr>
             <?php endforeach; ?>
