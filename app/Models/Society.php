@@ -86,8 +86,28 @@ final class Society
         $outstandingBills = $pdo->prepare("SELECT COALESCE(SUM(total_amount - paid_amount), 0) FROM maintenance_bills WHERE society_id = :sid AND status != 'paid'");
         $outstandingBills->execute(['sid' => $societyId]);
 
-        $income = $pdo->prepare('SELECT COALESCE(SUM(amount), 0) FROM income WHERE society_id = :sid AND MONTH(income_date) = MONTH(CURDATE()) AND YEAR(income_date) = YEAR(CURDATE())');
-        $income->execute(['sid' => $societyId]);
+        // Dashboard income includes manually recorded income plus confirmed maintenance payments.
+        // Payment-proof submissions are not counted until approval creates a payments row.
+        $income = $pdo->prepare(
+            'SELECT
+                COALESCE((
+                    SELECT SUM(i.amount)
+                    FROM income i
+                    WHERE i.society_id = :income_sid
+                      AND MONTH(i.income_date) = MONTH(CURDATE())
+                      AND YEAR(i.income_date) = YEAR(CURDATE())
+                ), 0)
+                +
+                COALESCE((
+                    SELECT SUM(p.amount)
+                    FROM payments p
+                    JOIN maintenance_bills b ON b.id = p.maintenance_bill_id
+                    WHERE b.society_id = :payment_sid
+                      AND MONTH(p.paid_at) = MONTH(CURDATE())
+                      AND YEAR(p.paid_at) = YEAR(CURDATE())
+                ), 0)'
+        );
+        $income->execute(['income_sid' => $societyId, 'payment_sid' => $societyId]);
 
         $expenses = $pdo->prepare('SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE society_id = :sid AND MONTH(expense_date) = MONTH(CURDATE()) AND YEAR(expense_date) = YEAR(CURDATE())');
         $expenses->execute(['sid' => $societyId]);
