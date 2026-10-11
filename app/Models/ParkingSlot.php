@@ -154,7 +154,7 @@ final class ParkingSlot
 
     public static function setAllocated(int $id, bool $allocated): void
     {
-        $stmt = db()->prepare('UPDATE parking_slots SET is_allocated = :allocated WHERE id = :id');
+        $stmt = db()->prepare('UPDATE parking_slots SET is_allocated = :allocated WHERE id = :id AND society_id = :sid');
         $stmt->execute(['allocated' => $allocated ? 1 : 0, 'id' => $id, 'sid' => Society::currentId()]);
     }
 
