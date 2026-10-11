@@ -22,7 +22,7 @@ ob_start();
                     <?= \App\Helpers\Csrf::field() ?>
                     <div class="mb-3">
                         <label class="form-label">Flat *</label>
-                        <select name="flat_id" class="form-select" required>
+                        <select name="flat_id" id="parking-slot-flat" class="form-select" required>
                             <option value="">Select flat</option>
                             <?php foreach ($flats as $flat): ?>
                                 <option value="<?= (int) $flat['id'] ?>"><?= htmlspecialchars($flat['wing_name'] . '-' . $flat['flat_number']) ?></option>
@@ -32,10 +32,10 @@ ob_start();
                     <div class="mb-3">
                         <label class="form-label">Vehicle (optional)</label>
                         <div class="form-text mb-2"><?= $slot['slot_type'] === 'four_wheeler' ? 'Only unallocated 4-wheelers are listed. Each 4-wheeler can have one active parking slot.' : 'Only vehicles matching this slot type are listed.' ?></div>
-                        <select name="vehicle_id" class="form-select">
-                            <option value="">Unassigned</option>
+                        <select name="vehicle_id" id="parking-slot-vehicle" class="form-select" required>
+                            <option value="">Select vehicle</option>
                             <?php foreach ($vehicles as $vehicle): ?>
-                                <option value="<?= (int) $vehicle['id'] ?>"><?= htmlspecialchars($vehicle['registration_number'] . ' (' . $vehicle['wing_name'] . '-' . $vehicle['flat_number'] . ')') ?></option>
+                                <option value="<?= (int) $vehicle['id'] ?>" data-flat-id="<?= (int) $vehicle['flat_id'] ?>"><?= htmlspecialchars($vehicle['registration_number'] . ' (' . $vehicle['wing_name'] . '-' . $vehicle['flat_number'] . ')') ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -94,6 +94,29 @@ ob_start();
         </div>
     </div>
 </div>
+<script>
+(function () {
+    const flat = document.getElementById('parking-slot-flat');
+    const vehicle = document.getElementById('parking-slot-vehicle');
+    if (!flat || !vehicle) return;
+    const options = Array.from(vehicle.querySelectorAll('option[data-flat-id]'));
+    function filterVehicles() {
+        let visible = 0;
+        options.forEach(option => {
+            option.hidden = !flat.value || option.dataset.flatId !== flat.value;
+            if (!option.hidden) visible++;
+        });
+        vehicle.value = '';
+        vehicle.disabled = !flat.value || visible === 0;
+        const placeholder = vehicle.querySelector('option[value=""]');
+        if (placeholder) placeholder.textContent = !flat.value
+            ? 'Select flat first'
+            : (visible ? 'Select vehicle' : 'No eligible vehicles for this flat');
+    }
+    flat.addEventListener('change', filterVehicles);
+    filterVehicles();
+})();
+</script>
 <?php
 $content = ob_get_clean();
 require __DIR__ . '/../layouts/app.php';
