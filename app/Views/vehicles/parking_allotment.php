@@ -16,7 +16,7 @@ ob_start();
             <div class="card-body p-4">
                 <h5 class="mb-3">New Parking Allotment</h5>
                 <form method="post" action="/vehicles/parking-allotment" id="parking-allotment-form">
-                    <?= \\App\\Helpers\\Csrf::field() ?>
+                    <?= \App\Helpers\Csrf::field() ?>
                     <div class="mb-3">
                         <label class="form-label" for="allot-flat">Resident Flat *</label>
                         <select id="allot-flat" name="flat_id" class="form-select" required>
