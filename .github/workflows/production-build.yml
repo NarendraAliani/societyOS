@@ -107,6 +107,9 @@ jobs:
       - name: Dashboard payment-income regression contract
         run: php tests/regression/dashboard_payment_income.php
 
+      - name: Counter payment entry regression contract
+        run: php tests/regression/counter_payment_entry.php
+
       - name: Prepare deployment branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
