@@ -73,6 +73,59 @@ final class BillingController
         require __DIR__ . '/../Views/billing/show.php';
     }
 
+    public function receivePaymentForm(): void
+    {
+        $pageTitle = 'Receive Payment';
+        $bills = MaintenanceBill::outstandingForSociety(Society::currentId());
+        require __DIR__ . '/../Views/billing/receive_payment.php';
+    }
+
+    public function receivePayment(): void
+    {
+        $this->verifyCsrf();
+
+        $billId = (int) ($_POST['bill_id'] ?? 0);
+        $bill = $billId > 0 ? MaintenanceBill::find($billId) : null;
+        if (!$bill || (int) $bill['society_id'] !== Society::currentId()) {
+            Flash::set('error', 'Select a valid outstanding bill for this society.');
+            header('Location: /billing/receive-payment');
+            exit;
+        }
+
+        $amount = $_POST['amount'] ?? '';
+        $mode = $_POST['payment_mode'] ?? '';
+        $validModes = ['cash', 'cheque', 'upi', 'bank_transfer', 'card'];
+        if (!is_numeric($amount) || (float) $amount <= 0 || !in_array($mode, $validModes, true)) {
+            Flash::set('error', 'A valid amount and payment mode are required.');
+            header('Location: /billing/receive-payment');
+            exit;
+        }
+
+        try {
+            $result = BillingService::recordPayment(
+                $billId,
+                (float) $amount,
+                $mode,
+                trim((string) ($_POST['reference_number'] ?? '')) ?: null,
+                Auth::id(),
+                Society::currentId()
+            );
+        } catch (\\InvalidArgumentException $e) {
+            Flash::set('error', $e->getMessage());
+            header('Location: /billing/receive-payment');
+            exit;
+        } catch (\\RuntimeException $e) {
+            Flash::set('error', 'Bill not found or no longer outstanding. Refresh and try again.');
+            header('Location: /billing/receive-payment');
+            exit;
+        }
+
+        ActivityLog::log('billing', 'payment', "Counter payment of {$amount} recorded on bill id {$billId}, receipt {$result['receipt_number']}");
+        Flash::set('success', "Payment received. Receipt {$result['receipt_number']} generated.");
+        header("Location: /billing/{$billId}");
+        exit;
+    }
+
     public function recordPayment(string $id): void
     {
         $this->verifyCsrf();
