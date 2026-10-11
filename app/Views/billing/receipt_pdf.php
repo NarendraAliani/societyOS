@@ -23,6 +23,7 @@
     <table>
         <tr><td>Receipt No.</td><td class="right"><?= htmlspecialchars($detail['receipt_number']) ?></td></tr>
         <tr><td>Bill No.</td><td class="right"><?= htmlspecialchars($detail['bill_number']) ?></td></tr>
+        <tr><td>Bill Period</td><td class="right"><?= htmlspecialchars(date('d M Y', strtotime($detail['bill_period_start'])) . ' – ' . date('d M Y', strtotime($detail['bill_period_end']))) ?></td></tr>
         <tr><td>Flat</td><td class="right"><?= htmlspecialchars($detail['wing_name'] . '-' . $detail['flat_number']) ?></td></tr>
         <tr><td>Payment Date</td><td class="right"><?= htmlspecialchars($detail['paid_at']) ?></td></tr>
         <tr><td>Payment Mode</td><td class="right"><?= htmlspecialchars(str_replace('_', ' ', $detail['payment_mode'])) ?></td></tr>
