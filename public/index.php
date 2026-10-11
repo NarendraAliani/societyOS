@@ -158,6 +158,8 @@ $router->get('/leases/{id}/agreement', [MemberController::class, 'serveLeaseDocu
 
 // Maintenance Billing — static paths must be registered before the /billing/{id} wildcard
 $router->get('/billing', [BillingController::class, 'index'], [$auth, $backOffice, $can('billing.view')]);
+$router->get('/billing/receive-payment', [BillingController::class, 'receivePaymentForm'], [$auth, $backOffice, $can('billing.manage')]);
+$router->post('/billing/receive-payment', [BillingController::class, 'receivePayment'], [$auth, $backOffice, $can('billing.manage')]);
 $router->get('/billing/payment-proofs', [PaymentProofController::class, 'index'], [$auth, $backOffice, $can('billing.manage')]);
 $router->post('/billing/payment-proofs/{id}/review', [PaymentProofController::class, 'review'], [$auth, $backOffice, $can('billing.manage')]);
 $router->get('/billing/payment-proofs/{id}/file', [PaymentProofController::class, 'file'], [$auth, $can('billing.view')]);
