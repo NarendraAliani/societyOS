@@ -135,6 +135,95 @@ final class VehicleController
         exit;
     }
 
+    public function parkingAllotment(): void
+    {
+        $pageTitle = 'Parking Allotment';
+        $societyId = Society::currentId();
+        $flats = Flat::allForSociety($societyId);
+        $vehicles = Vehicle::allForSociety($societyId);
+        $slots = array_values(array_filter(
+            ParkingSlot::allForSociety($societyId),
+            static fn (array $slot): bool => empty($slot['is_allocated'])
+        ));
+
+        $stmt = db()->prepare(
+            'SELECT pa.id AS allocation_id, pa.parking_slot_id, pa.vehicle_id, pa.flat_id,
+                    pa.allocated_from, pa.allocated_to, pa.is_chargeable,
+                    ps.slot_number, ps.slot_type, v.registration_number, v.make, v.model,
+                    m.name AS resident_name, f.flat_number, w.name AS wing_name
+             FROM parking_allocations pa
+             JOIN parking_slots ps ON ps.id = pa.parking_slot_id
+             JOIN flats f ON f.id = pa.flat_id
+             JOIN floors fl ON fl.id = f.floor_id
+             JOIN wings w ON w.id = fl.wing_id
+             LEFT JOIN vehicles v ON v.id = pa.vehicle_id
+             LEFT JOIN members m ON m.id = v.member_id
+             WHERE ps.society_id = :sid AND pa.allocated_to IS NULL
+             ORDER BY w.name, f.flat_number, ps.slot_number'
+        );
+        $stmt->execute(['sid' => $societyId]);
+        $activeAllocations = $stmt->fetchAll();
+
+        $assignedVehicleIds = [];
+        foreach ($activeAllocations as $allocation) {
+            if ($allocation['vehicle_id'] !== null && $allocation['slot_type'] === 'four_wheeler') {
+                $assignedVehicleIds[(int) $allocation['vehicle_id']] = true;
+            }
+        }
+        $vehicles = array_values(array_filter($vehicles, static function (array $vehicle) use ($assignedVehicleIds): bool {
+            return $vehicle['vehicle_type'] !== 'four_wheeler' || !isset($assignedVehicleIds[(int) $vehicle['id']]);
+        }));
+
+        require __DIR__ . '/../Views/vehicles/parking_allotment.php';
+    }
+
+    public function storeParkingAllotment(): void
+    {
+        $this->verifyCsrf();
+        $flatId = (int) ($_POST['flat_id'] ?? 0);
+        $vehicleId = (int) ($_POST['vehicle_id'] ?? 0);
+        $slotId = (int) ($_POST['parking_slot_id'] ?? 0);
+        $fromDate = trim((string) ($_POST['allocated_from'] ?? date('Y-m-d')));
+        $billing = (string) ($_POST['billing_status'] ?? 'paid');
+        $parsedDate = \\DateTimeImmutable::createFromFormat('!Y-m-d', $fromDate);
+        $validDate = $parsedDate && $parsedDate->format('Y-m-d') === $fromDate;
+        $flat = $flatId > 0 ? Flat::find($flatId) : null;
+        $vehicle = $vehicleId > 0 ? Vehicle::find($vehicleId) : null;
+        $slot = $slotId > 0 ? ParkingSlot::find($slotId) : null;
+        $vehicleMember = $vehicle ? Member::find((int) $vehicle['member_id']) : null;
+
+        if (!$flat || (int) ($flat['society_id'] ?? 0) !== Society::currentId()
+            || !$vehicle || !$vehicleMember
+            || (int) $vehicleMember['flat_id'] !== $flatId
+            || (int) $vehicleMember['society_id'] !== Society::currentId()
+            || !$slot || (int) $slot['society_id'] !== Society::currentId()
+            || $vehicle['vehicle_type'] !== $slot['slot_type']
+            || !$validDate || !in_array($billing, ['paid', 'free'], true)) {
+            Flash::set('error', 'Please select a valid resident flat, matching registered vehicle, available compatible parking slot, allocation date and billing option.');
+            header('Location: /vehicles/parking-allotment');
+            exit;
+        }
+
+        if (ParkingAllocation::activeForSlot($slotId)) {
+            Flash::set('error', 'That parking slot has just been allocated. Please choose another available slot.');
+            header('Location: /vehicles/parking-allotment');
+            exit;
+        }
+
+        try {
+            ParkingAllocation::allocate($slotId, $flatId, $vehicleId, $fromDate, $billing === 'paid');
+            ActivityLog::log('vehicles', 'parking_allocate', 'Allocated vehicle ' . $vehicle['registration_number'] . ' to parking slot ' . $slot['slot_number']);
+            Flash::set('success', 'Vehicle allocated to parking successfully.');
+        } catch (\\Throwable $e) {
+            Flash::set('error', $e->getMessage() === 'This vehicle already has an active 4-wheeler parking allocation.'
+                ? $e->getMessage()
+                : 'Unable to allocate the vehicle. Please verify the selections and try again.');
+        }
+
+        header('Location: /vehicles/parking-allotment');
+        exit;
+    }
+
     public function parkingIndex(): void
     {
         $pageTitle = 'Parking';
