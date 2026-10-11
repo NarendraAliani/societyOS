@@ -59,6 +59,9 @@ jobs:
       - name: Resident flat assignment regression contract
         run: php tests/regression/resident_flat_assignment.php
 
+      - name: Resident detail query regression contract
+        run: php tests/regression/resident_detail_queries.php
+
       - name: Multi-society context regression contract
         run: php tests/regression/multi_society_context.php
 
